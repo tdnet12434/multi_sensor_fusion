@@ -270,7 +270,7 @@ struct PoseMeasurement : public PoseMeasurementBase {
     // This line breaks the filter if a position sensor in the global frame is
     // available or if we want to set a global yaw rotation.
     H.block<1, 1>(6, kIdxstartcorr_qwv + 2) = Eigen::Matrix<double, 1, 1>::
-    Constant(driftwvattfix ? 0.0 : 1.0); // fix vision world yaw drift because unobservable otherwise (see PhD Thesis)
+    Constant(driftwvattfix ? 0.0 : 1.00); // fix vision world yaw drift because unobservable otherwise (see PhD Thesis)
     //above thanabadee uncommend
   }
 
