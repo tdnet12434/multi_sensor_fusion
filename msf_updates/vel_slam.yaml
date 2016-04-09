@@ -50,7 +50,7 @@ velocity_pose_sensor/pose_fixed_q_wv: true
 
 velocity_pose_sensor/pose_delay: 0.25
 velocity_pose_sensor/velocity_delay: 0.001
-velocity_pose_sensor/velocity_noise_meas: 0.01
+velocity_pose_sensor/velocity_noise_meas: 0.03924
 
 #init position offset prism imu
 velocity_sensor/init/p_ip/x: 0 #-0.02    

@@ -56,7 +56,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     {
 
       const double s_zv = n_zv_ * n_zv_;
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zv, s_zv, s_zv)
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zv, s_zv, 10)
           .finished().asDiagonal();
 
     } else {  // Tke covariance from sensor.
@@ -75,6 +75,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Eigen::Matrix<double, 3, 1> a_bf_;  /// bf measurement.
   Eigen::Matrix<double, 3, 1> z_v_;  /// Position measurement.
+  Eigen::Matrix<double, 3, 3> temp;
   double n_zv_;  /// Position measurement noise.
   double drag_;
 
@@ -110,9 +111,11 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
         .conjugate().toRotationMatrix();
 
+    Eigen::Matrix<double, 3, 1>  g;
+    g << 0, 0, 9.80655; /// Gravity.
     // Get measurement.
-    z_v_ = C_q * a_bf_;//Eigen::Matrix<double, 3, 1>(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
-
+    z_v_ = C_q*(a_bf_ - state.Get<StateDefinition_T::q>().inverse() * g);//Eigen::Matrix<double, 3, 1>(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
+    // printf("%f %f %f\n",z_v_(0,0),z_v_(1,0),z_v_(2,0));
     // Preprocess for elements in H matrix.
     // Eigen::Matrix<double, 3, 3> p_prism_imu_sk = Skew(
     //     state.Get<StateDefinition_T::p_ip>());
@@ -139,8 +142,12 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     const double body_k_ = drag_;
     Eigen::Matrix<double, 3, 3> body_k = (Eigen::Matrix<double, 3, 1>() << -body_k_, -body_k_,0).finished().asDiagonal();
     // velocity:
-    H.block<3, 3>(0, idxstartcorr_v_) = C_q*body_k;  // v
-
+    H.block<3, 3>(0, idxstartcorr_v_) = C_q * body_k;  // v
+    temp=C_q * body_k;
+    // printf("%.3f %.3f %.3f\n%.3f %.3f %.3f\n%.3f %.3f %.3f\n\n\n"
+    //   ,body_k(0,0),body_k(0,1),body_k(0,2)
+    //   ,body_k(1,0),body_k(1,1),body_k(1,2)
+    //   ,body_k(2,0),body_k(2,1),body_k(2,2));
 
     //H.block<3, 3>(1, idxstartcorr_v_+1) = -C_q.transpose() * p_prism_imu_sk;  // q
 
@@ -171,6 +178,8 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
           .conjugate().toRotationMatrix();
 
+      Eigen::Matrix<double, 3, 1>  g;
+      g << 0, 0, 9.80655; /// Gravity.
       // Construct residuals:
       // Position
       // r_old.block<3, 1>(0, 0) = z_v_
@@ -178,7 +187,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       // // Velocity
       r_old.block<3, 1>(0, 0) = z_v_
-          - (state.Get<StateDefinition_T::v>());
+          - temp*(state.Get<StateDefinition_T::v>());
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       if (!CheckForNumeric(r_old, "r_old")) {
         MSF_ERROR_STREAM("r_old: "<<r_old);
