@@ -60,7 +60,7 @@ velocity_sensor/velocity_use_fixed_covariance: true
 velocity_sensor/velocity_absolute_measurements: true
 
 
-velocity_pose_sensor/velocity_drag: 0.1
+velocity_pose_sensor/velocity_drag: 1
 velocity_pose_sensor/core_height: 1.5
 velocity_pose_sensor/position_yaw_init: 0 #-128.0
 velocity_pose_sensor/position_fixed_p_ip: true

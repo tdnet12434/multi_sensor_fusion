@@ -114,8 +114,10 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     Eigen::Matrix<double, 3, 1>  g;
     g << 0, 0, 9.80655; /// Gravity.
     // Get measurement.
-    z_v_ = C_q*(a_bf_ - state.Get<StateDefinition_T::q>().inverse() * g);//Eigen::Matrix<double, 3, 1>(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
+    z_v_ = C_q.transpose()*(a_bf_ )- g;//Eigen::Matrix<double, 3, 1>(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
+    z_v_(2,0)=0;
     // printf("%f %f %f\n",z_v_(0,0),z_v_(1,0),z_v_(2,0));
+    printf("%f %f %f\n",z_v_(0,0),z_v_(1,0),z_v_(2,0));
     // Preprocess for elements in H matrix.
     // Eigen::Matrix<double, 3, 3> p_prism_imu_sk = Skew(
     //     state.Get<StateDefinition_T::p_ip>());
@@ -142,8 +144,8 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     const double body_k_ = drag_;
     Eigen::Matrix<double, 3, 3> body_k = (Eigen::Matrix<double, 3, 1>() << -body_k_, -body_k_,0).finished().asDiagonal();
     // velocity:
-    H.block<3, 3>(0, idxstartcorr_v_) = C_q * body_k;  // v
-    temp=C_q * body_k;
+    H.block<3, 3>(0, idxstartcorr_v_) =  C_q.transpose() * body_k;  // v
+    temp= C_q.transpose() * body_k;
     // printf("%.3f %.3f %.3f\n%.3f %.3f %.3f\n%.3f %.3f %.3f\n\n\n"
     //   ,body_k(0,0),body_k(0,1),body_k(0,2)
     //   ,body_k(1,0),body_k(1,1),body_k(1,2)

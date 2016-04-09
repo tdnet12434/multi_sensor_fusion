@@ -15,7 +15,7 @@ is_init_heading = False
 
 # Spacify MSF node name parameter from launch file
 client = dynamic_reconfigure.client.Client(rospy.get_param("msf_sensor_node",
-    "pose_from_compass_position_gps/position_pose_sensor"), timeout=30.0)
+    "pose_from_compass_position_gps/velocity_pose_sensor"), timeout=30.0)
 
 # Write init_yaw MSF parameter from orientation message
 def callback_orientation_degrees(data):
@@ -68,6 +68,6 @@ if __name__ == "__main__":
     rospy.loginfo("is_init_heading %d", is_init_heading)
     while not rospy.is_shutdown():
         print rospy.get_param("msf_sensor_node",
-            "pose_from_compass_position_gps/position_pose_sensor")
+            "pose_from_compass_position_gps/velocity_pose_sensor")
         client.update_configuration({"position_yaw_init":heading})
         r.sleep()
