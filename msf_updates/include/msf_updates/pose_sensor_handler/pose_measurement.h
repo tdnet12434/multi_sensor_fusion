@@ -222,6 +222,8 @@ struct PoseMeasurement : public PoseMeasurementBase {
       state_in->ClearCrossCov<StatePwvIdx>();
 
 
+
+    //block of size p q .. start at   row,col
     // Construct H matrix.
     // Position:
     H.block<3, 3>(0, kIdxstartcorr_p) = C_wv
