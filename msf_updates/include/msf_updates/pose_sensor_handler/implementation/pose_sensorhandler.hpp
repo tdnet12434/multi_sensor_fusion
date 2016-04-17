@@ -68,7 +68,7 @@ PoseSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::PoseSensorHandler(
   ros::NodeHandle nh("msf_updates/" + topic_namespace);
   subPoseWithCovarianceStamped_ =
       nh.subscribe < geometry_msgs::PoseWithCovarianceStamped
-          > ("pose_with_covariance_input", 20, &PoseSensorHandler::MeasurementCallback, this);
+          > (parameternamespace+"_"+"pose_with_covariance_input", 20, &PoseSensorHandler::MeasurementCallback, this);
   subTransformStamped_ = nh.subscribe < geometry_msgs::TransformStamped
       > ("transform_input", 20, &PoseSensorHandler::MeasurementCallback, this);
   subPoseStamped_ = nh.subscribe < geometry_msgs::PoseStamped
