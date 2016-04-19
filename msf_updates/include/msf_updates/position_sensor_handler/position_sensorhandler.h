@@ -22,6 +22,7 @@
 #include <msf_core/msf_sensormanagerROS.h>
 #include <geometry_msgs/PointStamped.h>
 #include <geometry_msgs/TransformStamped.h>
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <msf_core/gps_conversion.h>
 #include <sensor_fusion_comm/PointWithCovarianceStamped.h>
@@ -39,6 +40,7 @@ class PositionSensorHandler : public msf_core::SensorHandler<
                        //the measurement provided by this sensor.
 
   ros::Subscriber subPointStamped_;
+  ros::Subscriber subPoseStamped_;
   ros::Subscriber subTransformStamped_;
   ros::Subscriber subNavSatFix_;
   msf_core::GPSConversion gpsConversion_;
@@ -49,6 +51,7 @@ class PositionSensorHandler : public msf_core::SensorHandler<
   void ProcessPositionMeasurement(
       const sensor_fusion_comm::PointWithCovarianceStampedConstPtr& msg);
   void MeasurementCallback(const geometry_msgs::PointStampedConstPtr & msg);
+  void MeasurementCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr & msg);
   void MeasurementCallback(const geometry_msgs::TransformStampedConstPtr & msg);
   void MeasurementCallback(const sensor_msgs::NavSatFixConstPtr& msg);
 

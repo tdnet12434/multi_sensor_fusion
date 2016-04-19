@@ -135,7 +135,7 @@ private:
 
 void Init(double scale) const {
   Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, g, w_m, a_m, p_ic, p_vc, p_wv,
-  p_ip, p_pos;
+  p_ip, p_pos ,p_zero;
   Eigen::Quaternion<double> q, q_wv, q_ic, q_vc;
   msf_core::MSF_Core<EKFState_T>::ErrorStateCov P;
 
@@ -151,7 +151,7 @@ void Init(double scale) const {
     p_wv.setZero();      // World-vision position drift.
 
     P.setZero();  // Error state covariance; if zero, a default initialization in msf_core is used.
-
+    p_zero.setZero();
     p_pos = position_handler_->GetPositionMeasurement();
 
     p_vc = pose_handler_->GetPositionMeasurement();
@@ -196,7 +196,8 @@ void Init(double scale) const {
     Eigen::Quaterniond yawq(cos(yawinit / 2), 0, 0, sin(yawinit / 2));
     yawq.normalize();
 
-    q = yawq;
+    //q = yawq;
+    q = q_vc;
     q_wv = (q * q_ic * q_vc.conjugate()).conjugate();
 
     MSF_WARN_STREAM("q " << STREAMQUAT(q));
@@ -209,7 +210,7 @@ void Init(double scale) const {
     // have to shift vision-world later on, before applying the first position
     // measurement.
     p = p_pos - q.toRotationMatrix() * p_ip;
-    p_wv = p - p_vision;  // Shift the vision frame so that it fits the position
+    //p_wv = 0;//p - p_vision;  // Shift the vision frame so that it fits the position
     // measurement
 
     a_m = q.inverse() * g;			    /// Initial acceleration.
@@ -225,7 +226,7 @@ void Init(double scale) const {
     shared_ptr < msf_core::MSF_InitMeasurement<EKFState_T>
     > meas(new msf_core::MSF_InitMeasurement<EKFState_T>(true));
 
-    meas->SetStateInitValue < StateDefinition_T::p > (p);
+    meas->SetStateInitValue < StateDefinition_T::p > (p_zero);
     meas->SetStateInitValue < StateDefinition_T::v > (v);
     meas->SetStateInitValue < StateDefinition_T::q > (q);
     meas->SetStateInitValue < StateDefinition_T::b_w > (b_w);

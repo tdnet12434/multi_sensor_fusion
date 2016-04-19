@@ -39,7 +39,7 @@
   msf_updates::EKFState> {
     typedef PositionPoseMagSensorManager this_T;
     typedef msf_pose_sensor::PoseSensorHandler<
-    msf_updates::pose_measurement::PoseMeasurement<>, this_T> PoseSensorHandler_T;
+    msf_updates::pose_measurement::PoseMeasurement<>, this_T> PoseSensorHandler_T,PoseSensorHandler2_T;
     friend class msf_pose_sensor::PoseSensorHandler<
     msf_updates::pose_measurement::PoseMeasurement<>, this_T>;
     typedef msf_position_sensor::PositionSensorHandler<
@@ -64,7 +64,7 @@
     AddHandler(pose_handler_);
 
     mag_handler_.reset(
-      new PoseSensorHandler_T(*this, "", "mag_sensor", distortmeas));
+      new PoseSensorHandler2_T(*this, "", "mag_sensor", distortmeas));
     AddHandler(mag_handler_);
 
     position_handler_.reset(
@@ -85,7 +85,8 @@
 
 private:
   shared_ptr<msf_core::IMUHandler_ROS<msf_updates::EKFState> > imu_handler_;
-  shared_ptr<PoseSensorHandler_T> pose_handler_,mag_handler_;
+  shared_ptr<PoseSensorHandler_T> pose_handler_;
+  shared_ptr<PoseSensorHandler2_T> mag_handler_;
   shared_ptr<PositionSensorHandler_T> position_handler_;
 
   Config_T config_;
@@ -157,6 +158,7 @@ void Init(double scale) const {
 
     q_wv.setIdentity();  // World-vision rotation drift.
     p_wv.setZero();      // World-vision position drift.
+    q_mag.setIdentity();
 
     P.setZero();  // Error state covariance; if zero, a default initialization in msf_core is used.
 
@@ -169,7 +171,7 @@ void Init(double scale) const {
     MSF_INFO_STREAM(
       "initial measurement vision: pos:["<<p_vc.transpose()<<"] orientation: " <<STREAMQUAT(q_vc));
     MSF_INFO_STREAM(
-      "initial measurement mag: orientation:["<<STREAMQUAT(q_mag)<<"]");
+      "initial measurement mag: orientation:"<<STREAMQUAT(q_mag));
     MSF_INFO_STREAM(
       "initial measurement position: pos:["<<p_pos.transpose()<<"]");
 
@@ -220,12 +222,13 @@ void Init(double scale) const {
 
     Eigen::Matrix<double, 3, 1> p_vision = q_wv.conjugate().toRotationMatrix()
     * p_vc / scale - q.toRotationMatrix() * p_ic;
+    // Eigen::Matrix<double, 3, 1> p_vision = p_vc / scale - q.toRotationMatrix() * p_ic;
 
     //TODO (slynen): what if there is no initial position measurement? Then we
     // have to shift vision-world later on, before applying the first position
     // measurement.
     p = p_pos - q.toRotationMatrix() * p_ip;
-    p_wv = p - p_vision;  // Shift the vision frame so that it fits the position
+   // p_wv = p - p_vision;  // Shift the vision frame so that it fits the position
     // measurement
 
     a_m = q.inverse() * g;			    /// Initial acceleration.

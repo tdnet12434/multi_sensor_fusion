@@ -51,6 +51,9 @@ PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::PositionSensorHandler(
   subPointStamped_ =
       nh.subscribe<geometry_msgs::PointStamped>
   ("position_input", 20, &PositionSensorHandler::MeasurementCallback, this);
+  subPoseStamped_ =
+      nh.subscribe<geometry_msgs::PoseWithCovarianceStamped>
+  ("pose_gps_input", 20, &PositionSensorHandler::MeasurementCallback, this);
   subTransformStamped_ =
       nh.subscribe<geometry_msgs::TransformStamped>
   ("transform_input", 20, &PositionSensorHandler::MeasurementCallback, this);
@@ -127,6 +130,30 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessPositionMeasu
   this->manager_.msf_core_->AddMeasurement(meas);
 }
 
+
+
+
+template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
+void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
+    const geometry_msgs::PoseWithCovarianceStampedConstPtr & msg) {
+  this->SequenceWatchDog(msg->header.seq, subPoseStamped_.getTopic());
+
+  MSF_INFO_STREAM_ONCE(
+      "*** position sensor got first measurement from topic "
+          << this->topic_namespace_ << "/" << subPoseStamped_.getTopic()
+          << " ***");
+
+  sensor_fusion_comm::PointWithCovarianceStampedPtr pointwCov(
+      new sensor_fusion_comm::PointWithCovarianceStamped);
+  pointwCov->header = msg->header;
+  pointwCov->point = msg->pose.pose.position;
+  pointwCov->covariance[0] = msg->pose.covariance[0];
+  pointwCov->covariance[4] = msg->pose.covariance[7];
+  pointwCov->covariance[8] = msg->pose.covariance[14];
+  ProcessPositionMeasurement(pointwCov);
+}
+
+
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
     const geometry_msgs::PointStampedConstPtr & msg) {
@@ -144,6 +171,10 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
 
   ProcessPositionMeasurement(pointwCov);
 }
+
+
+
+
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(

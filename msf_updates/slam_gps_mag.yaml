@@ -38,11 +38,12 @@ vision_sensor/init/p_ic/z: 0.048 #0.05936342052793327
 
 
 vision_sensor/pose_absolute_measurements: true
-vision_sensor/pose_use_fixed_covariance: false
+vision_sensor/pose_use_fixed_covariance: true
 vision_sensor/pose_measurement_world_sensor: true  # selects if sensor measures its position w.r.t. world (true, e.g. Vicon) or the position of the world coordinate system w.r.t. the sensor (false, e.g. ethzasl_ptam)
 
 
-
+position_pose_mag_sensor/pose_noise_meas_p: 0.008
+position_pose_mag_sensor/pose_noise_meas_q: 10
 position_pose_mag_sensor/pose_noise_scale: 0.0005
 position_pose_mag_sensor/pose_use_fixed_covariance: false
 position_pose_mag_sensor/pose_fixed_scale: false
@@ -50,8 +51,20 @@ position_pose_mag_sensor/pose_fixed_p_ic: true
 position_pose_mag_sensor/pose_fixed_q_ic: true
 position_pose_mag_sensor/pose_fixed_p_wv: true
 position_pose_mag_sensor/pose_fixed_q_wv: true
-
 position_pose_mag_sensor/pose_delay: 0.25
+
+position_pose_mag_sensor/mag_noise_meas_p: 10
+position_pose_mag_sensor/mag_noise_meas_q: 0.00001
+position_pose_mag_sensor/mag_use_fixed_covariance: true
+position_pose_mag_sensor/mag_fixed_scale: true
+position_pose_mag_sensor/mag_fixed_p_ic: true
+position_pose_mag_sensor/mag_fixed_q_ic: true
+position_pose_mag_sensor/mag_fixed_p_wv: true
+position_pose_mag_sensor/mag_fixed_q_wv: true
+position_pose_mag_sensor/mag_delay: 0
+
+
+
 position_pose_mag_sensor/position_delay: 0.2
 position_pose_mag_sensor/position_noise_meas: 0.01
 
@@ -72,7 +85,7 @@ position_pose_mag_sensor/position_fixed_p_ip: true
 
 mag_sensor/pose_initial_scale: 1
 mag_sensor/pose_fixed_scale: true
-mag_sensor/pose_noise_scale: 0.0005
+mag_sensor/pose_noise_scale: 0.0
 mag_sensor/pose_noise_p_wv: 0.0
 mag_sensor/pose_noise_q_wv: 0.0
 mag_sensor/pose_noise_q_ic: 0.0

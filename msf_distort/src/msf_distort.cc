@@ -35,6 +35,7 @@ struct CallbackHandler {
   ros::Publisher pubPoseStamped_;
   ros::Publisher pubNavSatFix_;
   ros::Publisher pubPoint_;
+  ros::Publisher pubPoseWithCovarianceStampedGPS_;
 
   CallbackHandler(ros::NodeHandle& nh) {
     pubPoseWithCovarianceStamped_ =
@@ -48,6 +49,8 @@ struct CallbackHandler {
         nh.advertise<sensor_msgs::NavSatFix>("navsatfix_output", 100);
     pubPoint_ =
         nh.advertise<geometry_msgs::PointStamped>("point_output", 100);
+    pubPoseWithCovarianceStampedGPS_ = 
+        nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("pose_with_covariance_gps_output", 100);
   }
 
   void config(Config_T &config, uint32_t /*level*/) {
@@ -84,6 +87,12 @@ struct CallbackHandler {
       pubPoint_.publish(msg);
     }
   }
+   void MeasurementCallback2(
+      const geometry_msgs::PoseWithCovarianceStampedConstPtr & msg) {
+    if (config_.publish_position) {
+      pubPoseWithCovarianceStampedGPS_.publish(msg);
+    }
+  }
 };
 
 int main(int argc, char** argv) {
@@ -116,7 +125,8 @@ int main(int argc, char** argv) {
           > ("navsatfix_input", 20, &CallbackHandler::MeasurementCallback, &handler);
   ros::Subscriber subPoint_ = nh.subscribe < geometry_msgs::PointStamped
       > ("point_input", 20, &CallbackHandler::MeasurementCallback, &handler);
-
+  ros::Subscriber subPoseGPS_ = nh.subscribe < geometry_msgs::PoseWithCovarianceStamped
+      > ("posegps_input", 20, &CallbackHandler::MeasurementCallback2, &handler);
   ros::V_string topics;
   ros::this_node::getSubscribedTopics(topics);
   std::string nodeName = ros::this_node::getName();
