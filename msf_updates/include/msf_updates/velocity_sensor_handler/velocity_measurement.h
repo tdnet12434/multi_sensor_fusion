@@ -114,7 +114,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     Eigen::Matrix<double, 3, 1>  g;
     g << 0, 0, 9.80655; /// Gravity.
     // Get measurement.
-    z_v_ = C_q.transpose()*(a_bf_ );//Eigen::Matrix<double, 3, 1>(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
+    z_v_ = C_q.transpose()*(a_bf_ )-g;//Eigen::Matrix<double, 3, 1>(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
     //z_v_(2,0)=0;
     // printf("%f %f %f\n",z_v_(0,0),z_v_(1,0),z_v_(2,0));
     printf("%f %f %f\n",z_v_(0,0),z_v_(1,0),z_v_(2,0));
@@ -191,7 +191,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       // // Velocity
       r_old.block<3, 1>(0, 0) = z_v_
-          - g;//(state.Get<StateDefinition_T::v>());
+          - temp*(state.Get<StateDefinition_T::v>());
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       if (!CheckForNumeric(r_old, "r_old")) {
         MSF_ERROR_STREAM("r_old: "<<r_old);
