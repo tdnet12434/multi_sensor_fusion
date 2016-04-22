@@ -21,6 +21,7 @@ generate_dynamic_reconfigure_options(
     cfg/SphericalPositionSensor.cfg
 	cfg/VelocityPoseSensor.cfg
 cfg/PositionPoseMagSensor.cfg
+cfg/PositionPosePressureSensor.cfg
 )
 
 catkin_package(
@@ -44,6 +45,7 @@ add_subdirectory(src/position_pose_msf)
 add_subdirectory(src/spherical_msf)
 add_subdirectory(src/velocity_pose_msf)
 add_subdirectory(src/position_pose_mag_msf)
+add_subdirectory(src/position_pose_pressure_msf)
 endif()
 
 add_executable(test_distort src/test/test_distort.cc)
