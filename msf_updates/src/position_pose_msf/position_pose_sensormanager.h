@@ -196,8 +196,8 @@ void Init(double scale) const {
     Eigen::Quaterniond yawq(cos(yawinit / 2), 0, 0, sin(yawinit / 2));
     yawq.normalize();
 
-    //q = yawq;
-    q = q_vc;
+    q = yawq;
+    //q = q_vc;
     q_wv = (q * q_ic * q_vc.conjugate()).conjugate();
 
     MSF_WARN_STREAM("q " << STREAMQUAT(q));

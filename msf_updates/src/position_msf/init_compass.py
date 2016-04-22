@@ -16,7 +16,7 @@ is_init_heading = False
 
 # Specify MSF node name parameter from launch file
 client = dynamic_reconfigure.client.Client(rospy.get_param("msf_sensor_node",
-    "pose_from_compass_position_gps/position_pose_sensor"), timeout=30.0)
+    "pose_from_compass_position_gps/position_pose_pressure_sensor"), timeout=30.0)
 
 def msg_to_quaternion(msg):
         q = [0,0,0,1]
@@ -73,6 +73,6 @@ if __name__ == "__main__":
 
     while not rospy.is_shutdown():
         print rospy.get_param("msf_sensor_node",
-            "pose_from_compass_position_gps/position_pose_sensor")
+            "pose_from_compass_position_gps/position_pose_pressure_sensor")
         client.update_configuration({"position_yaw_init":heading})
         r.sleep()
