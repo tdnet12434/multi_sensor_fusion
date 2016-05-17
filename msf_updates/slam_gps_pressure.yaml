@@ -50,14 +50,14 @@ position_pose_pressure_sensor/pose_fixed_p_wv: false
 position_pose_pressure_sensor/pose_fixed_q_wv: true
 
 position_pose_pressure_sensor/pose_delay: 0.25
-position_pose_pressure_sensor/position_delay: 0.25
+position_pose_pressure_sensor/position_delay: 0.01
 position_pose_pressure_sensor/position_noise_meas: 0.01
 
 #init position offset prism imu
 position_sensor/init/p_ip/x: 0 #-0.02    
 position_sensor/init/p_ip/y: 0 #0.05
 position_sensor/init/p_ip/z: 0.05
-position_sensor/position_use_fixed_covariance: true
+position_sensor/position_use_fixed_covariance: false
 position_sensor/position_absolute_measurements: true
 
 
