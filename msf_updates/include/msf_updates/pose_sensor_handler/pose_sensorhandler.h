@@ -74,6 +74,10 @@ class PoseSensorHandler : public msf_core::SensorHandler<
   Eigen::Quaterniond GetAttitudeMeasurement() {
     return z_q_;
   }
+  // Used for check alive
+  double GetLasttime() {
+    return timestamp_previous_pose_;
+  }
   //setters for configure values
   void SetNoises(double n_zp, double n_zq);
   void SetDelay(double delay);

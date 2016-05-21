@@ -178,6 +178,12 @@ void PoseSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
 
   this->SequenceWatchDog(msg->header.seq,
                          subPoseWithCovarianceStamped_.getTopic());
+
+  double time_now = msg->header.stamp.toSec();
+
+  timestamp_previous_pose_ = time_now;
+
+
   MSF_INFO_STREAM_ONCE(
       "*** pose sensor got first measurement from topic "
           << this->topic_namespace_ << "/"

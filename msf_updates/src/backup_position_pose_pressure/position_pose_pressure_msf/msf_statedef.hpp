@@ -37,12 +37,7 @@ enum StateDefinition {  //must not manually set the enum values!
   q_ic,
   p_ic,
   p_ip,
-  b_p,
-  L_2,
-  q_wv_2,
-  p_wv_2,
-  q_ic_2,
-  p_ic_2,
+  b_p
 };
 
 namespace {
@@ -71,16 +66,7 @@ typedef boost::fusion::vector<
     msf_core::StateVar_T<Eigen::Quaternion<double>, q_ic>,  ///< Rotation from the IMU frame to the camera frame expressed in the IMU frame.
     msf_core::StateVar_T<Eigen::Matrix<double, 3, 1>, p_ic>,  ///< Translation from the IMU frame to the camera frame expressed in the IMU frame.
     msf_core::StateVar_T<Eigen::Matrix<double, 3, 1>, p_ip>,  ///< Translation from the IMU frame to the position sensor frame expressed in the IMU frame.
-    msf_core::StateVar_T<Eigen::Matrix<double, 1, 1>, b_p>,  ///< Pressure sensor bias.
-
-
-
-    msf_core::StateVar_T<Eigen::Matrix<double, 1, 1>, L_2>,     ///< Visual scale.
-    msf_core::StateVar_T<Eigen::Quaternion<double>, q_wv_2,  ///< Rotation from the world frame to the frame in which the pose is measured expressed in the world frame.
-        msf_core::AuxiliaryNonTemporalDrifting>,  ///< Translation from the world frame to the frame in which the pose is measured expressed in the world frame.
-    msf_core::StateVar_T<Eigen::Matrix<double, 3, 1>, p_wv_2>,  ///< Vision world position drift.
-    msf_core::StateVar_T<Eigen::Quaternion<double>, q_ic_2>,  ///< Rotation from the IMU frame to the camera frame expressed in the IMU frame.
-    msf_core::StateVar_T<Eigen::Matrix<double, 3, 1>, p_ic_2>  ///< Translation from the IMU frame to the camera frame expressed in the IMU frame.
+    msf_core::StateVar_T<Eigen::Matrix<double, 1, 1>, b_p>  ///< Pressure sensor bias.
 > fullState_T;
 }
 ///< The state we want to use in this EKF.
