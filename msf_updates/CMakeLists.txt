@@ -9,25 +9,25 @@ project(msf_updates)
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 set(CMAKE_BUILD_TYPE Release)
 
-find_package(catkin REQUIRED COMPONENTS roscpp msf_core geometry_msgs sensor_fusion_comm)
+find_package(catkin REQUIRED COMPONENTS roscpp msf_core geometry_msgs mavros_msgs sensor_fusion_comm)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
 generate_dynamic_reconfigure_options(
-    cfg/PosePressureSensor.cfg
-    cfg/PositionPoseSensor.cfg
-    cfg/SinglePoseSensor.cfg
-    cfg/SinglePositionSensor.cfg
-    cfg/SphericalPositionSensor.cfg
-	cfg/VelocityPoseSensor.cfg
-cfg/PositionPoseMagSensor.cfg
+#    cfg/PosePressureSensor.cfg
+#    cfg/PositionPoseSensor.cfg
+#    cfg/SinglePoseSensor.cfg
+#    cfg/SinglePositionSensor.cfg
+#    cfg/SphericalPositionSensor.cfg
+#	cfg/VelocityPoseSensor.cfg
+#cfg/PositionPoseMagSensor.cfg
 cfg/PositionPosePressureSensor.cfg
-cfg/PositionPosePressureMagSensor.cfg
+#cfg/PositionPosePressureMagSensor.cfg
 )
 
 catkin_package(
     DEPENDS
-    CATKIN_DEPENDS roscpp msf_core geometry_msgs sensor_fusion_comm
+    CATKIN_DEPENDS roscpp msf_core geometry_msgs sensor_fusion_comm mavros_msgs
     INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
     LIBRARIES pose_distorter
 )
@@ -39,15 +39,15 @@ target_link_libraries(pose_distorter ${catkin_LIBRARIES})
 if(EXISTS "${PROJECT_SOURCE_DIR}/COMPILE_ONLY_POSEFILTER")
 add_subdirectory(src/pose_msf)
 else()
-add_subdirectory(src/pose_msf)
-add_subdirectory(src/pose_pressure_msf)
-add_subdirectory(src/position_msf)
-add_subdirectory(src/position_pose_msf)
-add_subdirectory(src/spherical_msf)
-add_subdirectory(src/velocity_pose_msf)
-add_subdirectory(src/position_pose_mag_msf)
+#add_subdirectory(src/pose_msf)
+#add_subdirectory(src/pose_pressure_msf)
+#add_subdirectory(src/position_msf)
+#add_subdirectory(src/position_pose_msf)
+#add_subdirectory(src/spherical_msf)
+#add_subdirectory(src/velocity_pose_msf)
+#add_subdirectory(src/position_pose_mag_msf)
 add_subdirectory(src/position_pose_pressure_msf)
-add_subdirectory(src/position_pose_pressure_mag_msf)
+#add_subdirectory(src/position_pose_pressure_mag_msf)
 endif()
 
 add_executable(test_distort src/test/test_distort.cc)

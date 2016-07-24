@@ -30,6 +30,9 @@
  #include <msf_updates/pressure_sensor_handler/pressure_sensorhandler.h>
 #include <msf_updates/PositionPosePressureSensorConfig.h>
 
+ #include <msf_updates/velocity_sensor_handler/velocity_sensorhandler.h>
+#include <msf_updates/velocity_sensor_handler/velocity_measurement.h>
+
  namespace msf_updates {
 
   typedef msf_updates::PositionPosePressureSensorConfig Config_T;
@@ -54,6 +57,12 @@
 
     friend class msf_position_sensor::PositionSensorHandler<
     msf_updates::position_measurement::PositionMeasurement, this_T>;
+
+    typedef msf_velocity_sensor::VelocitySensorHandler<
+    msf_updates::velocity_measurement::VelocityMeasurement, this_T> VelocitySensorHandler_T;
+    friend class msf_velocity_sensor::VelocitySensorHandler<
+    msf_updates::velocity_measurement::VelocityMeasurement, this_T>;
+
 
     typedef msf_pose_sensor::PoseSensorHandler<msf_updates::pose_measurement::PoseMeasurement<
     msf_updates::EKFState::StateDefinition_T::L_2,
@@ -91,7 +100,10 @@
     pose_2_handler_.reset(
       new PoseSensor_2_Handler_T(*this, "", "pose2_sensor", distortmeas));
     AddHandler(pose_2_handler_);
-
+    
+    velocity_handler_.reset(
+      new VelocitySensorHandler_T(*this, "", "velocity_sensor"));
+    AddHandler(velocity_handler_);
 
     reconf_server_.reset(new ReconfigureServer(pnh));
     ReconfigureServer::CallbackType f = boost::bind(&this_T::Config, this, _1,_2);
@@ -111,7 +123,8 @@ private:
   shared_ptr<msf_pressure_sensor::PressureSensorHandler> pressure_handler_;
 
   shared_ptr<PoseSensor_2_Handler_T> pose_2_handler_;
-  
+
+  shared_ptr<VelocitySensorHandler_T> velocity_handler_;
 
 
   Config_T config_;
@@ -134,6 +147,10 @@ private:
     pose_2_handler_->SetNoises(config.pose_noise_meas_p_2,
      config.pose_noise_meas_q_2);
     pose_2_handler_->SetDelay(config.pose_delay_2);
+
+    velocity_handler_->SetNoises(config.velocity_flowNoiseXY);
+    velocity_handler_->SetDelay(config.velocity_flowDelay);
+    velocity_handler_->SetMinQ(config.velocity_flowMinQ);
 
     if((level & msf_updates::PositionPosePressureSensor_SET_LATLON) && config.reset_coordinate == true)
     {
@@ -170,7 +187,7 @@ private:
 
 void Init(double scale) const {
   Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, g, w_m, a_m, p_ic, p_vc, p_wv,
-  p_ip, p_pos ,p_zero , p_ic_2, p_vc_2, p_wv_2, p_ip_2;
+  p_ip, p_pos ,p_zero , p_ic_2, p_vc_2, p_wv_2, p_ip_2, flow_pos;
   Eigen::Quaternion<double> q, q_wv, q_ic, q_vc,   q_wv_2, q_ic_2, q_vc_2;
   msf_core::MSF_Core<EKFState_T>::ErrorStateCov P;
   Eigen::Matrix<double, 1, 1> b_p;
@@ -195,7 +212,7 @@ void Init(double scale) const {
     p_vc = pose_handler_->GetPositionMeasurement();
     q_vc = pose_handler_->GetAttitudeMeasurement();
 
-
+    flow_pos = velocity_handler_->GetVelocityMeasurement();
 
     b_p << pose_handler_->GetPositionMeasurement()(2) / scale
             - pressure_handler_->GetPressureMeasurement()(0);  /// Pressure drift state
@@ -209,6 +226,8 @@ void Init(double scale) const {
       "initial measurement vision: pos:["<<p_vc.transpose()<<"] orientation: " <<STREAMQUAT(q_vc));
     MSF_INFO_STREAM(
       "initial measurement position: pos:["<<p_pos.transpose()<<"]");
+    MSF_INFO_STREAM(
+      "initial measurement position flow init:["<<flow_pos.transpose()<<"]");
 
     // Check if we have already input from the measurement sensor.
     if (!pose_handler_->ReceivedFirstMeasurement())
@@ -218,6 +237,9 @@ void Init(double scale) const {
     if (!position_handler_->ReceivedFirstMeasurement())
       MSF_WARN_STREAM(
         "No measurements received yet to initialize absolute position - using [0 0 0]");
+    if (!velocity_handler_->ReceivedFirstMeasurement())
+      MSF_WARN_STREAM(
+        "No measurements received yet to initialize flow position - using [0 0 0]");
 
     ros::NodeHandle pnh("~");
     pnh.param("pose_sensor/init/p_ic/x", p_ic[0], 0.0);

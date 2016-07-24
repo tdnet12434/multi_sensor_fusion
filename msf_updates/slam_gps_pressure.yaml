@@ -5,10 +5,17 @@ data_playback: false
 #########IMU PARAMETERS#######
 ####### mpu6000
 core/core_fixed_bias: false
-core/core_noise_acc: 0.03924 #9.43774e-5 #0.03924 #0.003924    # [m/s^2/sqrt(Hz)] mpu6000 datasheet
-core/core_noise_gyr: 3.43013e-8 #0.00008726 #0.00008726  # [rad/s/sqrt(Hz)] mpu6000 datasheet
-core/core_noise_gyrbias: 0.00000212     # For fixed bias we do not need process noise.
-core/core_noise_accbias: 0.00108     # For fixed bias we do not need process noise.
+# core/core_noise_acc: 0.00150 #0.03924 #9.43774e-5 #0.03924 #0.003924    # [m/s^2/sqrt(Hz)] mpu6000 datasheet
+# core/core_noise_gyr: 0.00008726 #3.43013e-8 #0.00008726 #0.00008726  # [rad/s/sqrt(Hz)] mpu6000 datasheet
+# core/core_noise_gyrbias: 0.000008726     # For fixed bias we do not need process noise.
+# core/core_noise_accbias: 0.000150     # For fixed bias we do not need process noise.
+
+core/core_noise_acc: 0.013
+core/core_noise_accbias: 0.000108
+core/core_noise_gyr: 0.00065
+core/core_noise_gyrbias: 0.00000212
+
+
 ####### ADIS
 #core/core_noise_acc: 0.002
 #core/core_noise_accbias: 8e-5

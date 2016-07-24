@@ -128,7 +128,7 @@ private:
 
 void Init(double scale) const {
   Eigen::Matrix<double, 3, 1> p, v, b_w, b_a, g, w_m, a_m, p_ic, p_vc, p_wv,
-  p_ip, p_pos,a_body;
+  p_ip, p_pos,flow_pos;
   Eigen::Quaternion<double> q, q_wv, q_ic, q_vc;
   msf_core::MSF_Core<EKFState_T>::ErrorStateCov P;
 
@@ -145,7 +145,7 @@ void Init(double scale) const {
 
     P.setZero();  // Error state covariance; if zero, a default initialization in msf_core is used.
 
-    a_body = velocity_handler_->GetVelocityMeasurement();
+    flow_pos = velocity_handler_->GetVelocityMeasurement();
 
     p_vc = pose_handler_->GetPositionMeasurement();
     q_vc = pose_handler_->GetAttitudeMeasurement();
@@ -153,7 +153,7 @@ void Init(double scale) const {
     MSF_INFO_STREAM(
       "initial measurement vision: pos:["<<p_vc.transpose()<<"] orientation: " <<STREAMQUAT(q_vc));
     MSF_INFO_STREAM(
-      "initial measurement vel: a:["<<a_body.transpose()<<"]");
+      "initial measurement position flow init: a:["<<flow_pos.transpose()<<"]");
 
     // Check if we have already input from the measurement sensor.
     if (!pose_handler_->ReceivedFirstMeasurement())
@@ -162,7 +162,7 @@ void Init(double scale) const {
         "using [0 0 0] and [1 0 0 0] respectively");
     if (!velocity_handler_->ReceivedFirstMeasurement())
       MSF_WARN_STREAM(
-        "No measurements received yet to initialize acceleration of velocity - using [0 0 0]");
+        "No measurements received yet to initialize flow position - using [0 0 0]");
 
     ros::NodeHandle pnh("~");
     pnh.param("pose_sensor/init/p_ic/x", p_ic[0], 0.0);
