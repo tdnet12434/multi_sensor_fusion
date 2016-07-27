@@ -451,10 +451,11 @@ void Init(double scale) const {
 
     double time_now = ros::Time::now().toSec();
     double lasttime_pose = pose_handler_->GetLasttime();
+    double lasttime_position = position_handler_->GetLasttime();
     // MSF_WARN_STREAM_THROTTLE(0.1,"Time " << time_now << "\t" << lasttime_pose);
     if(lasttime_pose!=0)
       if(time_now-lasttime_pose > 1) {
-        MSF_WARN_STREAM_THROTTLE(1,"SLAM timeout " << time_now << "\t" << lasttime_pose);
+        MSF_WARN_STREAM_THROTTLE(0.5,"SLAM timeout >1s" << time_now << "\t" << lasttime_pose);
         Eigen::Matrix<double, 1, 1> L_;
         L_ << 1;
         delaystate.Set < StateDefinition_T::L > (L_);
@@ -468,8 +469,11 @@ void Init(double scale) const {
         delaystate.Set < StateDefinition_T::q_wv > (q_wv_);
 
       }
-
-
+    if(lasttime_position!=0)
+      if(time_now-lasttime_position > 1)
+       { 
+        MSF_WARN_STREAM_THROTTLE(0.5,"GPS timeout >1s" << time_now << "\t" << lasttime_position);
+       }
 
 
   }

@@ -82,7 +82,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                                         msg->integrated_y,
                                         0);
 
-    dt = msg->integration_time_us*0.000001;
+    dt = (msg->integration_time_us != 0 ? msg->integration_time_us*0.000001 : 0.1); //should 10hz
     agl = msg->distance;
     flow_q = msg->quality;
     Eigen::Matrix<double, 3, 1> gyro_raw(msg->integrated_xgyro, 
@@ -129,6 +129,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   
   double flow_q;
   double agl; //
+  double agl_ef;
   double n_zv_;  /// Position measurement noise.
   double flow_minQ_;
   double dt;
@@ -166,7 +167,11 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
         .conjugate().toRotationMatrix();
 
-    double agl_ef = agl * C_q.transpose()(2,2);
+    agl_ef = agl * C_q.transpose()(2,2);
+
+    if(flow_q < flow_minQ_ || agl_ef <= 0.3)          {flow_healhy = false;}
+
+
     Eigen::Matrix<double, 3, 1> delta_b(
                               -(flow(0) - gyro(0)) * agl_ef,
                               -(flow(1) - gyro(1)) * agl_ef,
@@ -179,9 +184,10 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
     //put to z measurement
     Eigen::Matrix<double, 3, 1> _z_p_ = ( flow_n );
-    z_p_(0) = _z_p_(0);
-    z_p_(1) = _z_p_(1);
-    z_p_(2) = 0;
+      z_p_(0) = _z_p_(0);
+      z_p_(1) = _z_p_(1);
+      z_p_(2) = 0;
+
 
     // printf("%.3f\t  %.3f\t   %.3f\t   %.3f\t   %.3f\t   %.3f\n", 
            // z_p_(0), z_p_(1), gyro(0), gyro(1),  agl,   agl_ef);
@@ -270,25 +276,47 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
 
 
+      // static int fault_score=15;
+      // if(flow_q < flow_minQ_ || agl_ef <= 0.3) {
+      //   fault_score ++;
+      //   if(fault_score>=15) {
+      //     flow_healhy = false;
+      //     fault_score=15;
+      //   }
+      // }else{
+      //   fault_score --;
+      //   if(fault_score <=0) {
+      //     flow_healhy = true;
+      //     fault_score = 0;
+      //   }
+      // }
 
-      if(flow_q < flow_minQ_) {flow_healhy = false; return;}
-      if(agl <= 0.3)          {flow_healhy = false; return;}
+
       // // Velocity
-      r_old.block<3, 1>(0, 0) = z_p_
-          - state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
+      // if(flow_healhy)
+        r_old.block<3, 1>(0, 0) = z_p_
+                            - state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
+      // else
+      //   return;
+
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       if (!CheckForNumeric(r_old, "r_old")) {
-        MSF_ERROR_STREAM("r_old: "<<r_old);
+        // Eigen::Matrix<double, 3, 3> ident
+        // r_old.block<3, 1>(0, 0) =  ;
+        MSF_ERROR_STREAM("flow r_old: "<<r_old);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
       if (!CheckForNumeric(H_new, "H_old")) {
-        MSF_ERROR_STREAM("H_old: "<<H_new);
+        MSF_ERROR_STREAM("flow H_old: "<<H_new);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
       if (!CheckForNumeric(R_, "R_")) {
-        MSF_ERROR_STREAM("R_: "<<R_);
+        MSF_ERROR_STREAM("flow R_: "<<R_);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
@@ -318,7 +346,9 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
       // fault detection (mahalanobis distance !! )
       float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
-
+      if(std::isnan(beta) || std::isinf(beta))
+        return;
+      // printf("beta\t%.2f", beta);
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);
       int n_y_flow = 2;
@@ -327,8 +357,10 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
           if (_flowFault < FAULT_MINOR) {
             printf("flow FAULT_MINOR\n");
             _flowFault = FAULT_MINOR;
+          }else if(_flowFault >= FAULT_MINOR && beta > 10000) { //from default mah_threshold
+            printf("flow bad\n");
+            _flowFault = FAULT_SEVERE;
           }
-
         } else if (_flowFault) {
           _flowFault = FAULT_NONE;
         }

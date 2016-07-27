@@ -38,7 +38,7 @@ class PositionSensorHandler : public msf_core::SensorHandler<
   double n_zp_;  ///< Position measurement noise.
   double delay_;       ///< Delay to be subtracted from the ros-timestamp of
                        //the measurement provided by this sensor.
-
+  double timestamp_previous_pose_;  ///< Timestamp of previous pose message to subsample messages.
   ros::Subscriber subPointStamped_;
   ros::Subscriber subPoseStamped_;
   ros::Subscriber subTransformStamped_;
@@ -68,6 +68,10 @@ class PositionSensorHandler : public msf_core::SensorHandler<
   void SetDelay(double delay);
   void SetLatlon( bool referenceinit_);
   void AdjustGPSZReference(double current_z);
+  // Used for check alive
+  double GetLasttime() {
+    return timestamp_previous_pose_;
+  }
 };
 }  // namespace msf_position_sensor
 

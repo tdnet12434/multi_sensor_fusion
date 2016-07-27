@@ -1,0 +1,1726 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"faul",
+				"fault_score"
+			],
+			[
+				"fal",
+				"fault_score"
+			],
+			[
+				"fau",
+				"fault_score"
+			],
+			[
+				"flow",
+				"flow_healhy"
+			],
+			[
+				"flow_",
+				"flow_minQ_"
+			],
+			[
+				"FAU",
+				"FAULT_SEVERE"
+			],
+			[
+				"imu",
+				"imu_ts"
+			],
+			[
+				"gps_vel",
+				"gps_vel_callback"
+			],
+			[
+				"glo",
+				"global_position"
+			],
+			[
+				"GPS",
+				"GPShacc"
+			],
+			[
+				"long",
+				"longitude"
+			],
+			[
+				"position",
+				"position_covariance"
+			],
+			[
+				"baro",
+				"baroaltMsg"
+			],
+			[
+				"mavros",
+				"mavros_msgs"
+			],
+			[
+				"Nav",
+				"NavSatFix"
+			],
+			[
+				"map",
+				"map_projector"
+			],
+			[
+				"reset",
+				"resetHome"
+			],
+			[
+				"firs",
+				"first_init_home"
+			],
+			[
+				"_",
+				"_GPS"
+			],
+			[
+				"_GPS",
+				"_GPS_HOME"
+			],
+			[
+				"baro_al",
+				"baro_alt_msg"
+			],
+			[
+				"Con",
+				"ConstPtr"
+			],
+			[
+				"inc",
+				"include"
+			],
+			[
+				"sub",
+				"subAgl_"
+			],
+			[
+				"gyro",
+				"gyro_raw"
+			],
+			[
+				"del",
+				"delta_n"
+			],
+			[
+				"gy",
+				"gyro"
+			],
+			[
+				"offb",
+				"offb_wtf"
+			],
+			[
+				"off",
+				"offb_wtf"
+			],
+			[
+				"des",
+				"des_hz_init"
+			],
+			[
+				"des_",
+				"des_hy"
+			],
+			[
+				"local",
+				"local_pose"
+			],
+			[
+				"last",
+				"last_state"
+			],
+			[
+				"cur",
+				"current_state"
+			],
+			[
+				"mavr",
+				"mavros_msgs"
+			],
+			[
+				"ROS",
+				"ROS_INFO"
+			],
+			[
+				"arm",
+				"armed"
+			],
+			[
+				"STA",
+				"STATE_LOOCKUP"
+			],
+			[
+				"visual",
+				"visual_val"
+			],
+			[
+				"bool",
+				"bool_param"
+			],
+			[
+				"VISIO",
+				"VISION_LAST_STATE"
+			],
+			[
+				"boo",
+				"bool"
+			],
+			[
+				"GPS_",
+				"GPS_hAcc"
+			],
+			[
+				"cam_to",
+				"cam_to_vision"
+			],
+			[
+				"pub",
+				"publish"
+			],
+			[
+				"sta",
+				"stamp"
+			],
+			[
+				"mag_",
+				"mag_pub"
+			],
+			[
+				"V",
+				"Vector3Stamped"
+			],
+			[
+				"tra",
+				"transform_WV"
+			],
+			[
+				"state",
+				"state_out"
+			],
+			[
+				"E",
+				"ExtEkf"
+			],
+			[
+				"Pub",
+				"Publisher"
+			],
+			[
+				"an",
+				"angular_velocity"
+			],
+			[
+				"lie",
+				"linear_acceleration"
+			],
+			[
+				"linear",
+				"linear_acceleration"
+			],
+			[
+				"sen",
+				"sensor_fusion_comm"
+			],
+			[
+				"cam",
+				"cam_pitch"
+			],
+			[
+				"ROS_IN",
+				"ROS_INFO_STREAM"
+			],
+			[
+				"odom",
+				"odom_pose_filtered"
+			],
+			[
+				"begin",
+				"beginner_tutorials"
+			],
+			[
+				"LOST",
+				"LOST_COUNT"
+			],
+			[
+				"beg",
+				"beginner_tutorials"
+			],
+			[
+				"LOS",
+				"LOST_COUNT"
+			],
+			[
+				"tfT",
+				"tfTcw"
+			],
+			[
+				"pu",
+				"publisher_pose"
+			],
+			[
+				"odo",
+				"odotoposeMsg"
+			],
+			[
+				"image1B",
+				"image1BufSize"
+			],
+			[
+				"image0Bu",
+				"image0BufSize"
+			],
+			[
+				"GP",
+				"GPS_hAcc"
+			],
+			[
+				"iner",
+				"inertial_gps_pub"
+			],
+			[
+				"or",
+				"orientation"
+			],
+			[
+				"pose",
+				"pose_gps_callback"
+			],
+			[
+				"head",
+				"heading"
+			],
+			[
+				"PTAMS",
+				"PTAMStatus"
+			],
+			[
+				"pta",
+				"ptamWrapper"
+			],
+			[
+				"msf_",
+				"msf_data"
+			],
+			[
+				"msf",
+				"msf_odom_is_good"
+			],
+			[
+				"msf_c",
+				"msf_Cb"
+			],
+			[
+				"pointw",
+				"pointwCov"
+			],
+			[
+				"posenav",
+				"pose_navMsg"
+			],
+			[
+				"nav",
+				"nav_msgs"
+			],
+			[
+				"SONAR",
+				"SONAR_DATA2_O"
+			],
+			[
+				"Pos",
+				"PoseWithCovarianceStamped"
+			],
+			[
+				"pose_de",
+				"pose_demand_pub"
+			],
+			[
+				"Pose",
+				"PoseStamped"
+			],
+			[
+				"yaw",
+				"yaw_ondemand"
+			],
+			[
+				"imuMsg",
+				"imuMsgval"
+			],
+			[
+				"gp",
+				"gpsrawVal"
+			],
+			[
+				"gps",
+				"gpsrawMsg"
+			],
+			[
+				"Mout",
+				"Mout1"
+			],
+			[
+				"pres",
+				"pressure"
+			],
+			[
+				"rc_",
+				"rc_msg"
+			],
+			[
+				"remote",
+				"remotecallback"
+			],
+			[
+				"Temp",
+				"Temperature"
+			],
+			[
+				"temp",
+				"tempMsg"
+			],
+			[
+				"compas",
+				"compassVal"
+			],
+			[
+				"comp",
+				"compassMsg"
+			],
+			[
+				"pose_nav",
+				"pose_nav_callback"
+			],
+			[
+				"Po",
+				"PoseWithCovarianceStamped"
+			],
+			[
+				"fram",
+				"frame_id"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"file": "velocity_measurement.h",
+			"settings":
+			{
+				"buffer_size": 17502,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "velocity_sensorhandler.h",
+			"settings":
+			{
+				"buffer_size": 2548,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "implementation/velocity_sensorhandler.hpp",
+			"settings":
+			{
+				"buffer_size": 6371,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/position_sensorhandler.h",
+			"settings":
+			{
+				"buffer_size": 3237,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/position_measurement.h",
+			"settings":
+			{
+				"buffer_size": 9050,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/implementation/position_sensorhandler.hpp",
+			"settings":
+			{
+				"buffer_size": 10106,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/pose_sensorhandler.h",
+			"settings":
+			{
+				"buffer_size": 3613,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/implementation/pose_sensorhandler.hpp",
+			"settings":
+			{
+				"buffer_size": 10500,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/pose_measurement.h",
+			"settings":
+			{
+				"buffer_size": 17894,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_msf/position_pose_pressure_sensormanager.h",
+			"settings":
+			{
+				"buffer_size": 18240,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/cfg/PositionPosePressureSensor.cfg",
+			"settings":
+			{
+				"buffer_size": 7318,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_msf/CMakeLists.txt",
+			"settings":
+			{
+				"buffer_size": 229,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/CMakeLists.txt",
+			"settings":
+			{
+				"buffer_size": 1876,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/msf_optical_flow_vel.launch",
+			"settings":
+			{
+				"buffer_size": 6121,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_msf/msf_statedef.hpp",
+			"settings":
+			{
+				"buffer_size": 4412,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/slam_gps_pressure.yaml",
+			"settings":
+			{
+				"buffer_size": 4844,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/crossover_node.cpp",
+			"settings":
+			{
+				"buffer_size": 40095,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/Ulink_capter_and_inertial_nav.h",
+			"settings":
+			{
+				"buffer_size": 32522,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/inertial_nav.h",
+			"settings":
+			{
+				"buffer_size": 14627,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/useful_fn.h",
+			"settings":
+			{
+				"buffer_size": 20132,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/msf_sortedContainer.h",
+			"settings":
+			{
+				"buffer_size": 13169,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/implementation/msf_measurement_inl.h",
+			"settings":
+			{
+				"buffer_size": 7166,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/ethzasl_msf_new_mahanobis/msf_core/include/msf_core/implementation/msf_measurement_inl.h",
+			"settings":
+			{
+				"buffer_size": 8243,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/src/Firmware/src/modules/mavlink/mavlink_messages.cpp",
+			"settings":
+			{
+				"buffer_size": 90034,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/msf_sensorhandler.h",
+			"settings":
+			{
+				"buffer_size": 2083,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"selected_items":
+		[
+		],
+		"width": 404.0
+	},
+	"console":
+	{
+		"height": 139.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/home/fx/Dropbox/nuc_catkin/21_6_58_transfer/pnew_odom_gps.launch",
+		"/home/fx/src/Firmware/src/modules/local_position_estimator/sensors/flow.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/implementation/pose_sensorhandler.hpp",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/4030_solo",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/4011_dji_f450",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/4060_dji_matrice_100",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/rc.mc_apps",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/4001_quad_x",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/useful_fn.h",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pressure_sensor_handler/pressure_sensorhandler.h",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pressure_sensor_handler/pressure_measurement.h",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/cfg/MSF_Core.cfg",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/implementation/msf_measurement_inl.h",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/pose_measurement.h",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/velocity_pose_msf/velocity_pose_sensormanager.h",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_mag_msf/position_pose_pressure_mag_sensormanager.h",
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/velocity_pose_msf/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/build/build_logs/msf_updates.log",
+		"/home/fx/Dropbox/catkin_ws/fuck.launch",
+		"/home/fx/Dropbox/catkin_ws/all_run_quad.launch",
+		"/home/fx/Dropbox/catkin_ws/new_odom_gps.launch",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/examples/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/CMakeLists.txt",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/rc.io",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/rcS",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/rc.interface",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/rc.sensors",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/rc.mc_defaults",
+		"/media/fx/5805-1C12/log/2016-07-22/postflight_perf07_55_06.txt",
+		"/media/fx/5805-1C12/log/2016-07-22/preflight_perf07_51_55.txt",
+		"/home/fx/src/Firmware/ROMFS/px4fmu_common/init.d/2101_fw_AERT",
+		"/home/fx/Dropbox/catkin_ws/src/mavros/mavros/launch/px4_config.yaml",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/tutorial_slam2d/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/examples/target/static_target.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM/src/Optimizer.cc",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/examples/target/targetTypes6D.hpp",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/apps/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/mavros/mavros/launch/apm.launch",
+		"/home/fx/Dropbox/catkin_ws/ORB2_black_sj5000.launch",
+		"/home/fx/Dropbox/catkin_ws/try_msf_gps.launch",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/sensor_fusion_comm/msg/ExtEkf.msg",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/msf_updates/src/position_msf/position_sensormanager.h",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/Ulink_capter_and_inertial_nav.cpp",
+		"/home/fx/Desktop/plan to do",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/Ulink_capter_and_inertial_nav.h",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/msf_updates/test.yaml",
+		"/home/fx/Dropbox/catkin_ws/ORB2_black_sj4000.launch",
+		"/home/fx/src/Firmware/cmake/configs/nuttx_px4fmu-v2_default.cmake",
+		"/home/fx/Dropbox/catkin_ws/src/using_markers/src/quad_visual.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/Examples/ROS/ORB_SLAM2/Settings_sj5000.yaml",
+		"/home/fx/src/Firmware/src/modules/local_position_estimator/sensors/vision.cpp",
+		"/home/fx/src/Firmware/src/modules/local_position_estimator/BlockLocalPositionEstimator.hpp",
+		"/home/fx/src/Firmware/src/modules/local_position_estimator/BlockLocalPositionEstimator.cpp",
+		"/home/fx/src/Firmware/src/modules/navigator/takeoff.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/cmake-modules/FindEigen3.cmake",
+		"/home/fx/Dropbox/catkin_ws/src/mavlink/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/mavros/test_mavros/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/mavros/test_mavros/src/offb_node.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/mavros/test_mavros/scripts/setpoint_position_demo",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/gps_tester.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/mavros/test_mavros/launch/px4/iris_empty_world_offboard_ctl.launch",
+		"/home/fx/Dropbox/catkin_ws/src/mavros/mavros/launch/px4.launch",
+		"/home/fx/src/Firmware/src/examples/px4_simple_app/px4_simple_app.c",
+		"/home/fx/Downloads/qgroundcontrol/qgroundcontrol-start.sh",
+		"/home/fx/Dropbox/catkin_ws/pure_visual_quad.launch",
+		"/home/fx/g2o/config.h.in",
+		"/home/fx/g2o/g2o/examples/target/constant_velocity_target.cpp",
+		"/home/fx/Desktop/General config.txt",
+		"/home/fx/g2o/g2o/examples/target/static_target.cpp",
+		"/home/fx/g2o/CMakeLists.txt",
+		"/home/fx/g2o/g2o/examples/sphere/create_sphere.cpp",
+		"/home/fx/g2o/g2o/examples/target/targetTypes6D.hpp",
+		"/home/fx/g2o/bin/test_preopt.g2o",
+		"/home/fx/g2o/bin/test_gt.g2o",
+		"/home/fx/g2o/bin/tutorial_after.g2o",
+		"/home/fx/g2o/bin/tutorial_before.g2o",
+		"/home/fx/g2o/g2o/examples/simple_optimize/simple_optimize.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ecl/EKF/tests/base/base.cpp",
+		"/home/fx/ecl-master/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/ecl/EKF/tests/base/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/ecl/EKF/tests/ringbuffer/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/ecl/EKF/tests/ringbuffer/ringbuffer.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ecl/EKF/RingBuffer.h",
+		"/home/fx/Dropbox/catkin_ws/src/ecl/EKF/CMakeLists.txt",
+		"/home/fx/.cache/.fr-5o7OOy/ecl-master/EKF/estimator_base.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ecl/EKF/estimator_base.h",
+		"/home/fx/Dropbox/test_ahrs_accel_calibrate_matlab/data.txt",
+		"/home/fx/InertialNavigation-master/src/main_closed_loop_test_harness-21state.cpp",
+		"/home/fx/InertialNavigation-master/src/main_closed_loop_float.cpp",
+		"/home/fx/InertialNavigation-master/include/estimator_22states.h",
+		"/home/fx/Dropbox/test_ahrs_arducopter_lib/estimator_utilities.h",
+		"/home/fx/InertialNavigation-master/bin/timing.txt",
+		"/home/fx/InertialNavigation-master/bin/MAG.txt",
+		"/home/fx/InertialNav-master/code/Makefile",
+		"/home/fx/sketchbook/libraries/stlport/INSTALL.unixes",
+		"/home/fx/.arduino15/packages/arduino/hardware/sam/1.6.7/platform.txt",
+		"/home/fx/.arduino15/packages/arduino/tools/arm-none-eabi-gcc/4.8.3-2014q1/arm-none-eabi/include/c++/4.8.3/cstdio",
+		"/home/fx/.arduino15/packages/arduino/hardware/sam/1.6.7/libraries/Eigen320/Eigen320.h",
+		"/home/fx/.arduino15/packages/arduino/hardware/sam/1.6.7/libraries/Eigen313/Eigen313.h",
+		"/home/fx/InertialNavigation-master/Makefile",
+		"/home/fx/Dropbox/catkin_ws/src/kr_attitude_eskf/launch/test.launch",
+		"/home/fx/Dropbox/catkin_ws/src/kr_attitude_eskf/src/Node.cpp",
+		"/home/fx/Dropbox/catkin_ws/uvc_test_raw.launch",
+		"/home/fx/Dropbox/catkin_ws/src/camera_umd/uvc_camera/launch/example.launch",
+		"/home/fx/Dropbox/catkin_ws/src/camera_umd/uvc_camera/launch/camera_node.launch",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/Examples/ROS/ORB_SLAM2/src/ros_mono.cc",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/launch/vismaggps_fusion.launch",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/vismaggps_fix.yaml",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/src/gps_pos.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/src/gps_pos.h",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/src/vismaggps.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/src/vismaggps.h",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/src/vismaggps_measurements.h",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/vismaggps_fusion/src/main.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/sensor_fusion_core/src/Sensor_Fusion_Core.cpp",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/vismaggps/sensor_fusion_core/CMakeLists.txt",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/src/System.cc",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/include/System.h",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/src/MapDrawer.cc",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/src/Viewer.cc",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/src/Tracking.cc",
+		"/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/include/Tracking.h",
+		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/msg/odom_data.msg",
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/msf_updates/slam_gps.yaml"
+	],
+	"find":
+	{
+		"height": 47.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/velocity_sensor_handler",
+			"<current file>",
+			"current file",
+			"Ulink_capter_and_inertial_nav.h,Ulink_capter_and_inertial_nav.cpp",
+			"",
+			"ulink.py",
+			"Untitled Document",
+			"U",
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": true,
+		"find_history":
+		[
+			"flow_healhy",
+			"agl",
+			"vehicle_global_position",
+			"_gpsFault",
+			"_flowFault",
+			"position_use_fixed_covariance",
+			"flow_minQ_",
+			"delay_",
+			"flow_minQ_",
+			"timestamp_previous_pose_",
+			"GetLasttime",
+			"position_handler_",
+			"timestamp_previous_pose_",
+			"GetLasttime",
+			"imu_callback",
+			"imuMsg",
+			"GPS_hAcc",
+			"min_eph_epv",
+			"gps_eph",
+			"eph",
+			"ONE_G",
+			"gps_eph",
+			"i",
+			"navvelMsg",
+			"gps_callback",
+			"navvelMsg",
+			"poseMsg.pose",
+			"pose.p",
+			"GPS_HOME",
+			"map_projector",
+			"LATLON_TO_CM",
+			"map_projector",
+			"poseMsg",
+			"gpsrawMsg",
+			"check_state",
+			"baroaltMsg",
+			"altMsg",
+			"gpsrawMsg",
+			"inertial_gps",
+			"check_state",
+			"gpsrawMsg",
+			"imuMsg",
+			"baroaltMsg",
+			"min(",
+			"_lon_to_cm_scaling",
+			"Max(",
+			"max(",
+			"max",
+			"GPS_HOME",
+			"poseMsg",
+			"baroaltMsg",
+			"get_pose_nav_z_buffer",
+			"navvelMsg",
+			"baroaltMsg",
+			"PointStamped",
+			"baro_alt_msg",
+			"ppid_outMsg",
+			"t_prev",
+			"micros",
+			"5236",
+			"2452",
+			"pose_with_covariance_gps",
+			"GetVelocityMeasurement",
+			"fault_lvl_disable",
+			"res_delayed",
+			"P",
+			"H_delayed",
+			"pose",
+			"_flowFault",
+			"MakeFromSensorReading",
+			"MakeFromSensorReadingImpl",
+			"subFlow_",
+			"CalculateAndApplyCorrection",
+			"drag",
+			"SetDrag",
+			"drag_",
+			"P",
+			"ErrorStateCov",
+			"err",
+			"long",
+			"float",
+			"n_zv",
+			"n_zv_",
+			"P",
+			"body_k",
+			"isabsolute_",
+			"a_body",
+			"flow_pos",
+			"a_body",
+			"z_p_",
+			"r_old",
+			"linear",
+			">linear_acceleration",
+			"p_ip",
+			"subImu_",
+			"msg",
+			"linear_acceleration",
+			"a_bf_",
+			"temp",
+			"z_p_",
+			"z_v_",
+			"sensor_msgs/Imu.h",
+			"sensor_msgs::Imu",
+			"handle_position_target_local_ned",
+			"target_local_pub",
+			"millis()",
+			"static",
+			"example",
+			"acc",
+			";\n",
+			"gpsNoiseSigma",
+			"processNoiseSigma",
+			"MplConnect",
+			"TargetOdometry3DEdge",
+			"g2o::HyperGraph::VertexSet&,",
+			"initialEstimatePossible",
+			"TargetOdometry3DEdge::initialEstimate(g2o::HyperGraph::",
+			"toe->initialEstimate(vPrevSet,vCurr);",
+			"gpsMeasurement",
+			"optimizer",
+			".vertices()",
+			"optimizer.vertices()",
+			"Iterate",
+			"int ",
+			"Numstate",
+			"Iterate",
+			"j",
+			"(int)num_state/4"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"flow_minQ",
+			"SetMinQ",
+			"flow_minQ_",
+			"subFlow_",
+			"z_p_",
+			"mavros_msgs/OpticalFlowRad.h",
+			"mavros_msgs::OpticalFlowRad",
+			"fx/Dropbox",
+			"bool_param",
+			"//state_out",
+			"//TWBR",
+			"fx",
+			"cv2.cv.CV_CAP_PROP_POS_MSEC",
+			"cv2.cv.CV_CAP_PROP_POS_FRAMES",
+			"pose_navMsg.pose.",
+			"pose_navMsg.pose",
+			",",
+			"bool",
+			"int8_t"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 4,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "velocity_measurement.h",
+					"settings":
+					{
+						"buffer_size": 17502,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								10149,
+								10149
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3682.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "velocity_sensorhandler.h",
+					"settings":
+					{
+						"buffer_size": 2548,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2284,
+								2284
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 390.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "implementation/velocity_sensorhandler.hpp",
+					"settings":
+					{
+						"buffer_size": 6371,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4148,
+								4148
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1319.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/position_sensorhandler.h",
+					"settings":
+					{
+						"buffer_size": 3237,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2517,
+								2517
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 429.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/position_measurement.h",
+					"settings":
+					{
+						"buffer_size": 9050,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6441,
+								6441
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1126.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/implementation/position_sensorhandler.hpp",
+					"settings":
+					{
+						"buffer_size": 10106,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								5654,
+								5654
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1365.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/pose_sensorhandler.h",
+					"settings":
+					{
+						"buffer_size": 3613,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3302,
+								3302
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 7,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/implementation/pose_sensorhandler.hpp",
+					"settings":
+					{
+						"buffer_size": 10500,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6845,
+								6845
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2047.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 8,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/pose_measurement.h",
+					"settings":
+					{
+						"buffer_size": 17894,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								13362,
+								13362
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3838.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 9,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_msf/position_pose_pressure_sensormanager.h",
+					"settings":
+					{
+						"buffer_size": 18240,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								17205,
+								17205
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 5635.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 10,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/cfg/PositionPosePressureSensor.cfg",
+					"settings":
+					{
+						"buffer_size": 7318,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2065,
+								2065
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Python/Python.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 507.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 11,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_msf/CMakeLists.txt",
+					"settings":
+					{
+						"buffer_size": 229,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								229,
+								229
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 12,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/CMakeLists.txt",
+					"settings":
+					{
+						"buffer_size": 1876,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								949,
+								949
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 78.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 13,
+					"file": "/home/fx/Dropbox/catkin_ws/msf_optical_flow_vel.launch",
+					"settings":
+					{
+						"buffer_size": 6121,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1229,
+								1229
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/XML/XML.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 312.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 14,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_msf/msf_statedef.hpp",
+					"settings":
+					{
+						"buffer_size": 4412,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1049,
+								1049
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 15,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/slam_gps_pressure.yaml",
+					"settings":
+					{
+						"buffer_size": 4844,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2518,
+								2518
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/YAML/YAML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 599.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 16,
+					"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/crossover_node.cpp",
+					"settings":
+					{
+						"buffer_size": 40095,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								14098,
+								14098
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 11183.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 17,
+					"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/Ulink_capter_and_inertial_nav.h",
+					"settings":
+					{
+						"buffer_size": 32522,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								13790,
+								13790
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 6162.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 18,
+					"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/inertial_nav.h",
+					"settings":
+					{
+						"buffer_size": 14627,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3762,
+								3762
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 19,
+					"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/useful_fn.h",
+					"settings":
+					{
+						"buffer_size": 20132,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3422,
+								3422
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1561.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 20,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/msf_sortedContainer.h",
+					"settings":
+					{
+						"buffer_size": 13169,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								3237,
+								3237
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 858.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 21,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/implementation/msf_measurement_inl.h",
+					"settings":
+					{
+						"buffer_size": 7166,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 22,
+					"file": "/home/fx/Dropbox/catkin_ws/ethzasl_msf_new_mahanobis/msf_core/include/msf_core/implementation/msf_measurement_inl.h",
+					"settings":
+					{
+						"buffer_size": 8243,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1324,
+								1324
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 23,
+					"file": "/home/fx/src/Firmware/src/modules/mavlink/mavlink_messages.cpp",
+					"settings":
+					{
+						"buffer_size": 90034,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								30576,
+								30576
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 13729.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 24,
+					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/msf_sensorhandler.h",
+					"settings":
+					{
+						"buffer_size": 2083,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								774,
+								774
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		},
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 0.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			],
+			[
+				1,
+				0,
+				2,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			0.951409135083,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 28.0
+	},
+	"replace":
+	{
+		"height": 0.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"show_minimap": true,
+	"show_open_files": true,
+	"show_tabs": false,
+	"side_bar_visible": true,
+	"side_bar_width": 272.0,
+	"status_bar_visible": true
+}

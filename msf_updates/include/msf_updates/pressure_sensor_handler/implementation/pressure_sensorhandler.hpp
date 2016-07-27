@@ -52,10 +52,10 @@ void PressureSensorHandler::MeasurementCallback(
           << this->topic_namespace_ << "/" << subPressure_.getTopic()
           << " ***");
 
-  bool throttle = true;
-  if (throttle && msg->header.seq % 10 != 0) {
-    return;
-  }
+  // bool throttle = true;
+  // if (throttle && msg->header.seq % 10 != 0) {
+  //   return;
+  // }
 
   shared_ptr<pressure_measurement::PressureMeasurement> meas(
       new pressure_measurement::PressureMeasurement(n_zp_, true,

@@ -142,6 +142,8 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
       "*** position sensor got first measurement from topic "
           << this->topic_namespace_ << "/" << subPoseStamped_.getTopic()
           << " ***");
+  double time_now = msg->header.stamp.toSec();
+  timestamp_previous_pose_ = time_now;
 
   sensor_fusion_comm::PointWithCovarianceStampedPtr pointwCov(
       new sensor_fusion_comm::PointWithCovarianceStamped);

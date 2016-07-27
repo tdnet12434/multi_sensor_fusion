@@ -10,7 +10,7 @@ core/core_fixed_bias: false
 # core/core_noise_gyrbias: 0.000008726     # For fixed bias we do not need process noise.
 # core/core_noise_accbias: 0.000150     # For fixed bias we do not need process noise.
 
-core/core_noise_acc: 0.013
+core/core_noise_acc: 0.0454000011086#0.013
 core/core_noise_accbias: 0.000108
 core/core_noise_gyr: 0.00065
 core/core_noise_gyrbias: 0.00000212
@@ -63,7 +63,7 @@ position_pose_pressure_sensor/pose_fixed_q_wv: true
 
 position_pose_pressure_sensor/pose_delay: 0.25
 position_pose_pressure_sensor/position_delay: 0.01
-position_pose_pressure_sensor/position_noise_meas: 0.01
+position_pose_pressure_sensor/position_noise_meas: 2.0
 
 #init position offset prism imu
 position_sensor/init/p_ip/x: 0 #-0.02    

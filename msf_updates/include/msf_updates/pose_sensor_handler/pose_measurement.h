@@ -323,17 +323,20 @@ struct PoseMeasurement : public PoseMeasurementBase {
           / (1 - 2 * (q_err.y() * q_err.y() + q_err.z() * q_err.z()));
 
       if (!CheckForNumeric(r_old, "r_old")) {
-        MSF_ERROR_STREAM("r_old: "<<r_old);
+        MSF_ERROR_STREAM("pose r_old: "<<r_old);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
       if (!CheckForNumeric(H_new, "H_old")) {
-        MSF_ERROR_STREAM("H_old: "<<H_new);
+        MSF_ERROR_STREAM("pose H_old: "<<H_new);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
       if (!CheckForNumeric(R_, "R_")) {
-        MSF_ERROR_STREAM("R_: "<<R_);
+        MSF_ERROR_STREAM("pose R_: "<<R_);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }

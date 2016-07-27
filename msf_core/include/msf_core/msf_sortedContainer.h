@@ -90,10 +90,10 @@ class SortedContainer {
     std::pair<typename ListT::iterator, bool> itpr = stateList.insert(
         std::pair<double, shared_ptr<T> >(value->time, value));
     if (!itpr.second) {
-      MSF_WARN_STREAM(
-          "Wanted to insert a value to the sorted container at time " <<
-          std::fixed << std::setprecision(9) << value->time <<
-          " but the map already contained a value at this time. discarding.");
+    //   MSF_WARN_STREAM(
+    //       "Wanted to insert a value to the sorted container at time " <<
+    //       std::fixed << std::setprecision(9) << value->time <<
+    //       " but the map already contained a value at this time. discarding.");
     }
     return itpr.first;
   }

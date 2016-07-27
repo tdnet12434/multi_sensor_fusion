@@ -30,6 +30,36 @@ enum {
   nMeasurements = 3
 };
 
+
+enum fault_t {
+  FAULT_NONE = 0,
+  FAULT_MINOR,
+  FAULT_SEVERE
+};
+fault_t _gpsFault;
+
+// change this to set when
+// the system will abort correcting a measurement
+// given a fault has been detected
+static const fault_t fault_lvl_disable = FAULT_SEVERE;
+
+// for fault detection
+// chi squared distribution, false alarm probability 0.0001
+// see fault_table.py
+// note skip 0 index so we can use degree of freedom as index
+static const float BETA_TABLE[7] = {0,
+            8.82050518214,
+            12.094592431,
+            13.9876612368,
+            16.0875642296,
+            17.8797700658,
+            19.6465647819,
+           };
+
+
+
+
+
 /**
  * \brief A measurement as provided by a position sensor, e.g. Total Station, GPS.
  */
@@ -52,17 +82,26 @@ struct PositionMeasurement : public PositionMeasurementBase {
     // Get measurement.
     z_p_ = Eigen::Matrix<double, 3, 1>(msg->point.x, msg->point.y,
                                        msg->point.z);
-
+    double s_zp;
     if (fixed_covariance_)  //  take fix covariance from reconfigure GUI
     {
 
-      const double s_zp = n_zp_ * n_zp_;
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, s_zp)
+      s_zp = n_zp_ * n_zp_;
+      
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 100)
           .finished().asDiagonal();
 
     } else {  // Tke covariance from sensor.
+      if(msg->covariance[0] > n_zp_) { 
+        s_zp = msg->covariance[0] * msg->covariance[0];
+      }else{
+        s_zp = n_zp_ * n_zp_;
+      }
+      // printf("position covariance %.4f", s_zp);
 
-      R_.block<3, 3>(0, 0) = msf_core::Matrix3(&msg->covariance[0]);
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 100)
+          .finished().asDiagonal();
+      // R_.block<3, 3>(0, 0) = msf_core::Matrix3(&msg->covariance[0]);
 
       if (msg->header.seq % 100 == 0) {  // Only do this check from time to time.
         if (R_.block<3, 3>(0, 0).determinant() < -0.01)
@@ -168,26 +207,79 @@ struct PositionMeasurement : public PositionMeasurementBase {
       r_old.block<3, 1>(0, 0) = z_p_
           - (state.Get<StateDefinition_T::p>()
               + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
-
+          
       if (!CheckForNumeric(r_old, "r_old")) {
-        MSF_ERROR_STREAM("r_old: "<<r_old);
+        MSF_ERROR_STREAM("gps r_old: "<<r_old);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
       if (!CheckForNumeric(H_new, "H_old")) {
-        MSF_ERROR_STREAM("H_old: "<<H_new);
+        MSF_ERROR_STREAM("gps H_old: "<<H_new);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
       if (!CheckForNumeric(R_, "R_")) {
-        MSF_ERROR_STREAM("R_: "<<R_);
+        MSF_ERROR_STREAM("gps R_: "<<R_);
+        return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
 
-      // Call update step in base class.
-      this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
+
+
+
+
+
+
+    msf_core::MSF_Core<EKFState_T>::ErrorStateCov _P;
+
+
+
+      // residual covariance, (inverse)
+      Eigen::Matrix<double, 3, 3> S_I =
+       (H_new * _P * H_new.transpose() + R_).inverse();
+
+
+      // fault detection (mahalanobis distance !! )
+      float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
+
+      if(std::isnan(beta) || std::isinf(beta))
+        return;
+
+      printf("position beta\t%.2f\n", beta);
+      // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
+            // _P(3,3),_P(4,4),_P(5,5),beta);
+      int n_y_flow = 2;
+
+        if (beta > BETA_TABLE[n_y_flow]) {
+          if (_gpsFault < FAULT_MINOR) {
+            printf("gps FAULT_MINOR\n");
+            _gpsFault = FAULT_MINOR;
+          }else if(_gpsFault >= FAULT_MINOR && beta > 10000) { //from default mah_threshold
+            printf("gps bad\n");
+            _gpsFault = FAULT_SEVERE;
+          }
+        } else if (_gpsFault) {
+          _gpsFault = FAULT_NONE;
+        }
+
+        if (_gpsFault < fault_lvl_disable) {
+          // Call update step in base class.
+          this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);
+        } else {
+          return;
+        }
+
+
+
+
+
+
+
+      
     } else {
       MSF_ERROR_STREAM_THROTTLE(
           1, "You chose to apply the position measurement "
