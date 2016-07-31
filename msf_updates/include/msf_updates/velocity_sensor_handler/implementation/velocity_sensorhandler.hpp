@@ -151,6 +151,8 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
 
   flow_msg->distance = agl_sensor;
 
+  if(flow_msg->quality < flow_minQ_) return;
+  if(agl_sensor < 0.3) return;
   ProcessVelocityMeasurement(flow_msg);
 }
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
@@ -163,7 +165,7 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementAGLCallba
           << this->topic_namespace_ << "/" << subAgl_.getTopic()
           << " ***");
 
-  agl_sensor = msg->bottom_clearance;
+  agl_sensor = msg->relative;
 }
 }  // namespace msf_position_sensor
 #endif  // VELOCITY_SENSORHANDLER_HPP_

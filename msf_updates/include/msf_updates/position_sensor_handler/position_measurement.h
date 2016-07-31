@@ -23,11 +23,12 @@
 #include <msf_core/msf_core.h>
 #include <msf_core/eigen_utils.h>
 #include <sensor_fusion_comm/PointWithCovarianceStamped.h>
+#include <nav_msgs/Odometry.h>
 
 namespace msf_updates {
 namespace position_measurement {
 enum {
-  nMeasurements = 3
+  nMeasurements = 6
 };
 
 
@@ -64,7 +65,7 @@ static const float BETA_TABLE[7] = {0,
  * \brief A measurement as provided by a position sensor, e.g. Total Station, GPS.
  */
 typedef msf_core::MSF_Measurement<
-    sensor_fusion_comm::PointWithCovarianceStamped,
+    nav_msgs::Odometry,
     Eigen::Matrix<double, nMeasurements, nMeasurements>, msf_updates::EKFState> PositionMeasurementBase;
 struct PositionMeasurement : public PositionMeasurementBase {
  private:
@@ -80,26 +81,37 @@ struct PositionMeasurement : public PositionMeasurementBase {
     H_old.setZero();
 
     // Get measurement.
-    z_p_ = Eigen::Matrix<double, 3, 1>(msg->point.x, msg->point.y,
-                                       msg->point.z);
+    z_p_ = Eigen::Matrix<double, 3, 1>(msg->pose.pose.position.x, 
+                                       msg->pose.pose.position.y,
+                                       0);
+
+    z_v_ = Eigen::Matrix<double, 3, 1>(msg->twist.twist.linear.x, 
+                                       msg->twist.twist.linear.y,
+                                       0);
+
+    // printf("vx = %.3f vy = %.3f\n", z_v_(0), z_v_(1));
     double s_zp;
     if (fixed_covariance_)  //  take fix covariance from reconfigure GUI
     {
 
       s_zp = n_zp_ * n_zp_;
       
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 100)
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zp, s_zp, 9999)
           .finished().asDiagonal();
 
     } else {  // Tke covariance from sensor.
+
+      /*
       if(msg->covariance[0] > n_zp_) { 
         s_zp = msg->covariance[0] * msg->covariance[0];
       }else{
         s_zp = n_zp_ * n_zp_;
       }
+      */
+      s_zp = msg->pose.covariance[0] * msg->pose.covariance[0];
       // printf("position covariance %.4f", s_zp);
 
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 100)
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zp, s_zp, 9999)
           .finished().asDiagonal();
       // R_.block<3, 3>(0, 0) = msf_core::Matrix3(&msg->covariance[0]);
 
@@ -114,6 +126,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Eigen::Matrix<double, 3, 1> z_p_;  /// Position measurement.
+  Eigen::Matrix<double, 3, 1> z_v_;  /// Velocity measurement.
   double n_zp_;  /// Position measurement noise.
 
   bool fixed_covariance_;
@@ -172,6 +185,10 @@ struct PositionMeasurement : public PositionMeasurementBase {
     // Construct H matrix:
     // Position:
     H.block<3, 3>(0, idxstartcorr_p_) = Eigen::Matrix<double, 3, 3>::Identity();  // p
+    H.block<1, 1>(0, idxstartcorr_p_+2)(0) = 0;
+
+    H.block<3, 3>(0, idxstartcorr_v_) = Eigen::Matrix<double, 3, 3>::Identity();  // v
+    H.block<1, 1>(0, idxstartcorr_v_+2)(0) = 0;
 
     H.block<3, 3>(0, idxstartcorr_q_) = -C_q.transpose() * p_prism_imu_sk;  // q
 
@@ -207,7 +224,12 @@ struct PositionMeasurement : public PositionMeasurementBase {
       r_old.block<3, 1>(0, 0) = z_p_
           - (state.Get<StateDefinition_T::p>()
               + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
-          
+      
+      // Velocity
+      r_old.block<3, 1>(3, 0) = z_v_
+          - state.Get<StateDefinition_T::v>();
+
+
       if (!CheckForNumeric(r_old, "r_old")) {
         MSF_ERROR_STREAM("gps r_old: "<<r_old);
         return;
@@ -238,7 +260,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
 
       // residual covariance, (inverse)
-      Eigen::Matrix<double, 3, 3> S_I =
+      Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
        (H_new * _P * H_new.transpose() + R_).inverse();
 
 
@@ -251,9 +273,8 @@ struct PositionMeasurement : public PositionMeasurementBase {
       printf("position beta\t%.2f\n", beta);
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);
-      int n_y_flow = 2;
 
-        if (beta > BETA_TABLE[n_y_flow]) {
+        if (beta > BETA_TABLE[nMeasurements]) {
           if (_gpsFault < FAULT_MINOR) {
             printf("gps FAULT_MINOR\n");
             _gpsFault = FAULT_MINOR;

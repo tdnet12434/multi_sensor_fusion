@@ -26,6 +26,7 @@
 #include <sensor_msgs/NavSatFix.h>
 #include <msf_core/gps_conversion.h>
 #include <sensor_fusion_comm/PointWithCovarianceStamped.h>
+#include <nav_msgs/Odometry.h>
 
 namespace msf_position_sensor {
 
@@ -35,26 +36,30 @@ class PositionSensorHandler : public msf_core::SensorHandler<
  private:
 
   Eigen::Matrix<double, 3, 1> z_p_;  ///< Position measurement.
+  Eigen::Matrix<double, 3, 1> z_v_;  ///< Velocity measurement.
   double n_zp_;  ///< Position measurement noise.
   double delay_;       ///< Delay to be subtracted from the ros-timestamp of
                        //the measurement provided by this sensor.
   double timestamp_previous_pose_;  ///< Timestamp of previous pose message to subsample messages.
-  ros::Subscriber subPointStamped_;
+  // ros::Subscriber subPointStamped_;
   ros::Subscriber subPoseStamped_;
-  ros::Subscriber subTransformStamped_;
-  ros::Subscriber subNavSatFix_;
+  // ros::Subscriber subTransformStamped_;
+  // ros::Subscriber subNavSatFix_;
+  ros::Subscriber subVel;
   msf_core::GPSConversion gpsConversion_;
+  double vx,
+         vy;
 
   bool use_fixed_covariance_;  ///< Use fixed covariance set by dynamic reconfigure.
   bool provides_absolute_measurements_;  ///< Does this sensor measure relative or absolute values.
 
   void ProcessPositionMeasurement(
-      const sensor_fusion_comm::PointWithCovarianceStampedConstPtr& msg);
-  void MeasurementCallback(const geometry_msgs::PointStampedConstPtr & msg);
+      const nav_msgs::OdometryConstPtr& msg);
+  // void MeasurementCallback(const geometry_msgs::PointStampedConstPtr & msg);
   void MeasurementCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr & msg);
-  void MeasurementCallback(const geometry_msgs::TransformStampedConstPtr & msg);
-  void MeasurementCallback(const sensor_msgs::NavSatFixConstPtr& msg);
-
+  // void MeasurementCallback(const geometry_msgs::TransformStampedConstPtr & msg);
+  // void MeasurementCallback(const sensor_msgs::NavSatFixConstPtr& msg);
+  void MeasurementVelCallback(const geometry_msgs::TwistStampedConstPtr & msg);
  public:
   typedef MEASUREMENT_TYPE measurement_t;
   PositionSensorHandler(MANAGER_TYPE& meas, std::string topic_namespace,

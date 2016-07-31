@@ -72,6 +72,9 @@ struct PoseMeasurement : public PoseMeasurementBase {
       tlast = time;
     }
 
+    //design for magnetometer 
+    use_position_measurement = (msg->pose.covariance[0] > 4 ? false:true);
+
     if (fixed_covariance_) {  // Take fix covariance from reconfigure GUI.
       const double s_zp = n_zp_ * n_zp_;
       const double s_zq = n_zq_ * n_zq_;
@@ -118,6 +121,7 @@ struct PoseMeasurement : public PoseMeasurementBase {
   Eigen::Matrix<double, 3, 1> z_p_;  /// Position measurement camera seen from world.
   double n_zp_, n_zq_;  /// Position and attitude measurement noise.
 
+  bool use_position_measurement;
   bool measurement_world_sensor_;
   bool fixed_covariance_;
   msf_updates::PoseDistorter::Ptr distorter_;
@@ -225,37 +229,43 @@ struct PoseMeasurement : public PoseMeasurementBase {
 
     //block of size p q .. start at   row,col
     // Construct H matrix.
-    // Position:
-    H.block<3, 3>(0, kIdxstartcorr_p) = C_wv
-        * state.Get<StateLIdx>()(0);  // p
 
+    if(use_position_measurement) {
+      // Position:
+      H.block<3, 3>(0, kIdxstartcorr_p) = C_wv
+          * state.Get<StateLIdx>()(0);  // p
+    }else{
+      // Position:
+      H.block<3, 3>(0, kIdxstartcorr_p) = Eigen::Matrix<double, 3, 3>::Zero();
+    }
     H.block<3, 3>(0, kIdxstartcorr_q) = -C_wv * C_q * pci_sk
         * state.Get<StateLIdx>()(0);  // q
-
-    H.block<3, 1>(0, kIdxstartcorr_L) =
-        scalefix ?
-            Eigen::Matrix<double, 3, 1>::Zero() :
-            (C_wv * C_q * state.Get<StatePicIdx>() + C_wv
-                    * (-state.Get<StatePwvIdx>()
-                        + state.Get<StateDefinition_T::p>())).eval();  // L
+    if(use_position_measurement) {
+      H.block<3, 1>(0, kIdxstartcorr_L) =
+          scalefix ?
+              Eigen::Matrix<double, 3, 1>::Zero() :
+              (C_wv * C_q * state.Get<StatePicIdx>() + C_wv
+                      * (-state.Get<StatePwvIdx>()
+                          + state.Get<StateDefinition_T::p>())).eval();  // L
+    }
 
     H.block<3, 3>(0, kIdxstartcorr_qwv) =
         driftwvattfix ?
             Eigen::Matrix<double, 3, 3>::Zero() : (-C_wv * skewold).eval();  // q_wv
+    if(use_position_measurement) {
+      H.block<3, 3>(0, kIdxstartcorr_pic) =
+          calibposfix ?
+              Eigen::Matrix<double, 3, 3>::Zero() :
+              (C_wv * C_q * state.Get<StateLIdx>()(0)).eval();  //p_ic
 
-    H.block<3, 3>(0, kIdxstartcorr_pic) =
-        calibposfix ?
-            Eigen::Matrix<double, 3, 3>::Zero() :
-            (C_wv * C_q * state.Get<StateLIdx>()(0)).eval();  //p_ic
 
-
-    // TODO (slynen): Check scale commenting
-    H.block<3, 3>(0, kIdxstartcorr_pwv) =
-        driftwvposfix ?
-            Eigen::Matrix<double, 3, 3>::Zero() :
-            (-Eigen::Matrix<double, 3, 3>::Identity()
-            /* * state.Get<StateLIdx>()(0)*/).eval();  //p_wv
-
+      // TODO (slynen): Check scale commenting
+      H.block<3, 3>(0, kIdxstartcorr_pwv) =
+          driftwvposfix ?
+              Eigen::Matrix<double, 3, 3>::Zero() :
+              (-Eigen::Matrix<double, 3, 3>::Identity()
+              /* * state.Get<StateLIdx>()(0)*/).eval();  //p_wv
+    }
     // Attitude.
     H.block<3, 3>(3, kIdxstartcorr_q) = C_ci;  // q
 

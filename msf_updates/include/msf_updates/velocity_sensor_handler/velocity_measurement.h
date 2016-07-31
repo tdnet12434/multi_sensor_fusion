@@ -167,6 +167,14 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
         .conjugate().toRotationMatrix();
 
+    //w x y z preset drift 10 deg
+    Eigen::Quaternion<double> q_b_i(0.999,
+                                    0,
+                                    0,
+                                    0.044);
+    q_b_i.normalize();
+    Eigen::Matrix<double, 3, 3> Shift_q = q_b_i.toRotationMatrix();
+    
     agl_ef = agl * C_q.transpose()(2,2);
 
     if(flow_q < flow_minQ_ || agl_ef <= 0.3)          {flow_healhy = false;}
@@ -176,7 +184,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                               -(flow(0) - gyro(0)) * agl_ef,
                               -(flow(1) - gyro(1)) * agl_ef,
                                0);
-    Eigen::Matrix<double, 3, 1> delta_n = C_q.transpose() * delta_b;
+    Eigen::Matrix<double, 3, 1> delta_n = C_q.transpose() * Shift_q* delta_b;
 
     //flow integration
     static Eigen::Matrix<double, 3, 1> flow_n;/// sum flow
@@ -204,14 +212,14 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
     // Get indices of states in error vector.
     enum {
-      idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::p>::value,
+      // idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+      //     StateDefinition_T::p>::value,
       idxstartcorr_v_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
           StateDefinition_T::v>::value,
-      idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::q>::value,
-      idxstartcorr_p_pi_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::p_ip>::value,
+      // idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+      //     StateDefinition_T::q>::value,
+      // idxstartcorr_p_pi_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+      //     StateDefinition_T::p_ip>::value,
     };
 
     // bool fixed_p_pos_imu = (fixedstates_ & 1 << StateDefinition_T::p_ip);
@@ -324,14 +332,14 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
       // Get indices of states in error vector.
       enum {
-        idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-            StateDefinition_T::p>::value,
+        // idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+        //     StateDefinition_T::p>::value,
         idxstartcorr_v_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
             StateDefinition_T::v>::value,
-        idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-            StateDefinition_T::q>::value,
-        idxstartcorr_p_pi_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-            StateDefinition_T::p_ip>::value,
+        // idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+        //     StateDefinition_T::q>::value,
+        // idxstartcorr_p_pi_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+        //     StateDefinition_T::p_ip>::value,
       };
 
 
