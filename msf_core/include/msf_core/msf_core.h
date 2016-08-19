@@ -132,6 +132,17 @@ class MSF_Core {
   void PredictProcessCovariance(shared_ptr<EKFState_T>& state_old,
                                 shared_ptr<EKFState_T>& state_new);
 
+    //try to implement kutta
+  enum {X_x = 0, X_y, X_z, X_vx, X_vy, X_vz, X_bx, X_by, X_bz, n_x};
+  enum {U_ax = 0, U_ay, U_az, n_u};
+  // Eigen::Matrix<double, n_x, 1> dynamics(
+  //   Eigen::Matrix<double, n_x, n_x> _A,
+  //   Eigen::Matrix<double, n_x, n_u> _B,
+  //   double t,
+  //   Eigen::Matrix<double, n_x, 1> &x,
+  //   Eigen::Matrix<double, n_u, 1> &u);
+  
+
   /**
    * \brief Propagates the state with given dt.
    * \param state_old The state to propagate from.
@@ -139,6 +150,11 @@ class MSF_Core {
    */
   void PropagateState(shared_ptr<EKFState_T>& state_old,
                       shared_ptr<EKFState_T>& state_new);
+
+
+
+  void StopProp(bool IsStop);
+
 
   /**
    * \brief Delete very old states and measurements from the buffers to free
@@ -252,6 +268,11 @@ class MSF_Core {
 
   /// Checks the queue of measurements to be applied in the future.
   void HandlePendingMeasurements();
+
+
+
+
+
 };
 }
 // msf_core

@@ -133,7 +133,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   double n_zv_;  /// Position measurement noise.
   double flow_minQ_;
   double dt;
-
+ 
   bool flow_healhy;
   bool fixed_covariance_;
   int fixedstates_;
@@ -402,99 +402,149 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
 
        // Init variables: Get previous measurement.
-      // shared_ptr < msf_core::MSF_MeasurementBase<EKFState_T> > prevmeas_base =
-      //     core.GetPreviousMeasurement(this->time, this->sensorID_);
+      shared_ptr < msf_core::MSF_MeasurementBase<EKFState_T> > prevmeas_base =
+          core.GetPreviousMeasurement(this->time, this->sensorID_);
 
-      // if (prevmeas_base->time == msf_core::constants::INVALID_TIME) {
-      //   MSF_WARN_STREAM(
-      //       "The previous measurement is invalid. Could not apply measurement! " "time:"<<this->time<<" sensorID: "<<this->sensorID_);
-      //   return;
-      // }
+      if (prevmeas_base->time == msf_core::constants::INVALID_TIME) {
+        MSF_WARN_STREAM(
+            "The previous measurement is invalid. Could not apply measurement! " "time:"<<this->time<<" sensorID: "<<this->sensorID_);
+        return;
+      }
 
-      // // Make this a pose measurement.
-      // shared_ptr<PoseMeasurement> prevmeas = dynamic_pointer_cast
-      //     < PoseMeasurement > (prevmeas_base);
-      // if (!prevmeas) {
-      //   MSF_WARN_STREAM(
-      //       "The dynamic cast of the previous measurement has failed. "
-      //       "Could not apply measurement");
-      //   return;
-      // }
+      // Make this a pose measurement.
+      shared_ptr<VelocityMeasurement> prevmeas = dynamic_pointer_cast
+          < VelocityMeasurement > (prevmeas_base);
+      if (!prevmeas) {
+        MSF_WARN_STREAM(
+            "The dynamic cast of the previous measurement has failed. "
+            "Could not apply measurement");
+        return;
+      }
 
-      // // Get state at previous measurement.
-      // shared_ptr<EKFState_T> state_nonconst_old = core.GetClosestState(
-      //     prevmeas->time);
+      // Get state at previous measurement.
+      shared_ptr<EKFState_T> state_nonconst_old = core.GetClosestState(
+          prevmeas->time);
 
-      // if (state_nonconst_old->time == msf_core::constants::INVALID_TIME) {
-      //   MSF_WARN_STREAM(
-      //       "The state at the previous measurement is invalid. Could "
-      //       "not apply measurement");
-      //   return;
-      // }
+      if (state_nonconst_old->time == msf_core::constants::INVALID_TIME) {
+        MSF_WARN_STREAM(
+            "The state at the previous measurement is invalid. Could "
+            "not apply measurement");
+        return;
+      }
 
-      // // Get a const ref, so we can read core states.
-      // const EKFState_T& state_new = *state_nonconst_new;
-      // const EKFState_T& state_old = *state_nonconst_old;
+      // Get a const ref, so we can read core states.
+      const EKFState_T& state_new = *state_nonconst_new;
+      const EKFState_T& state_old = *state_nonconst_old;
 
-      // Eigen::Matrix<double, nMeasurements,
-      //     msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime> H_new,
-      //     H_old;
-      // Eigen::Matrix<double, nMeasurements, 1> r_new, r_old;
+      Eigen::Matrix<double, nMeasurements,
+          msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime> H_new,
+          H_old;
+      Eigen::Matrix<double, nMeasurements, 1> r_new, r_old;
 
-      // CalculateH(state_nonconst_old, H_old);
+      CalculateH(state_nonconst_old, H_old);
 
-      // H_old *= -1;
+      H_old *= -1;
 
-      // CalculateH(state_nonconst_new, H_new);
+      CalculateH(state_nonconst_new, H_new);
 
-      // //TODO (slynen): check that both measurements have the same states fixed!
+      //TODO (slynen): check that both measurements have the same states fixed!
       // Eigen::Matrix<double, 3, 3> C_wv_old, C_wv_new;
-      // Eigen::Matrix<double, 3, 3> C_q_old, C_q_new;
+      Eigen::Matrix<double, 3, 3> C_q_old, C_q_new;
 
       // C_wv_new = state_new.Get<StateQwvIdx>().conjugate().toRotationMatrix();
-      // C_q_new = state_new.Get<StateDefinition_T::q>().conjugate()
-      //     .toRotationMatrix();
+      C_q_new = state_new.Get<StateDefinition_T::q>().conjugate()
+          .toRotationMatrix();
 
       // C_wv_old = state_old.Get<StateQwvIdx>().conjugate().toRotationMatrix();
-      // C_q_old = state_old.Get<StateDefinition_T::q>().conjugate()
-      //     .toRotationMatrix();
+      C_q_old = state_old.Get<StateDefinition_T::q>().conjugate()
+          .toRotationMatrix();
 
-      // // Construct residuals.
-      // // Position:
-      // Eigen::Matrix<double, 3, 1> diffprobpos = (C_wv_new.transpose()
-      //     * (-state_new.Get<StatePwvIdx>() + state_new.Get<StateDefinition_T::p>()
-      //         + C_q_new.transpose() * state_new.Get<StatePicIdx>()))
-      //     * state_new.Get<StateLIdx>() - (C_wv_old.transpose()
-      //     * (-state_old.Get<StatePwvIdx>() + state_old.Get<StateDefinition_T::p>()
-      //         + C_q_old.transpose() * state_old.Get<StatePicIdx>()))
-      //         * state_old.Get<StateLIdx>();
+      // Construct residuals.
+      // Position:
+      Eigen::Matrix<double, 3, 1> diffprobpos =  state_new.Get<StateDefinition_T::p>()
+                                               - state_old.Get<StateDefinition_T::p>();
 
 
-      // Eigen::Matrix<double, 3, 1> diffmeaspos = z_p_ - prevmeas->z_p_;
+      Eigen::Matrix<double, 3, 1> diffmeaspos = z_p_/* - prevmeas->z_p_*/;
 
-      // r_new.block<3, 1>(0, 0) = diffmeaspos - diffprobpos;
+      r_new.block<3, 1>(0, 0) = diffmeaspos - diffprobpos;
 
 
-      // if (!CheckForNumeric(r_old, "r_old")) {
-      //   MSF_ERROR_STREAM("r_old: "<<r_old);
-      //   MSF_WARN_STREAM(
-      //       "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
-      // }
-      // if (!CheckForNumeric(H_new, "H_old")) {
-      //   MSF_ERROR_STREAM("H_old: "<<H_new);
-      //   MSF_WARN_STREAM(
-      //       "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
-      // }
-      // if (!CheckForNumeric(R_, "R_")) {
-      //   MSF_ERROR_STREAM("R_: "<<R_);
-      //   MSF_WARN_STREAM(
-      //       "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
-      // }
+      if (!CheckForNumeric(r_old, "r_old")) {
+        MSF_ERROR_STREAM("r_old: "<<r_old);
+        MSF_WARN_STREAM(
+            "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
+        return;
+      }
+      if (!CheckForNumeric(H_new, "H_old")) {
+        MSF_ERROR_STREAM("H_old: "<<H_new);
+        MSF_WARN_STREAM(
+            "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
+        return;
+      }
+      if (!CheckForNumeric(R_, "R_")) {
+        MSF_ERROR_STREAM("R_: "<<R_);
+        MSF_WARN_STREAM(
+            "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
+        return;
+      }
 
-      // // Call update step in base class.
-      // this->CalculateAndApplyCorrectionRelative(state_nonconst_old,
-      //                                           state_nonconst_new, core, H_old,
-      //                                           H_new, r_new, R_);
+
+
+
+      msf_core::MSF_Core<EKFState_T>::ErrorStateCov _P;
+
+
+
+      // residual covariance, (inverse)
+      Eigen::Matrix<double, 3, 3> S_I =
+       (H_new * _P * H_new.transpose() + R_).inverse();
+
+
+      // fault detection (mahalanobis distance !! )
+      float beta = (r_new.transpose() * (S_I * r_new))(0, 0);
+      if(std::isnan(beta) || std::isinf(beta))
+        return;
+      printf("beta\t%.2f\n", beta);
+      // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
+            // _P(3,3),_P(4,4),_P(5,5),beta);
+      int n_y_flow = 2;
+
+        if (beta > BETA_TABLE[n_y_flow]) {
+          if (_flowFault < FAULT_MINOR) {
+            printf("flow FAULT_MINOR\n");
+            _flowFault = FAULT_MINOR;
+          }else if(_flowFault >= FAULT_MINOR && beta > 10000) { //from default mah_threshold
+            printf("flow bad\n");
+            _flowFault = FAULT_SEVERE;
+          }
+        } else if (_flowFault) {
+          _flowFault = FAULT_NONE;
+        }
+
+        if (_flowFault < fault_lvl_disable) {
+        
+          flow_healhy = true;
+
+        } else {
+          flow_healhy = false;
+          // reset flow integral to current estimate of position
+          // if a fault occurred
+          // _flowX = _x(X_x);
+          // _flowY = _x(X_y);
+        }
+
+
+    if(flow_healhy) 
+      // Call update step in base class.
+      this->CalculateAndApplyCorrectionRelative(state_nonconst_old,
+                                                state_nonconst_new, core, H_old,
+                                                H_new, r_new, R_);
+    else 
+    {
+      printf("bad flow\n");
+      return;
+    }
     }
   }
 };

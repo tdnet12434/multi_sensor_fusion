@@ -21,8 +21,7 @@
 
 #include <msf_core/msf_sensormanagerROS.h>
 
-#include <mavros_msgs/OpticalFlowRad.h>
-#include <mavros_msgs/Altitude.h>
+#include <sensor_msgs/Imu.h>
 
 namespace msf_velocity_sensor {
 
@@ -30,40 +29,36 @@ template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 class VelocitySensorHandler : public msf_core::SensorHandler<
     typename msf_updates::EKFState> {
  private:
- 
-  Eigen::Matrix<double, 3, 1> z_p_;  ///< Velocity measurement.
+
+  Eigen::Matrix<double, 3, 1> z_v_;  ///< Velocity measurement.
   double n_zv_;  ///< Velocity measurement noise.
   double delay_;       ///< Delay to be subtracted from the ros-timestamp of
                        //the measurement provided by this sensor.
-  double flow_minQ_;  //flow_minQ coefficient
+  double drag_;  //drag coefficient
 
-  ros::Subscriber subFlow_, subAgl_;
-
-  double agl_sensor;
+  ros::Subscriber subImu_;
 
   bool use_fixed_covariance_;  ///< Use fixed covariance set by dynamic reconfigure.
   bool provides_absolute_measurements_;  ///< Does this sensor measure relative or absolute values.
 
   void ProcessVelocityMeasurement(
-      const mavros_msgs::OpticalFlowRadConstPtr& msg);
+      const sensor_msgs::ImuConstPtr& msg);
 
   void MeasurementCallback(
-    const mavros_msgs::OpticalFlowRadConstPtr & msg);
-
-  void MeasurementAGLCallback(
-    const mavros_msgs::AltitudeConstPtr & msg);
+    const sensor_msgs::ImuConstPtr & msg);
  public:
   typedef MEASUREMENT_TYPE measurement_t;
   VelocitySensorHandler(MANAGER_TYPE& meas, std::string topic_namespace,
                         std::string parameternamespace);
   // Used for the init.
   Eigen::Matrix<double, 3, 1> GetVelocityMeasurement() {
-    return z_p_;
+    return z_v_;
   }
   // Setters for configure values.
   void SetNoises(double n_zv);
   void SetDelay(double delay);
-  void SetMinQ(double flow_minQ);
+  void SetDrag(double drag);
+    void SetMinQ(double flow_minQ) {drag_ = flow_minQ;}
 
 
   double timestamp_previous_pose_;  ///< Timestamp of previous pose message to subsample messages.
@@ -71,6 +66,7 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
   double GetLasttime() {
     return timestamp_previous_pose_;
   }
+
   
 };
 }  // namespace msf_velocity_sensor

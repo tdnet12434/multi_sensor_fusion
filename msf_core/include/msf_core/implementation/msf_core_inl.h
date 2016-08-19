@@ -35,6 +35,8 @@
 #include <msf_core/falsecolor.h>
 #include <msf_core/msf_types.h>
 
+
+bool IsStop_;
 namespace msf_core {
 template<typename EKFState_T>
 MSF_Core<EKFState_T>::MSF_Core(const MSF_SensorManager<EKFState_T>& GetUserCalc)
@@ -325,10 +327,27 @@ void MSF_Core<EKFState_T>::CleanUpBuffers() {
   MeasurementBuffer_.ClearOlderThan(timeold);
 }
 
+enum {X_x = 0, X_y, X_z, X_vx, X_vy, X_vz, X_bx, X_by, X_bz, n_x};
+enum {U_ax = 0, U_ay, U_az, n_u};
+// template<typename EKFState_T>
+// Eigen::Matrix<double, n_x, 1> MSF_Core<EKFState_T>::dynamics(
+//     Eigen::Matrix<double, n_x, n_x> _A,
+//     Eigen::Matrix<double, n_x, n_u> _B,
+//     double t,
+//     Eigen::Matrix<double, n_x, 1> &x,
+//     Eigen::Matrix<double, n_u, 1> &u)
+//   {
+//     return _A * x + _B * u;
+//   }
+template<typename EKFState_T>
+void MSF_Core<EKFState_T>::StopProp(bool IsStop) {
+  IsStop_ = IsStop;
+}
+
+
 template<typename EKFState_T>
 void MSF_Core<EKFState_T>::PropagateState(shared_ptr<EKFState_T>& state_old,
                                           shared_ptr<EKFState_T>& state_new) {
-
   double dt = state_new->time - state_old->time;
 
   // Reset new state to zero.
@@ -380,6 +399,76 @@ void MSF_Core<EKFState_T>::PropagateState(shared_ptr<EKFState_T>& state_old,
   dv = (state_new->template Get<StateDefinition_T::q>().toRotationMatrix() *
        ea + state_old->template Get<StateDefinition_T::q>().toRotationMatrix() *
        eaold) / 2;
+  /*
+
+  //Try to implement The Runge–Kutta method forth-order
+  //after matrix need to use ".template " instead normal "."
+  Eigen::Matrix<double, n_x, n_x>  _A; // dynamics matrix
+  Eigen::Matrix<double, n_x, n_u>  _B; // input matrix
+  Eigen::Matrix<double, n_x, 1> _x;
+  Eigen::Matrix<double, n_u, 1> _u;
+
+  // dynamics matrix
+  _A.setZero();
+  // derivative of position is velocity
+  _A(X_x, X_vx) = 1;
+  _A(X_y, X_vy) = 1;
+  _A(X_z, X_vz) = 1;
+
+  // input matrix
+  _B.setZero();
+  _B(X_vx, U_ax) = 1;
+  _B(X_vy, U_ay) = 1;
+  _B(X_vz, U_az) = 1;
+
+  const Matrix3 R_att = state_new->template Get<StateDefinition_T::q>().toRotationMatrix();
+  _A(X_vx, X_bx) = -R_att(0, 0);
+  _A(X_vx, X_by) = -R_att(0, 1);
+  _A(X_vx, X_bz) = -R_att(0, 2);
+
+  _A(X_vy, X_bx) = -R_att(1, 0);
+  _A(X_vy, X_by) = -R_att(1, 1);
+  _A(X_vy, X_bz) = -R_att(1, 2);
+
+  _A(X_vz, X_bx) = -R_att(2, 0);
+  _A(X_vz, X_by) = -R_att(2, 1);
+  _A(X_vz, X_bz) = -R_att(2, 2);
+
+
+
+  _x.template block<3, 1>(0, 0) = state_old->template Get<StateDefinition_T::p>();
+  _x.template block<3, 1>(3, 0) = state_old->template Get<StateDefinition_T::v>();
+  _x.template block<3, 1>(6, 0) = state_old->template Get<StateDefinition_T::b_a>();
+  _u = state_new->template Get<StateDefinition_T::q>().toRotationMatrix()
+     * (state_new->a_m - state_new->template Get<StateDefinition_T::b_a>()) - constants::GRAVITY;
+
+
+
+
+  double h = dt;
+  Eigen::Matrix<double, n_x, 1> k1, k2, k3, k4;
+  k1 =  _A * _x + _B * _u;
+  k2 =  _A * (_x + k1 * h / 2) +  _B * _u;
+  k3 =  _A * (_x + k2 * h / 2) +  _B * _u;
+  k4 =  _A * (_x + k3 * h) +  _B * _u;
+  Eigen::Matrix<double, n_x, 1> dx = (k1 + k2 * 2 + k3 * 2 + k4) * (h / 6);
+
+
+  state_new->template Get<StateDefinition_T::v>() = state_old->template Get<StateDefinition_T::v>() 
+                                                  + dx.template block<3,1>(3,0);
+  state_new->template Get<StateDefinition_T::p>() = state_old->template Get<StateDefinition_T::p>()
+                                                  + dx.template block<3,1>(0,0);
+
+
+
+*/
+  if(IsStop_) {
+    state_new->template Get<StateDefinition_T::v>() =
+        state_old->template Get<StateDefinition_T::v>();
+    state_new->template Get<StateDefinition_T::p>() =
+        state_old->template Get<StateDefinition_T::p>();
+    return;
+  }
   state_new->template Get<StateDefinition_T::v>() =
       state_old->template Get<StateDefinition_T::v>()
       + (dv - constants::GRAVITY) * dt;
@@ -846,11 +935,14 @@ bool MSF_Core<EKFState_T>::ApplyCorrection(shared_ptr<EKFState_T>& delaystate,
                                            ErrorState & correction,
                                            double fuzzythres) {
 
+// Give the user the possibility to fix some states.
+  usercalc_.AugmentCorrectionVector(correction);
+  
   if (!initialized_ || !predictionMade_)
     return false;
 
-  // Give the user the possibility to fix some states.
-  usercalc_.AugmentCorrectionVector(correction);
+  // // Give the user the possibility to fix some states.
+  // usercalc_.AugmentCorrectionVector(correction);
 
   // Now augment core states.
   if (usercalc_.GetParamFixedBias()) {

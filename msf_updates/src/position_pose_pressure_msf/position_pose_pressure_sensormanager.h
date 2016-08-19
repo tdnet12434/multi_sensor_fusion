@@ -27,12 +27,16 @@
 #include <msf_updates/pose_sensor_handler/pose_measurement.h>
 #include <msf_updates/position_sensor_handler/position_sensorhandler.h>
 #include <msf_updates/position_sensor_handler/position_measurement.h>
- #include <msf_updates/pressure_sensor_handler/pressure_sensorhandler.h>
+#include <msf_updates/pressure_sensor_handler/pressure_sensorhandler.h>
 #include <msf_updates/PositionPosePressureSensorConfig.h>
 
- #include <msf_updates/velocity_sensor_handler/velocity_sensorhandler.h>
+#include <msf_updates/velocity_sensor_handler/velocity_sensorhandler.h>
 #include <msf_updates/velocity_sensor_handler/velocity_measurement.h>
 
+
+  bool zero_correction_all;
+  bool zero_correction_bias;
+  
  namespace msf_updates {
 
   typedef msf_updates::PositionPosePressureSensorConfig Config_T;
@@ -116,6 +120,7 @@
     return config_;
   }
 
+
 private:
   shared_ptr<msf_core::IMUHandler_ROS<msf_updates::EKFState> > imu_handler_;
   shared_ptr<PoseSensorHandler_T> pose_handler_;
@@ -125,6 +130,8 @@ private:
   shared_ptr<PoseSensor_2_Handler_T> pose_2_handler_;
 
   shared_ptr<VelocitySensorHandler_T> velocity_handler_;
+
+
 
 
   Config_T config_;
@@ -423,7 +430,81 @@ void Init(double scale) const {
 
   virtual void AugmentCorrectionVector(
     Eigen::Matrix<double, EKFState_T::nErrorStatesAtCompileTime, 1>& correction) const {
-    UNUSED(correction);
+    // UNUSED(correction);
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::p>::value p_type;
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::v>::value v_type;
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::q>::value q_type;
+
+
+
+
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::b_a>::value b_a_type;
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::b_w>::value b_w_type;
+    enum {
+      indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_v = msf_tmp::GetStartIndex<StateSequence_T, v_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_q = msf_tmp::GetStartIndex<StateSequence_T, q_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
+          msf_tmp::CorrectionStateLengthForType>::value
+    };
+
+    if(zero_correction_bias) {
+      msf_core_->StopProp(1);
+      for(int i =0; 
+              i<msf_tmp::StripConstReference<b_a_type>::result_t::sizeInCorrection_; 
+              i++) {
+        correction(indexOfState_b_a+i) = 0;
+      }
+      for(int i =0; 
+              i<msf_tmp::StripConstReference<b_w_type>::result_t::sizeInCorrection_; 
+              i++) {
+        correction(indexOfState_b_w+i) = 0;
+      }
+    }else{
+      msf_core_->StopProp(0);
+    }
+
+    if(zero_correction_all) {
+        msf_core_->StopProp(1);
+        for(int i =0; 
+                i<msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_; 
+                i++) {
+          correction(indexOfState_p+i)   = 0;
+        }
+        for(int i =0; 
+                i<msf_tmp::StripConstReference<v_type>::result_t::sizeInCorrection_; 
+                i++) {
+          correction(indexOfState_v+i)   = 0;
+        }
+        for(int i =0; 
+                i<msf_tmp::StripConstReference<q_type>::result_t::sizeInCorrection_; 
+                i++) {
+          correction(indexOfState_q+i)   = 0;
+        }
+        for(int i =0; 
+                i<msf_tmp::StripConstReference<b_a_type>::result_t::sizeInCorrection_; 
+                i++) {
+          correction(indexOfState_b_a+i) = 0;
+        }
+        for(int i =0; 
+                i<msf_tmp::StripConstReference<b_w_type>::result_t::sizeInCorrection_; 
+                i++) {
+          correction(indexOfState_b_w+i) = 0;
+        }
+    }else{
+      msf_core_->StopProp(0);
+    }
+
   }
 
 
@@ -434,11 +515,15 @@ void Init(double scale) const {
     Eigen::Matrix<double, EKFState_T::nErrorStatesAtCompileTime, 1>& correction) const {
 
     UNUSED(buffstate);
-    UNUSED(correction);
+    // UNUSED(correction);
 
-    
+
+
 
     const EKFState_T& state = delaystate;
+
+
+
     if (state.Get<StateDefinition_T::L>()(0) < 0) {
       MSF_WARN_STREAM_THROTTLE(
         1,
@@ -449,13 +534,30 @@ void Init(double scale) const {
     }
 
 
-    double time_now = ros::Time::now().toSec();
-    double lasttime_pose = pose_handler_->GetLasttime();
+
+
+
+    bool slam_h, gps_h, flow_h;
+    double time_now =          ros::Time::now().toSec();
+    // double lasttime_pose =     time_now;
+    // double lasttime_position = time_now;
+    // double lasttime_velocity = time_now;
+
+
+    double lasttime_pose =     pose_handler_->GetLasttime();
     double lasttime_position = position_handler_->GetLasttime();
+    double lasttime_velocity = velocity_handler_->GetLasttime();
+
     // MSF_WARN_STREAM_THROTTLE(0.1,"Time " << time_now << "\t" << lasttime_pose);
-    if(lasttime_pose!=0)
-      if(time_now-lasttime_pose > 1) {
-        MSF_WARN_STREAM_THROTTLE(0.5,"SLAM timeout >1s" << time_now << "\t" << lasttime_pose);
+    // if(lasttime_pose!=0)
+
+    slam_h = gps_h = flow_h = false;
+      if(time_now -  lasttime_pose > 1 ||
+         lasttime_pose == 0) {
+        MSF_WARN_STREAM_ONCE("SLAM timeout >1s" 
+                                 << time_now 
+                                 << "\t" 
+                                 << lasttime_pose);
         Eigen::Matrix<double, 1, 1> L_;
         L_ << 1;
         delaystate.Set < StateDefinition_T::L > (L_);
@@ -468,13 +570,110 @@ void Init(double scale) const {
         q_wv_.setIdentity();
         delaystate.Set < StateDefinition_T::q_wv > (q_wv_);
 
+        //set slam bad health
+        slam_h = false;
+      }else{
+        //set slam ok
+        lasttime_pose = lasttime_pose;
+        slam_h = true;
       }
-    if(lasttime_position!=0)
-      if(time_now-lasttime_position > 1)
+
+    // if(lasttime_position!=0)
+      if(time_now - lasttime_position > 1.0 || 
+         lasttime_position == 0)
        { 
-        MSF_WARN_STREAM_THROTTLE(0.5,"GPS timeout >1s" << time_now << "\t" << lasttime_position);
+        gps_h = false;
+        MSF_WARN_STREAM_ONCE("GPS timeout >1s" 
+                                << time_now 
+                                << "\t" 
+                                << lasttime_position);
+       }else{
+        lasttime_position = lasttime_position;
+        gps_h = true;
        }
 
+    // if(lasttime_velocity!=0)
+      if(time_now - lasttime_velocity > 0.5 ||
+         lasttime_velocity == 0)
+       { 
+        flow_h = false;
+        MSF_WARN_STREAM_ONCE("FLOW timeout >0.5s" 
+                                << time_now 
+                                << "\t" 
+                                << lasttime_velocity);
+       }else{
+        lasttime_velocity = time_now;
+        flow_h = true;
+       }
+
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::p>::value p_type;
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::v>::value v_type;
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::q>::value q_type;
+
+
+
+
+
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::b_a>::value b_a_type;
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::b_w>::value b_w_type;
+    enum {
+      indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_v = msf_tmp::GetStartIndex<StateSequence_T, v_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_q = msf_tmp::GetStartIndex<StateSequence_T, q_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
+          msf_tmp::CorrectionStateLengthForType>::value
+    };
+
+
+     //check if all require sensor bad not let state to propagation
+    if(!flow_h &&
+       !gps_h  &&
+       !slam_h )
+    {
+      zero_correction_all = true;
+    }else{
+      zero_correction_all = false;    
+    }
+
+
+
+    Eigen::Matrix<double, 3, 1> w_m;
+    w_m = state.w_m;
+    double w_m_ = w_m.norm();
+    if(w_m_ > 1.0) {
+      zero_correction_bias = true;
+    }else{
+      zero_correction_bias = false;
+    }
+
+
+    // printf("w_m = %.3f\n", w_m_);
+
+
+
+    //bound bias
+    static float BIAS_MAX = 0.10;
+    double bx = state.Get<StateDefinition_T::b_a>()(0);
+    double by = state.Get<StateDefinition_T::b_a>()(1);
+    double bz = state.Get<StateDefinition_T::b_a>()(2);
+
+    if (std::abs(bx) > BIAS_MAX) { bx = BIAS_MAX * bx / std::abs(bx); }
+    if (std::abs(by) > BIAS_MAX) { by = BIAS_MAX * by / std::abs(by); }
+    if (std::abs(bz) > BIAS_MAX) { bz = BIAS_MAX * bz / std::abs(bz); }
+
+
+    Eigen::Matrix<double, 3, 1> b_a_(bx, by, bz);
+    delaystate.Set < StateDefinition_T::b_a > (b_a_);
 
   }
 };

@@ -28,15 +28,14 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
     std::string parameternamespace)
     : SensorHandler<msf_updates::EKFState>(meas, topic_namespace,
                                            parameternamespace),
-      n_zv_(0.01),
+      n_zv_(1e-6),
       delay_(0),
-      flow_minQ_(75),
-      timestamp_previous_pose_(0) {
+      drag_(0.1) {
   ros::NodeHandle pnh("~/velocity_sensor");
-  pnh.param("velocity_use_fixed_covariance", use_fixed_covariance_, true);
+  pnh.param("velocity_use_fixed_covariance", use_fixed_covariance_, false);
   pnh.param("velocity_absolute_measurements", provides_absolute_measurements_,
-            true);
- 
+            false);
+
   MSF_INFO_STREAM_COND(use_fixed_covariance_, "Velocity sensor is using fixed "
                        "covariance");
   MSF_INFO_STREAM_COND(!use_fixed_covariance_, "Velocity sensor is using "
@@ -49,16 +48,12 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
 
   ros::NodeHandle nh("msf_updates");
 
-  subFlow_ =
-      nh.subscribe<mavros_msgs::OpticalFlowRad>
-  ("flow_input", 20, &VelocitySensorHandler::MeasurementCallback, this);
-
-  subAgl_ =
-      nh.subscribe<mavros_msgs::Altitude>
-  ("agl_input", 20, &VelocitySensorHandler::MeasurementAGLCallback, this);
+  subImu_ =
+      nh.subscribe<sensor_msgs::Imu>
+  ("imu_input", 20, &VelocitySensorHandler::MeasurementCallback, this);
 
 
-  z_p_.setZero();
+  z_v_.setZero();
 
 }
   static bool referenceinit = false;  //TODO (slynen): Dynreconf reset reference.
@@ -76,14 +71,14 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetDelay(
 }
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
-void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetMinQ(
-    double flow_minQ) {
-  flow_minQ_ = flow_minQ;
+void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetDrag(
+    double drag) {
+  drag_ = drag;
 }
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasurement(
-    const mavros_msgs::OpticalFlowRadConstPtr& msg) {
+    const sensor_msgs::ImuConstPtr& msg) {
   received_first_measurement_ = true;
 
   // Get the fixed states.
@@ -93,7 +88,7 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
       "larger variable to mark the fixed_states");
   // Do not exceed the 32 bits of int.
 
-  if (!use_fixed_covariance_  && 0/*&& msg->linear_acceleration_covariance[0] == 0*/)  // Take covariance from sensor.
+  if (!use_fixed_covariance_ && msg->linear_acceleration_covariance[0] == 0)  // Take covariance from sensor.
       {
     MSF_WARN_STREAM_THROTTLE(
         2, "Provided message type without covariance but set "
@@ -114,64 +109,35 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
       > meas(
           new MEASUREMENT_TYPE(n_zv_, use_fixed_covariance_,
                                provides_absolute_measurements_, this->sensorID,
-                               fixedstates,flow_minQ_));
+                               fixedstates,drag_));
 
   meas->MakeFromSensorReading(msg, msg->header.stamp.toSec() - delay_);
 
-  z_p_ = meas->z_p_;  // Store this for the init procedure.
+  z_v_ = meas->z_v_;  // Store this for the init procedure.
 
   this->manager_.msf_core_->AddMeasurement(meas);
 }
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
-    const mavros_msgs::OpticalFlowRadConstPtr & msg) {
-  this->SequenceWatchDog(msg->header.seq, subFlow_.getTopic());
+    const sensor_msgs::ImuConstPtr & msg) {
+  this->SequenceWatchDog(msg->header.seq, subImu_.getTopic());
 
   MSF_INFO_STREAM_ONCE(
       "*** velocity sensor got first measurement from topic "
-          << this->topic_namespace_ << "/" << subFlow_.getTopic()
+          << this->topic_namespace_ << "/" << subImu_.getTopic()
           << " ***");
 
+  sensor_msgs::ImuPtr pointwCov(
+      new sensor_msgs::Imu);
+  pointwCov->header = msg->header;
+  pointwCov->linear_acceleration = msg->linear_acceleration;
 
-
-
-  mavros_msgs::OpticalFlowRadPtr flow_msg(
-      new mavros_msgs::OpticalFlowRad());
-  // Fixed covariance will be set in measurement class -> MakeFromSensorReadingImpl.
-  flow_msg->header = msg->header;
-  flow_msg->integration_time_us = msg->integration_time_us;
-  flow_msg->integrated_x = msg->integrated_x;
-  flow_msg->integrated_y = msg->integrated_y;
-  flow_msg->integrated_xgyro = msg->integrated_xgyro;
-  flow_msg->integrated_ygyro = msg->integrated_ygyro;
-  flow_msg->integrated_zgyro = msg->integrated_zgyro;
-  flow_msg->temperature = msg->temperature;
-  flow_msg->quality = msg->quality;
-  flow_msg->time_delta_distance_us = msg->time_delta_distance_us;
-
-  flow_msg->distance = agl_sensor;
-
-  if(flow_msg->quality < flow_minQ_) return;
-  if(agl_sensor < 0.3) return;
-  if(agl_sensor > 4) return;
-
-   double time_now = msg->header.stamp.toSec();
+  double time_now = msg->header.stamp.toSec();
   timestamp_previous_pose_ = time_now;
 
-  ProcessVelocityMeasurement(flow_msg);
+  ProcessVelocityMeasurement(pointwCov);
 }
-template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
-void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementAGLCallback(
-    const mavros_msgs::AltitudeConstPtr & msg) {
-  this->SequenceWatchDog(msg->header.seq, subAgl_.getTopic());
 
-  MSF_INFO_STREAM_ONCE(
-      "*** velocity sensor got first agl measurement from topic "
-          << this->topic_namespace_ << "/" << subAgl_.getTopic()
-          << " ***");
-
-  agl_sensor = msg->relative;
-}
 }  // namespace msf_position_sensor
 #endif  // VELOCITY_SENSORHANDLER_HPP_

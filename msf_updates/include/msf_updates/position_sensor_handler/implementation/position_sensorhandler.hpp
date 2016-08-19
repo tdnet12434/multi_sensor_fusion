@@ -31,7 +31,9 @@ PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::PositionSensorHandler(
     : SensorHandler<msf_updates::EKFState>(meas, topic_namespace,
                                            parameternamespace),
       n_zp_(1e-6),
-      delay_(0) {
+      delay_(0),
+      timestamp_previous_pose_(0)
+      {
   ros::NodeHandle pnh("~/position_sensor");
   pnh.param("position_use_fixed_covariance", use_fixed_covariance_, false);
   pnh.param("position_absolute_measurements", provides_absolute_measurements_,
