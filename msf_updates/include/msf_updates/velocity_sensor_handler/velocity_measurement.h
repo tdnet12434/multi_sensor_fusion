@@ -132,6 +132,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   double agl_ef;
   double n_zv_;  /// Position measurement noise.
   double flow_minQ_;
+  Eigen::Quaternion<double> qif_;
   double dt;
  
   bool flow_healhy;
@@ -144,12 +145,14 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   virtual ~VelocityMeasurement() {
   }
   VelocityMeasurement(double n_zv, bool fixed_covariance,
-                      bool isabsoluteMeasurement, int sensorID, int fixedstates, double flow_minQ)
+                      bool isabsoluteMeasurement, int sensorID, int fixedstates, double flow_minQ, Eigen::Quaternion<double> qif)
       : VelocityMeasurementBase(isabsoluteMeasurement, sensorID),
         n_zv_(n_zv),
         fixed_covariance_(fixed_covariance),
         fixedstates_(fixedstates),
-        flow_minQ_(flow_minQ) {
+        flow_minQ_(flow_minQ),
+        qif_(qif)
+         {
   }
   virtual std::string Type() {
     return "velocity";
@@ -168,10 +171,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
         .conjugate().toRotationMatrix();
 
     //w x y z preset drift 10 deg
-    Eigen::Quaternion<double> q_b_i(0.999,
-                                    0,
-                                    0,
-                                    0.044);
+    Eigen::Quaternion<double> q_b_i = qif_;
     q_b_i.normalize();
     Eigen::Matrix<double, 3, 3> Shift_q = q_b_i.toRotationMatrix();
     

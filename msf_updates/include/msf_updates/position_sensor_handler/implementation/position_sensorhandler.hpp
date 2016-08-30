@@ -32,7 +32,8 @@ PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::PositionSensorHandler(
                                            parameternamespace),
       n_zp_(1e-6),
       delay_(0),
-      timestamp_previous_pose_(0)
+      timestamp_previous_pose_(0),
+      gps_cov_(10)
       {
   ros::NodeHandle pnh("~/position_sensor");
   pnh.param("position_use_fixed_covariance", use_fixed_covariance_, false);
@@ -160,6 +161,10 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
   odom->pose.covariance[0] = msg->pose.covariance[0];
   odom->pose.covariance[4] = msg->pose.covariance[7];
   odom->pose.covariance[8] = msg->pose.covariance[14];
+
+
+  gps_cov_ = msg->pose.covariance[0];
+
   ProcessPositionMeasurement(odom);
 }
 

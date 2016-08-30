@@ -155,9 +155,14 @@ private:
      config.pose_noise_meas_q_2);
     pose_2_handler_->SetDelay(config.pose_delay_2);
 
-    velocity_handler_->SetNoises(config.velocity_flowNoiseXY);
+    // velocity_handler_->SetNoises(config.velocity_flowNoiseXY); //move to use logic
     velocity_handler_->SetDelay(config.velocity_flowDelay);
     velocity_handler_->SetMinQ(config.velocity_flowMinQ);
+
+    double yawinit = config_.velocity_flowYaw / 180 * M_PI;
+    Eigen::Quaterniond yawq(cos(yawinit / 2), 0, 0, sin(yawinit / 2));
+    yawq.normalize();
+    velocity_handler_->SetQif(yawq);
 
     if((level & msf_updates::PositionPosePressureSensor_SET_LATLON) && config.reset_coordinate == true)
     {
@@ -523,7 +528,7 @@ void Init(double scale) const {
     const EKFState_T& state = delaystate;
 
 
-
+    /// Check if scale too large (L too small)
     if (state.Get<StateDefinition_T::L>()(0) < 0) {
       MSF_WARN_STREAM_THROTTLE(
         1,
@@ -536,144 +541,136 @@ void Init(double scale) const {
 
 
 
+    /// Check healhy of GPS if it bad let trust flow
+    if(position_handler_->GetGpscov() > 3.7) {
+      velocity_handler_->SetNoises(0.01);
+      MSF_WARN_STREAM_ONCE("GPS high cov: trust flow more");
+    }else{
+      velocity_handler_->SetNoises(0.1);
+      MSF_WARN_STREAM_ONCE("GPS low cov: trust flow less");
+    }
 
+
+    /// Check timeout each sensor
     bool slam_h, gps_h, flow_h;
     double time_now =          ros::Time::now().toSec();
-    // double lasttime_pose =     time_now;
-    // double lasttime_position = time_now;
-    // double lasttime_velocity = time_now;
-
-
     double lasttime_pose =     pose_handler_->GetLasttime();
     double lasttime_position = position_handler_->GetLasttime();
     double lasttime_velocity = velocity_handler_->GetLasttime();
 
-    // MSF_WARN_STREAM_THROTTLE(0.1,"Time " << time_now << "\t" << lasttime_pose);
-    // if(lasttime_pose!=0)
-
     slam_h = gps_h = flow_h = false;
-      if(time_now -  lasttime_pose > 1 ||
-         lasttime_pose == 0) {
-        MSF_WARN_STREAM_ONCE("SLAM timeout >1s" 
-                                 << time_now 
-                                 << "\t" 
-                                 << lasttime_pose);
-        Eigen::Matrix<double, 1, 1> L_;
-        L_ << 1;
-        delaystate.Set < StateDefinition_T::L > (L_);
+    if(time_now -  lasttime_pose > 1 ||
+     lasttime_pose == 0) {
+      MSF_WARN_STREAM_ONCE("SLAM timeout >1s" 
+       << time_now 
+       << "\t" 
+       << lasttime_pose);
+      Eigen::Matrix<double, 1, 1> L_;
+      L_ << 1;
+      delaystate.Set < StateDefinition_T::L > (L_);
 
-        Eigen::Matrix<double, 3, 1> p_wv_;
-        p_wv_.setZero();
-        delaystate.Set < StateDefinition_T::p_wv > (p_wv_);
+      Eigen::Matrix<double, 3, 1> p_wv_;
+      p_wv_.setZero();
+      delaystate.Set < StateDefinition_T::p_wv > (p_wv_);
 
-        Eigen::Quaternion<double>  q_wv_;
-        q_wv_.setIdentity();
-        delaystate.Set < StateDefinition_T::q_wv > (q_wv_);
+      Eigen::Quaternion<double>  q_wv_;
+      q_wv_.setIdentity();
+      delaystate.Set < StateDefinition_T::q_wv > (q_wv_);
 
-        //set slam bad health
-        slam_h = false;
-      }else{
-        //set slam ok
-        lasttime_pose = lasttime_pose;
-        slam_h = true;
-      }
-
-    // if(lasttime_position!=0)
-      if(time_now - lasttime_position > 1.0 || 
-         lasttime_position == 0)
-       { 
-        gps_h = false;
-        MSF_WARN_STREAM_ONCE("GPS timeout >1s" 
-                                << time_now 
-                                << "\t" 
-                                << lasttime_position);
-       }else{
-        lasttime_position = lasttime_position;
-        gps_h = true;
-       }
-
-    // if(lasttime_velocity!=0)
-      if(time_now - lasttime_velocity > 0.5 ||
-         lasttime_velocity == 0)
-       { 
-        flow_h = false;
-        MSF_WARN_STREAM_ONCE("FLOW timeout >0.5s" 
-                                << time_now 
-                                << "\t" 
-                                << lasttime_velocity);
-       }else{
-        lasttime_velocity = time_now;
-        flow_h = true;
-       }
-
-    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-        StateDefinition_T::p>::value p_type;
-    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-        StateDefinition_T::v>::value v_type;
-    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-        StateDefinition_T::q>::value q_type;
-
-
-
-
-
-    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-        StateDefinition_T::b_a>::value b_a_type;
-    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-        StateDefinition_T::b_w>::value b_w_type;
-    enum {
-      indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
-          msf_tmp::CorrectionStateLengthForType>::value,
-      indexOfState_v = msf_tmp::GetStartIndex<StateSequence_T, v_type,
-          msf_tmp::CorrectionStateLengthForType>::value,
-      indexOfState_q = msf_tmp::GetStartIndex<StateSequence_T, q_type,
-          msf_tmp::CorrectionStateLengthForType>::value,
-      indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
-          msf_tmp::CorrectionStateLengthForType>::value,
-      indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
-          msf_tmp::CorrectionStateLengthForType>::value
-    };
-
-
-     //check if all require sensor bad not let state to propagation
-    if(!flow_h &&
-       !gps_h  &&
-       !slam_h )
-    {
-      zero_correction_all = true;
+      //set slam bad health
+      slam_h = false;
     }else{
-      zero_correction_all = false;    
+      //set slam ok
+      lasttime_pose = lasttime_pose;
+      slam_h = true;
     }
 
 
-
-    Eigen::Matrix<double, 3, 1> w_m;
-    w_m = state.w_m;
-    double w_m_ = w_m.norm();
-    if(w_m_ > 1.0) {
-      zero_correction_bias = true;
-    }else{
-      zero_correction_bias = false;
-    }
-
-
-    // printf("w_m = %.3f\n", w_m_);
-
-
-
-    //bound bias
-    static float BIAS_MAX = 0.10;
-    double bx = state.Get<StateDefinition_T::b_a>()(0);
-    double by = state.Get<StateDefinition_T::b_a>()(1);
-    double bz = state.Get<StateDefinition_T::b_a>()(2);
-
-    if (std::abs(bx) > BIAS_MAX) { bx = BIAS_MAX * bx / std::abs(bx); }
-    if (std::abs(by) > BIAS_MAX) { by = BIAS_MAX * by / std::abs(by); }
-    if (std::abs(bz) > BIAS_MAX) { bz = BIAS_MAX * bz / std::abs(bz); }
+  if(time_now - lasttime_position > 1.0 || 
+   lasttime_position == 0)
+  { 
+    gps_h = false;
+    MSF_WARN_STREAM_ONCE("GPS timeout >1s" 
+      << time_now 
+      << "\t" 
+      << lasttime_position);
+  }else{
+    lasttime_position = lasttime_position;
+    gps_h = true;
+  }
 
 
-    Eigen::Matrix<double, 3, 1> b_a_(bx, by, bz);
-    delaystate.Set < StateDefinition_T::b_a > (b_a_);
+  if(time_now - lasttime_velocity > 0.5 ||
+   lasttime_velocity == 0)
+  { 
+    flow_h = false;
+    MSF_WARN_STREAM_ONCE("FLOW timeout >0.5s" 
+      << time_now 
+      << "\t" 
+      << lasttime_velocity);
+  }else{
+    lasttime_velocity = time_now;
+    flow_h = true;
+  }
+
+  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  StateDefinition_T::p>::value p_type;
+  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  StateDefinition_T::v>::value v_type;
+  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  StateDefinition_T::q>::value q_type;
+  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  StateDefinition_T::b_a>::value b_a_type;
+  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  StateDefinition_T::b_w>::value b_w_type;
+  enum {
+    indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
+    msf_tmp::CorrectionStateLengthForType>::value,
+    indexOfState_v = msf_tmp::GetStartIndex<StateSequence_T, v_type,
+    msf_tmp::CorrectionStateLengthForType>::value,
+    indexOfState_q = msf_tmp::GetStartIndex<StateSequence_T, q_type,
+    msf_tmp::CorrectionStateLengthForType>::value,
+    indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
+    msf_tmp::CorrectionStateLengthForType>::value,
+    indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
+    msf_tmp::CorrectionStateLengthForType>::value
+  };
+
+
+  //Check if all require sensor bad not let state to propagation
+  if(!flow_h &&
+   !gps_h  &&
+   !slam_h )
+  {
+    zero_correction_all = true;
+  }else{
+    zero_correction_all = false;    
+  }
+
+
+  //Check if rotate too fast, don't try to correct bias
+  Eigen::Matrix<double, 3, 1> w_m;
+  w_m = state.w_m;
+  double w_m_ = w_m.norm();
+  if(w_m_ > 1.0) {
+    zero_correction_bias = true;
+  }else{
+    zero_correction_bias = false;
+  }
+
+  //Check Bias and bound
+  static float BIAS_MAX = 0.10;
+  double bx = state.Get<StateDefinition_T::b_a>()(0);
+  double by = state.Get<StateDefinition_T::b_a>()(1);
+  double bz = state.Get<StateDefinition_T::b_a>()(2);
+
+  if (std::abs(bx) > BIAS_MAX) { bx = BIAS_MAX * bx / std::abs(bx); }
+  if (std::abs(by) > BIAS_MAX) { by = BIAS_MAX * by / std::abs(by); }
+  if (std::abs(bz) > BIAS_MAX) { bz = BIAS_MAX * bz / std::abs(bz); }
+
+
+  Eigen::Matrix<double, 3, 1> b_a_(bx, by, bz);
+  delaystate.Set < StateDefinition_T::b_a > (b_a_);
 
   }
 };

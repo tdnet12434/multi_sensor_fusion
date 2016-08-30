@@ -31,6 +31,7 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
       n_zv_(0.01),
       delay_(0),
       flow_minQ_(75),
+      qif_(Eigen::Quaternion<double>(1,0,0,0)),
       timestamp_previous_pose_(0) {
   ros::NodeHandle pnh("~/velocity_sensor");
   pnh.param("velocity_use_fixed_covariance", use_fixed_covariance_, true);
@@ -82,6 +83,12 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetMinQ(
 }
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
+void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetQif(
+    Eigen::Quaternion<double> qif) {
+  qif_ = qif;
+}
+
+template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasurement(
     const mavros_msgs::OpticalFlowRadConstPtr& msg) {
   received_first_measurement_ = true;
@@ -113,8 +120,11 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
   shared_ptr < MEASUREMENT_TYPE
       > meas(
           new MEASUREMENT_TYPE(n_zv_, use_fixed_covariance_,
-                               provides_absolute_measurements_, this->sensorID,
-                               fixedstates,flow_minQ_));
+                               provides_absolute_measurements_, 
+                               this->sensorID,
+                               fixedstates,
+                               flow_minQ_,
+                               qif_));
 
   meas->MakeFromSensorReading(msg, msg->header.stamp.toSec() - delay_);
 

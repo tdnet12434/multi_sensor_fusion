@@ -36,6 +36,7 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
   double delay_;       ///< Delay to be subtracted from the ros-timestamp of
                        //the measurement provided by this sensor.
   double flow_minQ_;  //flow_minQ coefficient
+  Eigen::Quaternion<double> qif_;
 
   ros::Subscriber subFlow_, subAgl_;
 
@@ -64,7 +65,7 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
   void SetNoises(double n_zv);
   void SetDelay(double delay);
   void SetMinQ(double flow_minQ);
-
+  void SetQif(Eigen::Quaternion<double> qif);
 
   double timestamp_previous_pose_;  ///< Timestamp of previous pose message to subsample messages.
     // Used for check alive

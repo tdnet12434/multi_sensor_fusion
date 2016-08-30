@@ -16,10 +16,10 @@ core/core_fixed_bias: false
 # core/core_noise_gyrbias: 0.00000212
 
 #exteme acc false tune
-core/core_noise_acc: 0.2 #0.013
-core/core_noise_accbias: 0.02 #0.000108
-core/core_noise_gyr: 0.024995
-core/core_noise_gyrbias: 0.000999999
+core/core_noise_acc: 0.5 #0.8 #0.013
+core/core_noise_accbias: 0.005 #0.000108
+core/core_noise_gyr: 0.00008726
+core/core_noise_gyrbias: 0.000008726 
 
 
 ####### ADIS
@@ -68,7 +68,7 @@ position_pose_pressure_sensor/pose_fixed_p_wv: false
 position_pose_pressure_sensor/pose_fixed_q_wv: true
 position_pose_pressure_sensor/pose_delay: 0.25
 
-position_pose_pressure_sensor/position_delay: 0.29 #0.01 #set minimum to Inertial nav output / set 0.29 to raw gps
+position_pose_pressure_sensor/position_delay: 0.23 #0.29 #0.01 #set minimum to Inertial nav output / set 0.29 to raw gps
 position_pose_pressure_sensor/position_noise_meas: 2.0  #set minimum to Inertial nav output / set 2.0 to raw gps
 position_pose_pressure_sensor/position_use_fixed_covariance: false #set fix if using Inertial nav output / set no fix (false) to raw gps
 position_sensor/position_use_fixed_covariance: false #set fix if using Inertial nav output / set no fix (false) to raw gps
@@ -76,7 +76,7 @@ position_sensor/position_use_fixed_covariance: false #set fix if using Inertial 
 #init position offset prism imu
 position_sensor/init/p_ip/x: 0 #-0.02    
 position_sensor/init/p_ip/y: 0 #0.05
-position_sensor/init/p_ip/z: 0.05
+position_sensor/init/p_ip/z: 0
 position_sensor/position_absolute_measurements: true
 
 
@@ -125,13 +125,19 @@ position_pose_pressure_sensor/pose_noise_meas_q_2: 0.01 #0.02
 
 
 
-#position_pose_pressure_sensor/pose_noise_scale_2: 0
-#position_pose_pressure_sensor/pose_noise_p_wv_2: 10e6
-#position_pose_pressure_sensor/pose_use_fixed_covariance_2: true
-#position_pose_pressure_sensor/pose_fixed_scale_2: true
-#position_pose_pressure_sensor/pose_fixed_p_ic_2: true
-#position_pose_pressure_sensor/pose_fixed_q_ic_2: true
-#position_pose_pressure_sensor/pose_fixed_p_wv_2: true
-#position_pose_pressure_sensor/pose_fixed_q_wv_2: true
+position_pose_pressure_sensor/pose_noise_scale_2: 0
+position_pose_pressure_sensor/pose_noise_p_wv_2: 10e6
+position_pose_pressure_sensor/pose_use_fixed_covariance_2: true
+position_pose_pressure_sensor/pose_fixed_scale_2: true
+position_pose_pressure_sensor/pose_fixed_p_ic_2: true
+position_pose_pressure_sensor/pose_fixed_q_ic_2: true
+position_pose_pressure_sensor/pose_fixed_p_wv_2: true
+position_pose_pressure_sensor/pose_fixed_q_wv_2: true
 
 # position_pose_pressure_sensor/pose_delay_2: 0.0
+
+
+
+position_pose_pressure_sensor/velocity_flowYaw: 10.8 #10.8 for rectan
+
+

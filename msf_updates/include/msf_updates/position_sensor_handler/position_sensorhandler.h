@@ -49,7 +49,8 @@ class PositionSensorHandler : public msf_core::SensorHandler<
   msf_core::GPSConversion gpsConversion_;
   double vx,
          vy;
-
+  double gps_cov_;
+  
   bool use_fixed_covariance_;  ///< Use fixed covariance set by dynamic reconfigure.
   bool provides_absolute_measurements_;  ///< Does this sensor measure relative or absolute values.
 
@@ -76,6 +77,9 @@ class PositionSensorHandler : public msf_core::SensorHandler<
   // Used for check alive
   double GetLasttime() {
     return timestamp_previous_pose_;
+  }
+  double GetGpscov() {
+    return gps_cov_;
   }
 };
 }  // namespace msf_position_sensor
