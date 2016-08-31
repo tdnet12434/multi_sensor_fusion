@@ -187,8 +187,9 @@ struct PositionMeasurement : public PositionMeasurementBase {
     H.block<3, 3>(0, idxstartcorr_p_) = Eigen::Matrix<double, 3, 3>::Identity();  // p
     H.block<1, 1>(0, idxstartcorr_p_+2)(0) = 0;
 
-    H.block<3, 3>(0, idxstartcorr_v_) = Eigen::Matrix<double, 3, 3>::Identity();  // v
-    H.block<1, 1>(0, idxstartcorr_v_+2)(0) = 0;
+    // Velocity:
+    H.block<3, 3>(3, idxstartcorr_v_) = Eigen::Matrix<double, 3, 3>::Identity();  // v
+    H.block<1, 1>(3, idxstartcorr_v_+2)(0) = 0;
 
     H.block<3, 3>(0, idxstartcorr_q_) = -C_q.transpose() * p_prism_imu_sk;  // q
 

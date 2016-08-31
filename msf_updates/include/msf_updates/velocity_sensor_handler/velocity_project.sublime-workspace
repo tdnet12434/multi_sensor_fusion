@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"sensor",
+				"sensor_msgs"
+			],
+			[
 				"gps",
 				"gps_cov_"
 			],
@@ -510,10 +514,6 @@
 			[
 				"pres",
 				"pressure"
-			],
-			[
-				"rc_",
-				"rc_msg"
 			]
 		]
 	},
@@ -571,7 +571,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/pose_sensorhandler.h",
 			"settings":
 			{
-				"buffer_size": 3613,
+				"buffer_size": 3742,
 				"line_ending": "Unix"
 			}
 		},
@@ -579,7 +579,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/implementation/pose_sensorhandler.hpp",
 			"settings":
 			{
-				"buffer_size": 10500,
+				"buffer_size": 11480,
 				"line_ending": "Unix"
 			}
 		},
@@ -688,6 +688,14 @@
 			}
 		},
 		{
+			"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/launch/msf_optical_flow_vel.launch",
+			"settings":
+			{
+				"buffer_size": 7265,
+				"line_ending": "Unix"
+			}
+		},
+		{
 			"file": "/home/fx/Dropbox/catkin_ws/ORB2_wificam.launch",
 			"settings":
 			{
@@ -739,15 +747,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/slam_gps_pressure.yaml",
 			"settings":
 			{
-				"buffer_size": 5437,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/launch/msf_optical_flow_vel.launch",
-			"settings":
-			{
-				"buffer_size": 7281,
+				"buffer_size": 5453,
 				"line_ending": "Unix"
 			}
 		},
@@ -1022,6 +1022,11 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"imu_max/pose",
+			"navvelMsg",
+			"poseMsg",
+			"pose",
+			"subPoseStamped_",
 			"gps_cov_",
 			"timestamp_previous_pose_",
 			"timestamp_previous_pose_\ntimestamp_previous_pose_",
@@ -1144,12 +1149,7 @@
 			"poseMsg",
 			"state_out",
 			"poseMsg",
-			"state_fix_pub",
-			"set_stop_propagation",
-			"usercalc_",
-			"GetParamFixedBias",
-			"SanityCheckCorrection",
-			"ResetState"
+			"state_fix_pub"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1187,7 +1187,7 @@
 	"groups":
 	[
 		{
-			"selected": 27,
+			"selected": 28,
 			"sheets":
 			[
 				{
@@ -1213,7 +1213,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1368.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1241,7 +1241,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 333.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1314,8 +1314,8 @@
 						"selection":
 						[
 							[
-								3344,
-								3344
+								1223,
+								1223
 							]
 						],
 						"settings":
@@ -1325,7 +1325,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 507.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1363,15 +1363,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/pose_sensorhandler.h",
 					"settings":
 					{
-						"buffer_size": 3613,
+						"buffer_size": 3742,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2026,
-								2026
+								3239,
+								3239
 							]
 						],
 						"settings":
@@ -1381,7 +1381,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 481.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1391,15 +1391,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/pose_sensor_handler/implementation/pose_sensorhandler.hpp",
 					"settings":
 					{
-						"buffer_size": 10500,
+						"buffer_size": 11480,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								5924,
-								5924
+								2897,
+								2897
 							]
 						],
 						"settings":
@@ -1409,7 +1409,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1464.0,
+						"translation.y": 585.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1426,8 +1426,8 @@
 						"selection":
 						[
 							[
-								5642,
-								5642
+								1027,
+								1027
 							]
 						],
 						"settings":
@@ -1437,7 +1437,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1412.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1762,8 +1762,8 @@
 						"selection":
 						[
 							[
-								45383,
-								45383
+								8957,
+								8957
 							]
 						],
 						"settings":
@@ -1773,13 +1773,41 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 16388.0,
+						"translation.y": 3466.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
 				},
 				{
 					"buffer": 21,
+					"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/launch/msf_optical_flow_vel.launch",
+					"settings":
+					{
+						"buffer_size": 7265,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								6522,
+								6522
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/XML/XML.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 1391.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 22,
 					"file": "/home/fx/Dropbox/catkin_ws/ORB2_wificam.launch",
 					"settings":
 					{
@@ -1807,7 +1835,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 22,
+					"buffer": 23,
 					"file": "/home/fx/Dropbox/catkin_ws/src/mav_navi/CMakeLists.txt",
 					"settings":
 					{
@@ -1835,7 +1863,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 23,
+					"buffer": 24,
 					"file": "/home/fx/Dropbox/catkin_ws/src/ORB_SLAM2/Examples/ROS/ORB_SLAM2/CMakeLists.txt",
 					"settings":
 					{
@@ -1861,7 +1889,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 24,
+					"buffer": 25,
 					"file": "/home/fx/Dropbox/catkin_ws/src/using_markers/CMakeLists.txt",
 					"settings":
 					{
@@ -1889,7 +1917,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 25,
+					"buffer": 26,
 					"file": "/home/fx/Dropbox/catkin_ws/src/g2o_ros/CMakeLists.txt",
 					"settings":
 					{
@@ -1917,7 +1945,7 @@
 					"type": "text"
 				},
 				{
-					"buffer": 26,
+					"buffer": 27,
 					"file": "/home/fx/src/Firmware/src/modules/mavlink/mavlink_messages.cpp",
 					"settings":
 					{
@@ -1944,19 +1972,19 @@
 					"type": "text"
 				},
 				{
-					"buffer": 27,
+					"buffer": 28,
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/slam_gps_pressure.yaml",
 					"settings":
 					{
-						"buffer_size": 5437,
+						"buffer_size": 5453,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								3361,
-								3361
+								5434,
+								5434
 							]
 						],
 						"settings":
@@ -1964,35 +1992,7 @@
 							"syntax": "Packages/YAML/YAML.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 632.0,
-						"zoom_level": 1.0
-					},
-					"type": "text"
-				},
-				{
-					"buffer": 28,
-					"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/launch/msf_optical_flow_vel.launch",
-					"settings":
-					{
-						"buffer_size": 7281,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								6408,
-								6408
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/XML/XML.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1581.0,
+						"translation.y": 1373.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -2009,8 +2009,8 @@
 						"selection":
 						[
 							[
-								166,
-								166
+								235,
+								235
 							]
 						],
 						"settings":
@@ -2333,7 +2333,7 @@
 		"cols":
 		[
 			0.0,
-			0.867724867725,
+			0.911998207475,
 			1.0
 		],
 		"rows":
