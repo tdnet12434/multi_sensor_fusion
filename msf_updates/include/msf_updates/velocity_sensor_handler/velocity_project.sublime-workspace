@@ -4,6 +4,10 @@
 		"selected_items":
 		[
 			[
+				"gps",
+				"gps_cov_"
+			],
+			[
 				"imuE",
 				"imu_ef_pub"
 			],
@@ -500,10 +504,6 @@
 				"gpsrawVal"
 			],
 			[
-				"gps",
-				"gpsrawMsg"
-			],
-			[
 				"Mout",
 				"Mout1"
 			],
@@ -523,7 +523,7 @@
 			"file": "velocity_measurement.h",
 			"settings":
 			{
-				"buffer_size": 18729,
+				"buffer_size": 18701,
 				"line_ending": "Unix"
 			}
 		},
@@ -531,7 +531,7 @@
 			"file": "velocity_sensorhandler.h",
 			"settings":
 			{
-				"buffer_size": 2744,
+				"buffer_size": 2823,
 				"line_ending": "Unix"
 			}
 		},
@@ -539,7 +539,7 @@
 			"file": "implementation/velocity_sensorhandler.hpp",
 			"settings":
 			{
-				"buffer_size": 6593,
+				"buffer_size": 6923,
 				"line_ending": "Unix"
 			}
 		},
@@ -555,7 +555,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/position_sensorhandler.h",
 			"settings":
 			{
-				"buffer_size": 3453,
+				"buffer_size": 3522,
 				"line_ending": "Unix"
 			}
 		},
@@ -563,7 +563,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/implementation/position_sensorhandler.hpp",
 			"settings":
 			{
-				"buffer_size": 11024,
+				"buffer_size": 11085,
 				"line_ending": "Unix"
 			}
 		},
@@ -619,7 +619,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_msf/position_pose_pressure_sensormanager.h",
 			"settings":
 			{
-				"buffer_size": 24512,
+				"buffer_size": 24340,
 				"line_ending": "Unix"
 			}
 		},
@@ -739,7 +739,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/slam_gps_pressure.yaml",
 			"settings":
 			{
-				"buffer_size": 5364,
+				"buffer_size": 5437,
 				"line_ending": "Unix"
 			}
 		},
@@ -835,7 +835,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/cfg/PositionPosePressureSensor.cfg",
 			"settings":
 			{
-				"buffer_size": 7318,
+				"buffer_size": 7441,
 				"line_ending": "Unix"
 			}
 		}
@@ -864,6 +864,9 @@
 	},
 	"file_history":
 	[
+		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_eval/Matlab/evaluation.m",
+		"/home/fx/Dropbox/catkin_ws/build/ardrone_autonomy/ardrone/src/ardronelib/ARDroneLib/ARDroneLib.xcodeproj/project.pbxproj",
+		"/home/fx/Dropbox/catkin_ws/fuck.launch",
 		"/home/fx/Dropbox/catkin_ws/src/g2o_ros/src/tutorial_slam2d/simulator.cpp",
 		"/home/fx/src/Firmware/src/modules/mavlink/mavlink_messages.cpp",
 		"/home/fx/Dropbox/catkin_ws/src/g2o_ros/src/tutorial_slam2d/tutorial_slam2d.cpp",
@@ -968,7 +971,6 @@
 		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_mag_msf/position_pose_pressure_mag_sensormanager.h",
 		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/velocity_pose_msf/CMakeLists.txt",
 		"/home/fx/Dropbox/catkin_ws/build/build_logs/msf_updates.log",
-		"/home/fx/Dropbox/catkin_ws/fuck.launch",
 		"/home/fx/Dropbox/catkin_ws/all_run_quad.launch",
 		"/home/fx/Dropbox/catkin_ws/new_odom_gps.launch",
 		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/examples/CMakeLists.txt",
@@ -989,9 +991,7 @@
 		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/apps/CMakeLists.txt",
 		"/home/fx/Dropbox/catkin_ws/src/mavros/mavros/launch/apm.launch",
 		"/home/fx/Dropbox/catkin_ws/try_msf_gps.launch",
-		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/sensor_fusion_comm/msg/ExtEkf.msg",
-		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/msf_updates/src/position_msf/position_sensormanager.h",
-		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/Ulink_capter_and_inertial_nav.cpp"
+		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/sensor_fusion_comm/msg/ExtEkf.msg"
 	],
 	"find":
 	{
@@ -1022,6 +1022,53 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"gps_cov_",
+			"timestamp_previous_pose_",
+			"timestamp_previous_pose_\ntimestamp_previous_pose_",
+			"timestamp_previous_pose_",
+			"GetLasttime",
+			"gps_cov_",
+			"GetLasttime",
+			"gps_cov_",
+			"GetLasttime",
+			"GetGpscov",
+			"n_zv",
+			"n_zv_",
+			"velocity_flowMinQ",
+			"yawinit",
+			"M_PI",
+			"Eigen::",
+			"flow_minQ_",
+			"qif_",
+			"qif",
+			"flow_minQ_",
+			"SetQif",
+			"SetMinQ",
+			"SetQif",
+			"yaw_if_",
+			"q",
+			"ProcessExternallyPropagatedState",
+			"StopProp",
+			"flow_minQ_",
+			"qif_",
+			"flow_minQ_",
+			"qif_",
+			"flow_minQ_",
+			"flow_minQ",
+			"VelocityMeasurement",
+			"flow_minQ_",
+			"VelocityMeasurement(",
+			"delay_",
+			"VelocityMeasurement(",
+			"flow_minQ",
+			"VelocityMeasurement",
+			"qif_",
+			"fixedstates",
+			"PoseMeasurement",
+			"drift",
+			"C_ci",
+			"StateQwvIdx",
+			"C_wv",
 			"imu_orientation_to_pose",
 			"imu_to_orintation_pose",
 			"lpeMsg",
@@ -1102,54 +1149,7 @@
 			"usercalc_",
 			"GetParamFixedBias",
 			"SanityCheckCorrection",
-			"ResetState",
-			"CalculateQAuxiliaryStates",
-			"usercalc_",
-			"set_stop_propagation()",
-			"is_already_propagated",
-			"Is_stop_propagation",
-			"stop_propagation",
-			"stop_pro",
-			"userca",
-			"stop_propagation",
-			"PropagateState",
-			"SanityCheckCorrection",
-			"distortmeas",
-			"zero_correction_bias",
-			"ProcessExternallyPropagatedState",
-			"correction",
-			"lasttime_position",
-			"lasttime_velocity",
-			"old_",
-			"old_lasttime_pose",
-			"lasttime_velocity",
-			"timestamp_previous_pose_",
-			"PoseSensorHandler",
-			"timestamp_previous_pose_",
-			"MeasurementAGLCallback",
-			"subAgl_",
-			"MeasurementAGLCallback",
-			"Altitude",
-			"MeasurementAGLCallback",
-			"timestamp_previous_pose_",
-			"double",
-			"lasttime_velocity",
-			"timestamp_previous_pose_",
-			"indexOfState_p",
-			"MSF_WARN_STREAM_THROTTLE",
-			"indexOfState_b_w",
-			"GetEnumStateType",
-			"msf_tmp",
-			"StateDefinition_T::b_w ",
-			"CorrectionStateLengthForType",
-			"StateSequence_T",
-			"GetStartIndex",
-			"msf_tmp",
-			"float",
-			"double",
-			"meas",
-			"w_m",
-			"a_b_"
+			"ResetState"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1187,7 +1187,7 @@
 	"groups":
 	[
 		{
-			"selected": 28,
+			"selected": 27,
 			"sheets":
 			[
 				{
@@ -1195,15 +1195,15 @@
 					"file": "velocity_measurement.h",
 					"settings":
 					{
-						"buffer_size": 18729,
+						"buffer_size": 18701,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								4544,
-								4544
+								5115,
+								5115
 							]
 						],
 						"settings":
@@ -1213,7 +1213,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1644.0,
+						"translation.y": 1368.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1223,15 +1223,15 @@
 					"file": "velocity_sensorhandler.h",
 					"settings":
 					{
-						"buffer_size": 2744,
+						"buffer_size": 2823,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1204,
-								1204
+								2388,
+								2388
 							]
 						],
 						"settings":
@@ -1241,7 +1241,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 277.0,
+						"translation.y": 333.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1251,15 +1251,15 @@
 					"file": "implementation/velocity_sensorhandler.hpp",
 					"settings":
 					{
-						"buffer_size": 6593,
+						"buffer_size": 6923,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2377,
-								2377
+								1411,
+								1411
 							]
 						],
 						"settings":
@@ -1286,8 +1286,8 @@
 						"selection":
 						[
 							[
-								6309,
-								6309
+								10147,
+								10147
 							]
 						],
 						"settings":
@@ -1297,7 +1297,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1924.0,
+						"translation.y": 3744.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1307,15 +1307,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/position_sensorhandler.h",
 					"settings":
 					{
-						"buffer_size": 3453,
+						"buffer_size": 3522,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1850,
-								1850
+								3344,
+								3344
 							]
 						],
 						"settings":
@@ -1325,7 +1325,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 78.0,
+						"translation.y": 507.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1335,15 +1335,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/implementation/position_sensorhandler.hpp",
 					"settings":
 					{
-						"buffer_size": 11024,
+						"buffer_size": 11085,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2079,
-								2079
+								6090,
+								6090
 							]
 						],
 						"settings":
@@ -1353,7 +1353,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 86.0,
+						"translation.y": 1789.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1370,8 +1370,8 @@
 						"selection":
 						[
 							[
-								3043,
-								3043
+								2026,
+								2026
 							]
 						],
 						"settings":
@@ -1381,7 +1381,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 585.0,
+						"translation.y": 481.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1398,8 +1398,8 @@
 						"selection":
 						[
 							[
-								8085,
-								8085
+								5924,
+								5924
 							]
 						],
 						"settings":
@@ -1409,7 +1409,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 2301.0,
+						"translation.y": 1464.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1426,8 +1426,8 @@
 						"selection":
 						[
 							[
-								8939,
-								8939
+								5642,
+								5642
 							]
 						],
 						"settings":
@@ -1437,7 +1437,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3786.0,
+						"translation.y": 1412.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1531,15 +1531,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/src/position_pose_pressure_msf/position_pose_pressure_sensormanager.h",
 					"settings":
 					{
-						"buffer_size": 24512,
+						"buffer_size": 24340,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								19154,
-								19154
+								20496,
+								20496
 							]
 						],
 						"settings":
@@ -1549,7 +1549,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 6201.0,
+						"translation.y": 6877.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1566,8 +1566,8 @@
 						"selection":
 						[
 							[
-								36612,
-								36612
+								13928,
+								13928
 							]
 						],
 						"settings":
@@ -1577,7 +1577,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 12475.0,
+						"translation.y": 4987.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1594,8 +1594,8 @@
 						"selection":
 						[
 							[
-								2032,
-								2032
+								9426,
+								9426
 							]
 						],
 						"settings":
@@ -1605,7 +1605,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 507.0,
+						"translation.y": 3003.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1678,8 +1678,8 @@
 						"selection":
 						[
 							[
-								855,
-								855
+								1118,
+								1118
 							]
 						],
 						"settings":
@@ -1689,7 +1689,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 234.0,
+						"translation.y": 507.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1762,8 +1762,8 @@
 						"selection":
 						[
 							[
-								18358,
-								18358
+								45383,
+								45383
 							]
 						],
 						"settings":
@@ -1773,7 +1773,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 6295.0,
+						"translation.y": 16388.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1948,15 +1948,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/slam_gps_pressure.yaml",
 					"settings":
 					{
-						"buffer_size": 5364,
+						"buffer_size": 5437,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2407,
-								2407
+								3361,
+								3361
 							]
 						],
 						"settings":
@@ -1964,7 +1964,7 @@
 							"syntax": "Packages/YAML/YAML.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 429.0,
+						"translation.y": 632.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1981,8 +1981,8 @@
 						"selection":
 						[
 							[
-								5607,
-								5607
+								6408,
+								6408
 							]
 						],
 						"settings":
@@ -1992,7 +1992,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1386.0,
+						"translation.y": 1581.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -2009,8 +2009,8 @@
 						"selection":
 						[
 							[
-								32,
-								32
+								166,
+								166
 							]
 						],
 						"settings":
@@ -2276,15 +2276,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/cfg/PositionPosePressureSensor.cfg",
 					"settings":
 					{
-						"buffer_size": 7318,
+						"buffer_size": 7441,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								0,
-								0
+								7273,
+								7273
 							]
 						],
 						"settings":
@@ -2292,7 +2292,7 @@
 							"syntax": "Packages/Python/Python.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 592.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -2372,6 +2372,6 @@
 	"show_open_files": true,
 	"show_tabs": false,
 	"side_bar_visible": true,
-	"side_bar_width": 272.0,
+	"side_bar_width": 262.0,
 	"status_bar_visible": true
 }

@@ -74,6 +74,9 @@ PoseSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::PoseSensorHandler(
   subPoseStamped_ = nh.subscribe < geometry_msgs::PoseStamped
       > ("pose_input", 20, &PoseSensorHandler::MeasurementCallback, this);
 
+  subImu_ = nh.subscribe < sensor_msgs::Imu
+      > (parameternamespace+"_"+"imu_input", 20, &PoseSensorHandler::MeasurementCallback, this);
+
   z_p_.setZero();
   z_q_.setIdentity();
 
@@ -190,7 +193,34 @@ void PoseSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
           << subPoseWithCovarianceStamped_.getTopic() << " ***");
   ProcessPoseMeasurement(msg);
 }
+template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
+void PoseSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
+    const sensor_msgs::ImuConstPtr & msg) {
 
+  this->SequenceWatchDog(msg->header.seq,
+                         subImu_.getTopic());
+
+  double time_now = msg->header.stamp.toSec();
+
+  timestamp_previous_pose_ = time_now;
+
+
+  MSF_INFO_STREAM_ONCE(
+      "*** pose sensor got first measurement from topic "
+          << this->topic_namespace_ << "/"
+          << subImu_.getTopic() << " ***");
+
+
+  geometry_msgs::PoseWithCovarianceStampedPtr pose(
+      new geometry_msgs::PoseWithCovarianceStamped());
+
+  // Fixed covariance will be set in measurement class -> MakeFromSensorReadingImpl.
+  pose->header = msg->header;
+
+  pose->pose.pose.orientation = msg->orientation;
+
+  ProcessPoseMeasurement(pose);
+}
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void PoseSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
     const geometry_msgs::TransformStampedConstPtr & msg) {
