@@ -138,6 +138,6 @@ position_pose_pressure_sensor/pose_fixed_q_wv_2: true
 
 
 
-position_pose_pressure_sensor/velocity_flowYaw: 10.8 #10.8 for rectan
+position_pose_pressure_sensor/velocity_flowYaw: 0 #0 for eight shape, 10.8 for rectan
 
 
