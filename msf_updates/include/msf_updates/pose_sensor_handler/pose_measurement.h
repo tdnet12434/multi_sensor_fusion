@@ -225,34 +225,35 @@ struct PoseMeasurement : public PoseMeasurementBase {
     if (driftwvposfix)
       state_in->ClearCrossCov<StatePwvIdx>();
 
-
-
-    //block of size p q .. start at   row,col
-    // Construct H matrix.
-
-    if(use_position_measurement) {
+    if(!use_position_measurement) 
+    {
+      H.block<3, 3>(0, kIdxstartcorr_p) = Eigen::Matrix<double, 3, 3>::Zero();
+      H.block<3, 3>(0, kIdxstartcorr_q) = Eigen::Matrix<double, 3, 3>::Zero();
+      H.block<3, 1>(0, kIdxstartcorr_L) = Eigen::Matrix<double, 3, 1>::Zero();
+      H.block<3, 3>(0, kIdxstartcorr_qwv) = Eigen::Matrix<double, 3, 3>::Zero();
+      H.block<3, 3>(0, kIdxstartcorr_pic) = Eigen::Matrix<double, 3, 3>::Zero();
+      H.block<3, 3>(0, kIdxstartcorr_pwv) = Eigen::Matrix<double, 3, 3>::Zero();
+    }else{
+      //block of size p q .. start at   row,col
+      // Construct H matrix.
       // Position:
       H.block<3, 3>(0, kIdxstartcorr_p) = C_wv
           * state.Get<StateLIdx>()(0);  // p
-    }else{
-      // Position:
-      H.block<3, 3>(0, kIdxstartcorr_p) = Eigen::Matrix<double, 3, 3>::Zero();
-    }
-    H.block<3, 3>(0, kIdxstartcorr_q) = -C_wv * C_q * pci_sk
+
+      H.block<3, 3>(0, kIdxstartcorr_q) = -C_wv * C_q * pci_sk
         * state.Get<StateLIdx>()(0);  // q
-    if(use_position_measurement) {
+
       H.block<3, 1>(0, kIdxstartcorr_L) =
           scalefix ?
               Eigen::Matrix<double, 3, 1>::Zero() :
               (C_wv * C_q * state.Get<StatePicIdx>() + C_wv
                       * (-state.Get<StatePwvIdx>()
                           + state.Get<StateDefinition_T::p>())).eval();  // L
-    }
 
-    H.block<3, 3>(0, kIdxstartcorr_qwv) =
+      H.block<3, 3>(0, kIdxstartcorr_qwv) =
         driftwvattfix ?
             Eigen::Matrix<double, 3, 3>::Zero() : (-C_wv * skewold).eval();  // q_wv
-    if(use_position_measurement) {
+
       H.block<3, 3>(0, kIdxstartcorr_pic) =
           calibposfix ?
               Eigen::Matrix<double, 3, 3>::Zero() :

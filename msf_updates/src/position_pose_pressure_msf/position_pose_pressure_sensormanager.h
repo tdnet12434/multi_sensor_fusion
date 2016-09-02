@@ -541,15 +541,6 @@ void Init(double scale) const {
 
 
 
-    /// Check healhy of GPS if it bad let trust flow
-    if(position_handler_->GetGpscov() > 3.7) {
-      velocity_handler_->SetNoises(0.01);
-      MSF_WARN_STREAM_ONCE("GPS high cov: trust flow more");
-    }else{
-      velocity_handler_->SetNoises(0.1);
-      MSF_WARN_STREAM_ONCE("GPS low cov: trust flow less");
-    }
-
 
     /// Check timeout each sensor
     bool slam_h, gps_h, flow_h;
@@ -612,6 +603,21 @@ void Init(double scale) const {
     lasttime_velocity = time_now;
     flow_h = true;
   }
+
+
+
+
+  /// Check healhy of GPS if it bad or timeout let trust flow
+  if(position_handler_->GetGpscov() > 3.7 || !gps_h) {
+    velocity_handler_->SetNoises(0.01);
+    MSF_WARN_STREAM_ONCE("GPS high cov: trust flow more");
+  }else{
+    velocity_handler_->SetNoises(2);
+    MSF_WARN_STREAM_ONCE("GPS low cov: trust flow less");
+  }
+
+
+
 
   typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
   StateDefinition_T::p>::value p_type;

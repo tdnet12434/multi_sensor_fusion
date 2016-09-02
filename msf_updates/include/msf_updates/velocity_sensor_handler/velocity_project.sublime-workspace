@@ -547,7 +547,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/position_measurement.h",
 			"settings":
 			{
-				"buffer_size": 10147,
+				"buffer_size": 10166,
 				"line_ending": "Unix"
 			}
 		},
@@ -627,7 +627,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/implementation/msf_core_inl.h",
 			"settings":
 			{
-				"buffer_size": 37964,
+				"buffer_size": 38134,
 				"line_ending": "Unix"
 			}
 		},
@@ -683,7 +683,7 @@
 			"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/crossover_node.cpp",
 			"settings":
 			{
-				"buffer_size": 46111,
+				"buffer_size": 46261,
 				"line_ending": "Unix"
 			}
 		},
@@ -864,6 +864,8 @@
 	},
 	"file_history":
 	[
+		"/media/fx/0A5CFAB75CFA9C9F/Windows/System32/LogFiles/Srt/SrtTrail.txt",
+		"/media/fx/0A5CFAB75CFA9C9F/Recovery.txt",
 		"/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_eval/Matlab/evaluation.m",
 		"/home/fx/Dropbox/catkin_ws/build/ardrone_autonomy/ardrone/src/ardronelib/ARDroneLib/ARDroneLib.xcodeproj/project.pbxproj",
 		"/home/fx/Dropbox/catkin_ws/fuck.launch",
@@ -989,9 +991,7 @@
 		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/CMakeLists.txt",
 		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/examples/target/targetTypes6D.hpp",
 		"/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/g2o/g2o/apps/CMakeLists.txt",
-		"/home/fx/Dropbox/catkin_ws/src/mavros/mavros/launch/apm.launch",
-		"/home/fx/Dropbox/catkin_ws/try_msf_gps.launch",
-		"/home/fx/Dropbox/catkin_ws/src/ethzasl_msf/sensor_fusion_comm/msg/ExtEkf.msg"
+		"/home/fx/Dropbox/catkin_ws/src/mavros/mavros/launch/apm.launch"
 	],
 	"find":
 	{
@@ -1022,6 +1022,20 @@
 		"case_sensitive": true,
 		"find_history":
 		[
+			"MSF_IS_RUNNING()",
+			"baro_inertial_z_late",
+			"baroaltABSMsg",
+			"baro_alt_abs_pub",
+			"baroaltABSMsg",
+			"lpe_callback",
+			"state_out_callback",
+			"lpe_callback",
+			"baro_inertial_z_late",
+			"setZero",
+			"zero",
+			"zeros",
+			"fixedstates_",
+			"fixed_covariance_",
 			"imu_max/pose",
 			"navvelMsg",
 			"poseMsg",
@@ -1135,21 +1149,7 @@
 			"Inertial_nav",
 			"state_out",
 			"ukfMsg",
-			"Inertial_nav",
-			"position",
-			"pose",
-			"state_out",
-			"position",
-			"state_out",
-			"msf_errorMsg",
-			"navvelMsg",
-			"linear",
-			"position",
-			"pose",
-			"poseMsg",
-			"state_out",
-			"poseMsg",
-			"state_fix_pub"
+			"Inertial_nav"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -1187,7 +1187,7 @@
 	"groups":
 	[
 		{
-			"selected": 28,
+			"selected": 32,
 			"sheets":
 			[
 				{
@@ -1279,15 +1279,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_updates/include/msf_updates/position_sensor_handler/position_measurement.h",
 					"settings":
 					{
-						"buffer_size": 10147,
+						"buffer_size": 10166,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								10147,
-								10147
+								6075,
+								6075
 							]
 						],
 						"settings":
@@ -1297,7 +1297,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3744.0,
+						"translation.y": 2153.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1325,7 +1325,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 429.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1353,7 +1353,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1789.0,
+						"translation.y": 1750.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1381,7 +1381,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 390.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1426,8 +1426,8 @@
 						"selection":
 						[
 							[
-								1027,
-								1027
+								9584,
+								9584
 							]
 						],
 						"settings":
@@ -1437,7 +1437,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2847.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1538,8 +1538,8 @@
 						"selection":
 						[
 							[
-								20496,
-								20496
+								16833,
+								16833
 							]
 						],
 						"settings":
@@ -1549,7 +1549,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 6877.0,
+						"translation.y": 6448.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1559,15 +1559,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/multi_sensor_fusion/msf_core/include/msf_core/implementation/msf_core_inl.h",
 					"settings":
 					{
-						"buffer_size": 37964,
+						"buffer_size": 38134,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								13928,
-								13928
+								17854,
+								17854
 							]
 						],
 						"settings":
@@ -1577,7 +1577,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 4987.0,
+						"translation.y": 5736.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1755,15 +1755,15 @@
 					"file": "/home/fx/Dropbox/catkin_ws/src/beginner_tutorials/src/crossover_node.cpp",
 					"settings":
 					{
-						"buffer_size": 46111,
+						"buffer_size": 46261,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								8957,
-								8957
+								26501,
+								26501
 							]
 						],
 						"settings":
@@ -1773,7 +1773,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 3466.0,
+						"translation.y": 8986.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1790,8 +1790,8 @@
 						"selection":
 						[
 							[
-								6522,
-								6522
+								5600,
+								5600
 							]
 						],
 						"settings":
@@ -1801,7 +1801,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1391.0,
+						"translation.y": 1404.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -1983,8 +1983,8 @@
 						"selection":
 						[
 							[
-								5434,
-								5434
+								2720,
+								2720
 							]
 						],
 						"settings":
@@ -1992,7 +1992,7 @@
 							"syntax": "Packages/YAML/YAML.tmLanguage"
 						},
 						"translation.x": 0.0,
-						"translation.y": 1373.0,
+						"translation.y": 710.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
@@ -2009,8 +2009,8 @@
 						"selection":
 						[
 							[
-								235,
-								235
+								103,
+								103
 							]
 						],
 						"settings":
@@ -2089,8 +2089,8 @@
 						"selection":
 						[
 							[
-								3111,
-								3111
+								922,
+								922
 							]
 						],
 						"settings":
@@ -2100,7 +2100,7 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 1014.0,
+						"translation.y": 195.0,
 						"zoom_level": 1.0
 					},
 					"type": "text"
