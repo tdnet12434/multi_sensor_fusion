@@ -162,6 +162,13 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       shared_ptr<EKFState_T> state_in,
       Eigen::Matrix<double, nMeasurements,
           msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime>& H) {
+
+
+
+    //select absolute or relative measurement
+    if(isabsolute_) MSF_WARN_STREAM_ONCE("FLOW: treat as absolute");
+    else            MSF_WARN_STREAM_ONCE("FLOW: treat as relative");
+
     const EKFState_T& state = *state_in;  // Get a const ref, so we can read core states.
 
     H.setZero();
@@ -186,64 +193,44 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                                0);
     Eigen::Matrix<double, 3, 1> delta_n = C_q.transpose() * Shift_q* delta_b;
 
-    //flow integration
     static Eigen::Matrix<double, 3, 1> flow_n;/// sum flow
-    flow_n = delta_n/dt; //10 hz
+    if(isabsolute_) {
+      //treat flow as velocity
+      flow_n = delta_n/dt; //10 hz
+    }else{
+      //treat flow as position odometry (relative measurement)
+      flow_n += delta_n; //10 hz
+    }
+        z_p_(0) = flow_n(0);
+        z_p_(1) = flow_n(1);
+        z_p_(2) = 0;
 
-    //put to z measurement
-    Eigen::Matrix<double, 3, 1> _z_p_ = ( flow_n );
-      z_p_(0) = _z_p_(0);
-      z_p_(1) = _z_p_(1);
-      z_p_(2) = 0;
 
-
-    // printf("%.3f\t  %.3f\t   %.3f\t   %.3f\t   %.3f\t   %.3f\n", 
-           // z_p_(0), z_p_(1), gyro(0), gyro(1),  agl,   agl_ef);
-    // Eigen::Matrix<double, 3, 1>  g;
-    // g << 0, 0, 9.80655; /// Gravity.
-    // Get measurement.
-    // z_p_ = C_q.transpose()*(a_bf_ )-g;//Eigen::Matrix<double, 3, 1>(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
-    //z_p_(2,0)=0;
-    // printf("%f %f %f\n",z_p_(0,0),z_p_(1,0),z_p_(2,0));
-    // printf("%f %f %f\n",z_p_(0,0),z_p_(1,0),z_p_(2,0));
-    // Preprocess for elements in H matrix.
-    // Eigen::Matrix<double, 3, 3> p_prism_imu_sk = Skew(
-    //     state.Get<StateDefinition_T::p_ip>());
 
     // Get indices of states in error vector.
     enum {
-      // idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-      //     StateDefinition_T::p>::value,
+      idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+          StateDefinition_T::p>::value,
       idxstartcorr_v_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
           StateDefinition_T::v>::value,
-      // idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-      //     StateDefinition_T::q>::value,
-      // idxstartcorr_p_pi_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-      //     StateDefinition_T::p_ip>::value,
+
     };
 
-    // bool fixed_p_pos_imu = (fixedstates_ & 1 << StateDefinition_T::p_ip);
 
-    // // Clear crosscorrelations.
-    // if (fixed_p_pos_imu)
-    //   state_in->ClearCrossCov<StateDefinition_T::p_ip>();
-
-    // Construct H matrix:
-    // const double body_k_ = flow_minQ_;
     Eigen::Matrix<double, 3, 3> ident = (Eigen::Matrix<double, 3, 1>() << 1, 1, 0).finished().asDiagonal();
     // velocity:
-    H.block<3, 3>(0, idxstartcorr_v_) =  ident;  // p
-    // temp= C_q.transpose() * body_k;
-    // printf("%.3f %.3f %.3f\n%.3f %.3f %.3f\n%.3f %.3f %.3f\n\n\n"
-    //   ,ident(0,0),ident(0,1),ident(0,2)
-    //   ,ident(1,0),ident(1,1),ident(1,2)
-    //   ,ident(2,0),ident(2,1),ident(2,2));
 
-    //H.block<3, 3>(1, idxstartcorr_v_+1) = -C_q.transpose() * p_prism_imu_sk;  // q
+    if(isabsolute_)
+      {
+        H.block<3, 3>(0, idxstartcorr_v_) =  ident;
+      } 
+    else
+      {
+        H.block<3, 3>(0, idxstartcorr_p_) = ident;
+      }
+      
 
-    // H.block<3, 3>(0, idxstartcorr_p_pi_) =
-    //     fixed_p_pos_imu ?
-    //         Eigen::Matrix<double, 3, 3>::Zero() : (C_q.transpose()).eval();  //p_pos_imu_
+
 
   }
 
@@ -330,25 +317,12 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       }
 
 
-      // Get indices of states in error vector.
-      enum {
-        // idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-        //     StateDefinition_T::p>::value,
-        idxstartcorr_v_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-            StateDefinition_T::v>::value,
-        // idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-        //     StateDefinition_T::q>::value,
-        // idxstartcorr_p_pi_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-        //     StateDefinition_T::p_ip>::value,
-      };
 
 
       msf_core::MSF_Core<EKFState_T>::ErrorStateCov _P;
 
-
-
       // residual covariance, (inverse)
-      Eigen::Matrix<double, 3, 3> S_I =
+      Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
        (H_new * _P * H_new.transpose() + R_).inverse();
 
 
@@ -367,7 +341,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
             _flowFault = FAULT_MINOR;
           }else if(_flowFault >= FAULT_MINOR && beta > 10000) { //from default mah_threshold
             printf("flow bad\n");
-            _flowFault = FAULT_SEVERE;
+            // _flowFault = FAULT_SEVERE;
           }
         } else if (_flowFault) {
           _flowFault = FAULT_NONE;
@@ -391,11 +365,28 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);
         }else{
-          printf("bad flow");
+          printf("bad flow\n");
           return;
         }
+    } 
 
-    } else {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    else {
       // MSF_ERROR_STREAM_THROTTLE(
       //     1, "You chose to apply the Velocity measurement "
       //     "as a relative quantitiy, which is currently not implemented.");
@@ -465,10 +456,10 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                                                - state_old.Get<StateDefinition_T::p>();
 
 
-      Eigen::Matrix<double, 3, 1> diffmeaspos = z_p_/* - prevmeas->z_p_*/;
+      Eigen::Matrix<double, 3, 1> diffmeaspos = z_p_ - prevmeas->z_p_;
 
       r_new.block<3, 1>(0, 0) = diffmeaspos - diffprobpos;
-
+      // printf("calH-");
 
       if (!CheckForNumeric(r_old, "r_old")) {
         MSF_ERROR_STREAM("r_old: "<<r_old);
@@ -476,75 +467,77 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
             "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
         return;
       }
+      // printf("chkr-");
       if (!CheckForNumeric(H_new, "H_old")) {
         MSF_ERROR_STREAM("H_old: "<<H_new);
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
         return;
       }
+      // printf("chkH-");
       if (!CheckForNumeric(R_, "R_")) {
         MSF_ERROR_STREAM("R_: "<<R_);
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
         return;
       }
+      // printf("chkR-");
 
 
 
-
-      msf_core::MSF_Core<EKFState_T>::ErrorStateCov _P;
-
+      // msf_core::MSF_Core<EKFState_T>::ErrorStateCov _P;
 
 
-      // residual covariance, (inverse)
-      Eigen::Matrix<double, 3, 3> S_I =
-       (H_new * _P * H_new.transpose() + R_).inverse();
+
+      // // residual covariance, (inverse)
+      // Eigen::Matrix<double, 3, 3> S_I =
+      //  (H_new * _P * H_new.transpose() + R_).inverse();
 
 
-      // fault detection (mahalanobis distance !! )
-      float beta = (r_new.transpose() * (S_I * r_new))(0, 0);
-      if(std::isnan(beta) || std::isinf(beta))
-        return;
-      printf("beta\t%.2f\n", beta);
-      // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
-            // _P(3,3),_P(4,4),_P(5,5),beta);
-      int n_y_flow = 2;
+      // // fault detection (mahalanobis distance !! )
+      // float beta = (r_new.transpose() * (S_I * r_new))(0, 0);
+      // printf("calB\n");
+      // if(std::isnan(beta) || std::isinf(beta))
+      //   return;
+      // printf("beta\t%.2f\n", beta);
+      // // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
+      //       // _P(3,3),_P(4,4),_P(5,5),beta);
+      // int n_y_flow = 2;
 
-        if (beta > BETA_TABLE[n_y_flow]) {
-          if (_flowFault < FAULT_MINOR) {
-            printf("flow FAULT_MINOR\n");
-            _flowFault = FAULT_MINOR;
-          }else if(_flowFault >= FAULT_MINOR && beta > 10000) { //from default mah_threshold
-            printf("flow bad\n");
-            _flowFault = FAULT_SEVERE;
-          }
-        } else if (_flowFault) {
-          _flowFault = FAULT_NONE;
-        }
+      //   if (beta > BETA_TABLE[n_y_flow]) {
+      //     if (_flowFault < FAULT_MINOR) {
+      //       printf("flow FAULT_MINOR relative\n");
+      //       _flowFault = FAULT_MINOR;
+      //     }else if(_flowFault >= FAULT_MINOR && beta > 10000) { //from default mah_threshold
+      //       printf("flow bad relative\n");
+      //       _flowFault = FAULT_SEVERE;
+      //     }
+      //   } else if (_flowFault) {
+      //     _flowFault = FAULT_NONE;
+      //   }
 
-        if (_flowFault < fault_lvl_disable) {
+      //   if (_flowFault < fault_lvl_disable) {
         
-          flow_healhy = true;
+      //     flow_healhy = true;
 
-        } else {
-          flow_healhy = false;
-          // reset flow integral to current estimate of position
-          // if a fault occurred
-          // _flowX = _x(X_x);
-          // _flowY = _x(X_y);
-        }
+      //   } else {
+      //     flow_healhy = false;
+      //     // reset flow integral to current estimate of position
+      //     // if a fault occurred
+      //     // _flowX = _x(X_x);
+      //     // _flowY = _x(X_y);
+      //   }
 
 
-    if(flow_healhy) 
-      // Call update step in base class.
-      this->CalculateAndApplyCorrectionRelative(state_nonconst_old,
-                                                state_nonconst_new, core, H_old,
-                                                H_new, r_new, R_);
-    else 
-    {
-      printf("bad flow\n");
-      return;
-    }
+      // if(flow_healhy) {
+        // Call update step in base class.
+        this->CalculateAndApplyCorrectionRelative(state_nonconst_old,
+                                                  state_nonconst_new, core, H_old,
+                                                  H_new, r_new, R_);
+      // } else {
+      //   printf("bad flow relative\n");
+      //   return;
+      // }
     }
   }
 };

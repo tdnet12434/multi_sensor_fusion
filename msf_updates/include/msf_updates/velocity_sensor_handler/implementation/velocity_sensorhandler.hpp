@@ -112,8 +112,8 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
   MANAGER_TYPE* mngr = dynamic_cast<MANAGER_TYPE*>(&manager_);
 
   if (mngr) {
-    if (mngr->Getcfg().position_fixed_p_ip) {
-      fixedstates |= 1 << msf_updates::EKFState::StateDefinition_T::p_ip;
+    if (mngr->Getcfg().flow_is_absolute) {
+      fixedstates = 1;
     }
   }
 
