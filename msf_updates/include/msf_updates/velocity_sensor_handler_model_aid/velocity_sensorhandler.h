@@ -18,7 +18,7 @@
  */
 #ifndef VELOCITY_SENSOR_H_
 #define VELOCITY_SENSOR_H_
-
+ 
 #include <msf_core/msf_sensormanagerROS.h>
 
 #include <sensor_msgs/Imu.h>
@@ -35,7 +35,7 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
   double delay_;       ///< Delay to be subtracted from the ros-timestamp of
                        //the measurement provided by this sensor.
   double drag_;  //drag coefficient
-
+ 
   ros::Subscriber subImu_;
 
   bool use_fixed_covariance_;  ///< Use fixed covariance set by dynamic reconfigure.
@@ -53,7 +53,7 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
   // Used for the init.
   Eigen::Matrix<double, 3, 1> GetVelocityMeasurement() {
     return z_v_;
-  }
+  } 
   // Setters for configure values.
   void SetNoises(double n_zv);
   void SetDelay(double delay);

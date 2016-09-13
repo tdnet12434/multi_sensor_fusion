@@ -29,7 +29,7 @@ class PressureSensorHandler : public msf_core::SensorHandler<
     typename msf_updates::EKFState> {
  private:
   enum {
-    heightbuffsize = 10
+    heightbuffsize = 20
   };
   Eigen::Matrix<double, 1, 1> z_p_;  ///< Pressure measurement.
   double n_zp_;  ///< Pressure measurement noise.

@@ -15,9 +15,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */ 
 #ifndef VELOCITY_MEASUREMENT_HPP_
-#define VELOCITY_MEASUREMENT_HPP_
+#define VELOCITY_MEASUREMENT_HPP_ 
 
 #include <msf_core/msf_measurement.h>
 #include <msf_core/msf_core.h>
@@ -175,14 +175,14 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
     // Get rotation matrices.
     Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-        .conjugate().toRotationMatrix();
+        .toRotationMatrix();
 
     //w x y z preset drift 10 deg
     Eigen::Quaternion<double> q_b_i = qif_;
     q_b_i.normalize();
     Eigen::Matrix<double, 3, 3> Shift_q = q_b_i.toRotationMatrix();
     
-    agl_ef = agl * C_q.transpose()(2,2);
+    agl_ef = agl * C_q(2,2);
 
     if(flow_q < flow_minQ_ || agl_ef <= 0.3)          {flow_healhy = false;}
 
@@ -191,7 +191,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                               -(flow(0) - gyro(0)) * agl_ef,
                               -(flow(1) - gyro(1)) * agl_ef,
                                0);
-    Eigen::Matrix<double, 3, 1> delta_n = C_q.transpose() * Shift_q* delta_b;
+    Eigen::Matrix<double, 3, 1> delta_n = C_q * Shift_q* delta_b;
 
     static Eigen::Matrix<double, 3, 1> flow_n;/// sum flow
     if(isabsolute_) {
@@ -199,7 +199,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       flow_n = delta_n/dt; //10 hz
     }else{
       //treat flow as position odometry (relative measurement)
-      flow_n += delta_n; //10 hz
+      flow_n += delta_n*0.5; //10 hz
     }
         z_p_(0) = flow_n(0);
         z_p_(1) = flow_n(1);
@@ -258,7 +258,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
       // Get rotation matrices.
       Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-          .conjugate().toRotationMatrix();
+          .toRotationMatrix();
       //C_q.transpose() is turn body to earth frame 
 
 
@@ -330,33 +330,35 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
       if(std::isnan(beta) || std::isinf(beta))
         return;
-      // printf("beta\t%.2f", beta);
+      printf("beta\t%.2f\n", beta);
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);
       int n_y_flow = 2;
 
         if (beta > BETA_TABLE[n_y_flow]) {
+          if(_flowFault >= FAULT_MINOR && beta > 500) { //from default mah_threshold
+            printf("flow bad\n");
+            _flowFault = FAULT_SEVERE;
+          }else{
+            _flowFault = FAULT_MINOR;
+          }
           if (_flowFault < FAULT_MINOR) {
             printf("flow FAULT_MINOR\n");
             _flowFault = FAULT_MINOR;
-          }else if(_flowFault >= FAULT_MINOR && beta > 10000) { //from default mah_threshold
-            printf("flow bad\n");
-            // _flowFault = FAULT_SEVERE;
           }
-        } else if (_flowFault) {
+        }else{
           _flowFault = FAULT_NONE;
         }
 
-        if (_flowFault < fault_lvl_disable) {
         
-          flow_healhy = true;
+        // else if (_flowFault) {
+        //   _flowFault = FAULT_NONE;
+        // }
 
+        if (_flowFault < fault_lvl_disable) {
+          flow_healhy = true;
         } else {
           flow_healhy = false;
-          // reset flow integral to current estimate of position
-          // if a fault occurred
-          // _flowX = _x(X_x);
-          // _flowY = _x(X_y);
         }
 
 
@@ -459,7 +461,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       Eigen::Matrix<double, 3, 1> diffmeaspos = z_p_ - prevmeas->z_p_;
 
       r_new.block<3, 1>(0, 0) = diffmeaspos - diffprobpos;
-      // printf("calH-");
+      // printf("dpp = %.3f\tdmp = %.3f\n", diffprobpos(0), diffmeaspos(0));
 
       if (!CheckForNumeric(r_old, "r_old")) {
         MSF_ERROR_STREAM("r_old: "<<r_old);

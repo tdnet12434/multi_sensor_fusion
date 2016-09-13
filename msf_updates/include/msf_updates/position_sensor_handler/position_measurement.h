@@ -273,7 +273,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
       if(std::isnan(beta) || std::isinf(beta))
         return;
 
-      printf("position beta\t%.2f\n", beta);
+      // printf("position beta\t%.2f\n", beta);
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);
 

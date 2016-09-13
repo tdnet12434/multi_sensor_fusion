@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (C) 2012-2013 Simon Lynen, ASL, ETH Zurich, Switzerland
  * You can contact the author at <slynen at ethz dot ch>
  * Copyright (C) 2011-2012 Stephan Weiss, ASL, ETH Zurich, Switzerland
@@ -15,7 +15,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ */ 
 #ifndef VELOCITY_SENSOR_H_
 #define VELOCITY_SENSOR_H_
 

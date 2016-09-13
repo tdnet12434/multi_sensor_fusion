@@ -27,7 +27,7 @@
 namespace msf_updates {
 namespace mag_measurement {
 enum {
-  nMeasurements = 3
+  nMeasurements = 1
 };
 
 /**
@@ -50,32 +50,39 @@ struct MagMeasurement : public MagMeasurementBase {
     H_old.setZero();
 
     // Get measurement.
-    z_m_ = Eigen::Matrix<double, 3, 1>(msg->point.x, msg->point.y,
+    vec_m = Eigen::Matrix<double, 3, 1>(msg->point.x, msg->point.y,
                                        msg->point.z);
-    z_m_.normalize();
+    vec_m.normalize();
 
-    if (fixed_covariance_)  //  take fix covariance from reconfigure GUI
-    {
+    double heading = atan2(-vec_m(1),vec_m(0);
+    if(heading > M_PI) heading-=2*M_PI;
+    else if (heading <-M_PI) heading+=2*M_PI;
+    printf("heading = %.2f", heading);
+
+    Eigen::Quaterniond yawq(cos(heading / 2), 0, 0, sin(heading / 2));
+    yawq.normalize();
+    z_q_ = yawq;
+    // if (fixed_covariance_)  //  take fix covariance from reconfigure GUI
+    // {
 
       const double s_zm = n_zm_ * n_zm_;
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zm, s_zm, s_zm)
-          .finished().asDiagonal();
+      R_ = s_zm;
 
-    } else {  // Tke covariance from sensor.
+    // } else {  // Tke covariance from sensor.
 
-      R_.block<3, 3>(0, 0) = msf_core::Matrix3(&msg->covariance[0]);
+    //   R_.block<3, 3>(0, 0) = msf_core::Matrix3(&msg->covariance[0]);
 
-      if (msg->header.seq % 100 == 0) {  // Only do this check from time to time.
-        if (R_.block<3, 3>(0, 0).determinant() < -0.01)
-          MSF_WARN_STREAM_THROTTLE(
-              60, "The covariance matrix you provided for "
-              "the mag sensor is not positive definite");
-      }
-    }
+    //   if (msg->header.seq % 100 == 0) {  // Only do this check from time to time.
+    //     if (R_.block<3, 3>(0, 0).determinant() < -0.01)
+    //       MSF_WARN_STREAM_THROTTLE(
+    //           60, "The covariance matrix you provided for "
+    //           "the mag sensor is not positive definite");
+    //   }
+    // }
   }
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  Eigen::Matrix<double, 3, 1> z_m_;  /// Mag measurement.
+  Eigen::Quaternion<double> z_q_;  /// Attitude measurement camera seen from world.
   Eigen::Matrix<double, 3, 1> vec_m;  // x-axis points north (i.e. beta==0)
   double n_zm_;  /// Mag measurement noise.
   Eigen::Matrix<double,3,3> C_mi;
@@ -120,91 +127,18 @@ struct MagMeasurement : public MagMeasurementBase {
       idxstartcorr_v_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
           StateDefinition_T::v>::value,
       idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::q>::value,
-      idxstartcorr_q_mi_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::q_mi_>::value,
-      idxstartcorr_alpha_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::alpha_>::value,
-      idxstartcorr_beta_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::beta_>::value,
+          StateDefinition_T::q>::value
     };
-    ////////////////////////////////////////////GPS POSITION//////////////////////////////////////
-    // // Preprocess for elements in H matrix.
-    // Eigen::Matrix<double, 3, 3> p_prism_imu_sk = Skew(
-    //     state.Get<StateDefinition_T::p_ip>());
-
-
-
-    // bool fixed_p_pos_imu = (fixedstates_ & 1 << StateDefinition_T::p_ip);
-
-    // // Clear crosscorrelations.
-    // if (fixed_p_pos_imu)
-    //   state_in->ClearCrossCov<StateDefinition_T::p_ip>();
-
-    // // Construct H matrix:
-    // // Mag:
-    // H.block<3, 3>(0, idxstartcorr_p_) = Eigen::Matrix<double, 3, 3>::Identity();  // p
-
-    // H.block<3, 3>(0, idxstartcorr_q_) = -C_q.transpose() * p_prism_imu_sk;  // q
-
-    // H.block<3, 3>(0, idxstartcorr_p_pi_) =
-    //     fixed_p_pos_imu ?
-    //         Eigen::Matrix<double, 3, 3>::Zero() : (C_q.transpose()).eval();  //p_pos_imu_
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
 
 
+    // Eigen::Matrix<double, 3, 3> H_q_yaw = (Eigen::Matrix<double, 3, 1>() << 0, 0, 1).finished().asDiagonal();
+    Eigen::Quaternion
+    H.block<3, 3>(0, kIdxstartcorr_q) = Eigen::Matrix<double, 3, 3>Identity();  // q
 
-    // copy from vismaggps 
-       C_mi = state.Get<StateDefinition_T::q_mi_>().conjugate().toRotationMatrix();
-
-
-      // z_m_ = MagBuff_.back().mag_;
-       const static float PI =3.14159265359;
-      // Eigen::Matrix<double,3,1> magRvec;
-      // magRvec  << n_zm_*n_zm_,n_zm_*n_zm_,n_zm_*n_zm_;
-      // R.block(nGPSMeas_,nGPSMeas_,nMagMeas_,nMagMeas_) = magRvec.asDiagonal();
-  //    customMeas->p_m_ = z_m_;
-
-      double alpha_ = state.Get<StateDefinition_T::alpha_>()(0,0);  //Elevator angle
-      double  beta_ = state.Get<StateDefinition_T::beta_>()(0,0);   //Azimuth angle
-      
-      vec_m << cos(beta_)*cos(alpha_), sin(beta_)*cos(alpha_), sin(alpha_);
-      Eigen::Matrix<double,3,1> vec_m_dalpha;
-      vec_m_dalpha << -cos(beta_)*sin(alpha_), -sin(beta_)*sin(alpha_), cos(alpha_);
-      Eigen::Matrix<double,3,1> vec_m_dbeta;
-      vec_m_dbeta << -sin(beta_)*cos(alpha_), cos(beta_)*cos(alpha_), 0;
-
-      Eigen::Matrix<double,3,3> mw_sk1;
-      Eigen::Matrix<double,3,1> vec1_mw = C_q*vec_m;
-      mw_sk1 << 0, -vec1_mw(2), vec1_mw(1)
-          ,vec1_mw(2), 0, -vec1_mw(0)
-          ,-vec1_mw(1), vec1_mw(0), 0;
-
-      Eigen::Matrix<double,3,3> mw_sk2;
-      Eigen::Matrix<double,3,1> vec2_mw = C_mi*C_q*vec_m;
-      mw_sk2 << 0, -vec2_mw(2), vec2_mw(1)
-          ,vec2_mw(2), 0, -vec2_mw(0)
-          ,-vec2_mw(1), vec2_mw(0), 0;
-
-      // construct H matrix using H-blockx :-)
-      H.block<3,3>(0,idxstartcorr_q_)/*(nGPSMeas_,6,3,3)*/ = C_mi*mw_sk1;
-      H.block<3,3>(0,idxstartcorr_q_mi_)/*(nGPSMeas_,25,3,3)*/ = mw_sk2; //start at q_mi_
-      H.block<3,1>(0,idxstartcorr_alpha_)/*(nGPSMeas_,34,3,1)*/ = C_mi*C_q*vec_m_dalpha;  //start at alpha
-      H.block<3,1>(0,idxstartcorr_beta_)/*(nGPSMeas_,35,3,1)*/ =C_mi*C_q*vec_m_dbeta;    //start at beta
-
-            
-
-
-
-
-
-
-
-
-
+    
 
 
 
@@ -250,7 +184,7 @@ struct MagMeasurement : public MagMeasurementBase {
 
       // Construct residuals:
       // Mag
-      r_old.block<3, 1>(0,0)/*(nGPSMeas_,0,3,1)*/ = z_m_ - C_mi*C_q*(vec_m);  
+      r_old.block<3, 1>(0,0)/*(nGPSMeas_,0,3,1)*/ = z_q_ - C_mi*C_q*(vec_m);  
 
       // r_old.block<3, 1>(0, 0) = z_p_
       //     - (state.Get<StateDefinition_T::p>()

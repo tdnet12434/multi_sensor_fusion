@@ -18,7 +18,7 @@
  */
 #ifndef VELOCITY_MEASUREMENT_HPP_
 #define VELOCITY_MEASUREMENT_HPP_
-
+ 
 #include <msf_core/msf_measurement.h>
 #include <msf_core/msf_core.h>
 #include <msf_core/eigen_utils.h>
@@ -30,7 +30,7 @@ enum {
   nMeasurements = 3
 };
 
-/**
+/** 
  * \brief A measurement as provided by a position sensor, e.g. Total Station, GPS.
  */
 typedef msf_core::MSF_Measurement<
@@ -109,14 +109,18 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
     // Get rotation matrices.
     Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-        .conjugate().toRotationMatrix();
+        .toRotationMatrix();
 
     Eigen::Matrix<double, 3, 1>  g;
     g << 0, 0, 9.80655; /// Gravity.
+
+    z_v_ = a_bf_- C_q.transpose() * g;
     // Get measurement.
-    z_v_ = C_q.transpose()*(a_bf_ )-g;//Eigen::Matrix<double, 3, 1>(msg->linear_acceleration.x, msg->linear_acceleration.y, msg->linear_acceleration.z);
-    //z_v_(2,0)=0;
-    // printf("%f %f %f\n",z_v_(0,0),z_v_(1,0),z_v_(2,0));
+    // Eigen::Matrix<double, 3, 1> a_ef = C_q.transpose() * (C_q*(a_bf_ - state.Get<StateDefinition_T::b_a>())-g);
+    // static Eigen::Matrix<double, 3, 1>  z_old =a_ef;
+    // z_v_ = /*z_old*0.9+0.1**/a_ef;
+    // z_old = z_v_;
+
     printf("%f %f %f\n",z_v_(0,0),z_v_(1,0),z_v_(2,0));
     // Preprocess for elements in H matrix.
     // Eigen::Matrix<double, 3, 3> p_prism_imu_sk = Skew(
@@ -135,11 +139,11 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     //   state_in->ClearCrossCov<StateDefinition_T::p_ip>();
 
     // Construct H matrix:
-    const double body_k_ = drag_;
+    double body_k_ = drag_/2.0;
     Eigen::Matrix<double, 3, 3> body_k = (Eigen::Matrix<double, 3, 1>() << -body_k_, -body_k_,0).finished().asDiagonal();
     // velocity:
-    H.block<3, 3>(0, idxstartcorr_v_) =  C_q.transpose() * body_k;  // v
-    temp= C_q.transpose() * body_k;
+    H.block<3, 3>(0, idxstartcorr_v_) =  body_k * C_q.transpose();  // v (transform ef of state to body then scale with drag)
+    temp= body_k * C_q.transpose();
     // printf("%.3f %.3f %.3f\n%.3f %.3f %.3f\n%.3f %.3f %.3f\n\n\n"
     //   ,body_k(0,0),body_k(0,1),body_k(0,2)
     //   ,body_k(1,0),body_k(1,1),body_k(1,2)
@@ -172,7 +176,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
       // Get rotation matrices.
       Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-          .conjugate().toRotationMatrix();
+          .toRotationMatrix();
       //C_q.transpose() is turn body to earth frame 
 
 
@@ -185,7 +189,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       // // Velocity
       r_old.block<3, 1>(0, 0) = z_v_
-          - temp*(state.Get<StateDefinition_T::v>());
+          - (temp * (state.Get<StateDefinition_T::v>()));
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       if (!CheckForNumeric(r_old, "r_old")) {
         MSF_ERROR_STREAM("r_old: "<<r_old);

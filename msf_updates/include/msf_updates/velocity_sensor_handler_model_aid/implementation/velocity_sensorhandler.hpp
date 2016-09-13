@@ -19,8 +19,8 @@
 #ifndef VELOCITY_SENSORHANDLER_HPP_
 #define VELOCITY_SENSORHANDLER_HPP_
 #include <msf_core/msf_types.h>
-#include <msf_core/eigen_utils.h>
-
+#include <msf_core/eigen_utils.h> 
+ 
 namespace msf_velocity_sensor {
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
@@ -30,7 +30,7 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
                                            parameternamespace),
       n_zv_(1e-6),
       delay_(0),
-      drag_(0.1) {
+      drag_(0.1) { 
   ros::NodeHandle pnh("~/velocity_sensor");
   pnh.param("velocity_use_fixed_covariance", use_fixed_covariance_, false);
   pnh.param("velocity_absolute_measurements", provides_absolute_measurements_,
@@ -132,10 +132,10 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
       new sensor_msgs::Imu);
   pointwCov->header = msg->header;
   pointwCov->linear_acceleration = msg->linear_acceleration;
-
+  // printf("%f %f %f\n",msg->linear_acceleration.x,z_v_(1,0),z_v_(2,0));
   double time_now = msg->header.stamp.toSec();
   timestamp_previous_pose_ = time_now;
-
+  
   ProcessVelocityMeasurement(pointwCov);
 }
 

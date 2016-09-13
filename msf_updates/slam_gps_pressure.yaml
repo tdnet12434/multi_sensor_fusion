@@ -137,9 +137,17 @@ position_pose_pressure_sensor/pose_fixed_q_wv_2: true
 # position_pose_pressure_sensor/pose_delay_2: 0.0
 
 
-
-position_pose_pressure_sensor/velocity_flowYaw: 0 #0 for eight shape, 10.8 for rectan
-
-position_pose_pressure_sensor/press_noise_meas_p: 1.00
-
 velocity_sensor/velocity_absolute_measurements: true
+position_pose_pressure_sensor/velocity_flowYaw: 10.8 #0 for eight shape, 10.8 for rectan
+
+position_pose_pressure_sensor/press_noise_meas_p: 10.00
+
+
+
+#velocity model-aid
+# velocity_sensor/velocity_absolute_measurements: true
+# velocity_sensor/velocity_use_fixed_covariance: true
+
+# position_pose_pressure_sensor/velocity_flowYaw: 10.8 #0 for eight shape, 10.8 for rectan
+# position_pose_pressure_sensor/velocity_flowMinQ: 1 #0 for eight shape, 10.8 for rectan
+# position_pose_pressure_sensor/velocity_flowNoiseXY: 0.5 

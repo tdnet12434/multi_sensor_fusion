@@ -873,6 +873,30 @@ shared_ptr<EKFState_T> MSF_Core<EKFState_T>::GetClosestState(double tstamp) {
       // Prepare a new state.
       shared_ptr<EKFState_T> currentState(new EKFState_T);
       currentState->time = timenow;  // Set state time to measurement time.
+      
+      // //Lagrange 2nd order interpolation
+      // static Vector3 a_m_0 = lastState->a_m;
+      // static Vector3 w_m_0 = lastState->w_m;
+      // Vector3 a_m_1=lastState->a_m;
+      // Vector3 w_m_1=lastState->w_m;
+      // Vector3 a_m_2=nextState->a_m;
+      // Vector3 w_m_2=nextState->w_m;
+      // static double t_0 = 0;
+      // double t_1 = lastState->time;
+      // double t_2 = nextState->time;
+
+      
+      // currentState->a_m = (timenow-t_1)*(timenow-t_2)*a_m_0 / ((t_0-t_1)*(t_0-t_2))
+      //                   + (timenow-t_0)*(timenow-t_2)*a_m_1 / ((t_1-t_0)*(t_1-t_2))
+      //                   + (timenow-t_0)*(timenow-t_1)*a_m_1 / ((t_2-t_0)*(t_2-t_1));
+      // currentState->w_m = (timenow-t_1)*(timenow-t_2)*w_m_0 / ((t_0-t_1)*(t_0-t_2))
+      //                   + (timenow-t_0)*(timenow-t_2)*w_m_1 / ((t_1-t_0)*(t_1-t_2))
+      //                   + (timenow-t_0)*(timenow-t_1)*w_m_1 / ((t_2-t_0)*(t_2-t_1));
+      // //store last-laststate
+      // a_m_0 = lastState->a_m;
+      // w_m_0 = lastState->w_m;
+      // t_0 = lastState->time;
+
       // Linearly interpolate imu readings.
       currentState->a_m = lastState->a_m
           + (nextState->a_m - lastState->a_m)
