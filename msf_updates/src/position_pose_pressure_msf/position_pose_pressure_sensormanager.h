@@ -155,7 +155,7 @@ private:
      config.pose_noise_meas_q_2);
     pose_2_handler_->SetDelay(config.pose_delay_2);
 
-    // velocity_handler_->SetNoises(config.velocity_flowNoiseXY); //move to use logic
+    velocity_handler_->SetNoises(config.velocity_flowNoiseXY); //move to use logic
     velocity_handler_->SetDelay(config.velocity_flowDelay);
     velocity_handler_->SetMinQ(config.velocity_flowMinQ);
 
@@ -462,9 +462,17 @@ void Init(double scale) const {
       indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
           msf_tmp::CorrectionStateLengthForType>::value
     };
+    //get size of correction msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_
+
+    // enum {
+    //   p_x = 0, p_y, p_z,
+    //   v_x,     v_y, v_z,
+    //   q_0,     q_1, q_2,
+    // };
+
 
     if(zero_correction_bias) {
-      msf_core_->StopProp(1);
+      // msf_core_->StopProp(1);
       for(int i =0; 
               i<msf_tmp::StripConstReference<b_a_type>::result_t::sizeInCorrection_; 
               i++) {
@@ -476,39 +484,40 @@ void Init(double scale) const {
         correction(indexOfState_b_w+i) = 0;
       }
     }else{
-      msf_core_->StopProp(0);
+      // msf_core_->StopProp(0);
     }
 
-    if(zero_correction_all) {
-        msf_core_->StopProp(1);
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_p+i)   = 0;
-        }
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<v_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_v+i)   = 0;
-        }
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<q_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_q+i)   = 0;
-        }
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<b_a_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_b_a+i) = 0;
-        }
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<b_w_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_b_w+i) = 0;
-        }
-    }else{
-      msf_core_->StopProp(0);
-    }
+    // // if this uncommend, we should change cross_over node to scale with lpe odom because state z also not propagate as
+    // if(zero_correction_all) {
+    //     msf_core_->StopProp(1);
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_p+i)   = 0;
+    //     }
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<v_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_v+i)   = 0;
+    //     }
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<q_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_q+i)   = 0;
+    //     }
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<b_a_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_b_a+i) = 0;
+    //     }
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<b_w_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_b_w+i) = 0;
+    //     }
+    // }else{
+    //   msf_core_->StopProp(0);
+    // }
 
   }
 
@@ -608,39 +617,46 @@ void Init(double scale) const {
 
 
   /// Check healhy of GPS if it bad or timeout let trust flow
-  if(position_handler_->GetGpscov() > 3.7 || !gps_h) {
-    velocity_handler_->SetNoises(0.01);
-    MSF_WARN_STREAM_ONCE("GPS high cov: trust flow more");
-  }else{
-    velocity_handler_->SetNoises(2);
-    MSF_WARN_STREAM_ONCE("GPS low cov: trust flow less");
-  }
+  // if(position_handler_->GetGpscov() > 3.7 || !gps_h) {
+  //   velocity_handler_->SetNoises(0.01);
+  //   MSF_WARN_STREAM_ONCE("GPS high cov: trust flow more");
+  // }else{
+  //   velocity_handler_->SetNoises(2);
+  //   MSF_WARN_STREAM_ONCE("GPS low cov: trust flow less");
+  // }
 
 
 
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::p>::value p_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::v>::value v_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::q>::value q_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::b_a>::value b_a_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::b_w>::value b_w_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::L>::value L_type;
 
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::p>::value p_type;
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::v>::value v_type;
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::q>::value q_type;
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::b_a>::value b_a_type;
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::b_w>::value b_w_type;
-  enum {
-    indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
-    msf_tmp::CorrectionStateLengthForType>::value,
-    indexOfState_v = msf_tmp::GetStartIndex<StateSequence_T, v_type,
-    msf_tmp::CorrectionStateLengthForType>::value,
-    indexOfState_q = msf_tmp::GetStartIndex<StateSequence_T, q_type,
-    msf_tmp::CorrectionStateLengthForType>::value,
-    indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
-    msf_tmp::CorrectionStateLengthForType>::value,
-    indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
-    msf_tmp::CorrectionStateLengthForType>::value
-  };
+
+
+  // enum {
+  //   indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_v = msf_tmp::GetStartIndex<StateSequence_T, v_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_q = msf_tmp::GetStartIndex<StateSequence_T, q_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_L = msf_tmp::GetStartIndex<StateSequence_T, L_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value
+  // };
+
 
 
   //Check if all require sensor bad not let state to propagation
