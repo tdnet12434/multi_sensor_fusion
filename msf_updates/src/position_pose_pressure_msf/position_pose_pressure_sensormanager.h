@@ -33,7 +33,8 @@
 #include <msf_updates/velocity_sensor_handler/velocity_sensorhandler.h>
 #include <msf_updates/velocity_sensor_handler/velocity_measurement.h>
 
-
+#include <msf_updates/ahrs_sensor_handler/ahrs_sensorhandler.h>
+#include <msf_updates/ahrs_sensor_handler/ahrs_measurement.h>
   bool zero_correction_all;
   bool zero_correction_bias;
   
@@ -55,12 +56,6 @@
     msf_updates::pose_measurement::PoseMeasurement<>, this_T>;
 
 
-    typedef msf_position_sensor::PositionSensorHandler<
-    msf_updates::position_measurement::PositionMeasurement, this_T> PositionSensorHandler_T;
-
-
-    friend class msf_position_sensor::PositionSensorHandler<
-    msf_updates::position_measurement::PositionMeasurement, this_T>;
 
     typedef msf_velocity_sensor::VelocitySensorHandler<
     msf_updates::velocity_measurement::VelocityMeasurement, this_T> VelocitySensorHandler_T;
@@ -68,13 +63,22 @@
     msf_updates::velocity_measurement::VelocityMeasurement, this_T>;
 
 
-    typedef msf_pose_sensor::PoseSensorHandler<msf_updates::pose_measurement::PoseMeasurement<
-    msf_updates::EKFState::StateDefinition_T::L_2,
-    msf_updates::EKFState::StateDefinition_T::q_ic_2,
-    msf_updates::EKFState::StateDefinition_T::p_ic_2,
-    msf_updates::EKFState::StateDefinition_T::q_wv_2,
-    msf_updates::EKFState::StateDefinition_T::p_wv_2
-    >,this_T> PoseSensor_2_Handler_T;
+    typedef msf_ahrs_sensor::AhrsSensorHandler<
+    msf_updates::ahrs_measurement::AhrsMeasurement, this_T> AhrsSensorHandler_T;
+    friend class msf_ahrs_sensor::AhrsSensorHandler<
+    msf_updates::ahrs_measurement::AhrsMeasurement, this_T>;
+
+    typedef msf_position_sensor::PositionSensorHandler<
+    msf_updates::position_measurement::PositionMeasurement, this_T> PositionSensorHandler_T;
+    friend class msf_position_sensor::PositionSensorHandler<
+    msf_updates::position_measurement::PositionMeasurement, this_T>;
+    // typedef msf_pose_sensor::PoseSensorHandler<msf_updates::pose_measurement::PoseMeasurement<
+    // msf_updates::EKFState::StateDefinition_T::L_2,
+    // msf_updates::EKFState::StateDefinition_T::q_ic_2,
+    // msf_updates::EKFState::StateDefinition_T::p_ic_2,
+    // msf_updates::EKFState::StateDefinition_T::q_wv_2,
+    // msf_updates::EKFState::StateDefinition_T::p_wv_2
+    // >,this_T> PoseSensor_2_Handler_T;
 
   public:
     typedef msf_updates::EKFState EKFState_T;
@@ -101,13 +105,20 @@
         new msf_pressure_sensor::PressureSensorHandler(*this, "","pressure_sensor"));
     AddHandler(pressure_handler_);
 
-    pose_2_handler_.reset(
-      new PoseSensor_2_Handler_T(*this, "", "pose2_sensor", distortmeas));
-    AddHandler(pose_2_handler_);
+    // pose_2_handler_.reset(
+      // new PoseSensor_2_Handler_T(*this, "", "pose2_sensor", distortmeas));
+    // AddHandler(pose_2_handler_);
     
     velocity_handler_.reset(
       new VelocitySensorHandler_T(*this, "", "velocity_sensor"));
     AddHandler(velocity_handler_);
+
+    ahrs_handler_.reset(
+      new AhrsSensorHandler_T(*this, "", "ahrs_sensor"));
+    AddHandler(ahrs_handler_);
+
+
+
 
     reconf_server_.reset(new ReconfigureServer(pnh));
     ReconfigureServer::CallbackType f = boost::bind(&this_T::Config, this, _1,_2);
@@ -127,10 +138,10 @@ private:
   shared_ptr<PositionSensorHandler_T> position_handler_;
   shared_ptr<msf_pressure_sensor::PressureSensorHandler> pressure_handler_;
 
-  shared_ptr<PoseSensor_2_Handler_T> pose_2_handler_;
+  // shared_ptr<PoseSensor_2_Handler_T> pose_2_handler_;
 
   shared_ptr<VelocitySensorHandler_T> velocity_handler_;
-
+  shared_ptr<AhrsSensorHandler_T> ahrs_handler_;
 
 
 
@@ -151,13 +162,15 @@ private:
 
     pressure_handler_->SetNoises(config.press_noise_meas_p);
 
-    pose_2_handler_->SetNoises(config.pose_noise_meas_p_2,
-     config.pose_noise_meas_q_2);
-    pose_2_handler_->SetDelay(config.pose_delay_2);
+    // pose_2_handler_->SetNoises(config.pose_noise_meas_p_2,
+     // config.pose_noise_meas_q_2);
+    // pose_2_handler_->SetDelay(config.pose_delay_2);
 
-    // velocity_handler_->SetNoises(config.velocity_flowNoiseXY); //move to use logic
+    velocity_handler_->SetNoises(config.velocity_flowNoiseXY); //move to use logic
     velocity_handler_->SetDelay(config.velocity_flowDelay);
     velocity_handler_->SetMinQ(config.velocity_flowMinQ);
+
+    ahrs_handler_->SetNoises(config.ahrs_q);
 
     double yawinit = config_.velocity_flowYaw / 180 * M_PI;
     Eigen::Quaterniond yawq(cos(yawinit / 2), 0, 0, sin(yawinit / 2));
@@ -230,9 +243,9 @@ void Init(double scale) const {
             - pressure_handler_->GetPressureMeasurement()(0);  /// Pressure drift state
 
 
-    p_vc_2 = pose_2_handler_->GetPositionMeasurement();
-    q_vc_2 = pose_2_handler_->GetAttitudeMeasurement();
-
+    // p_vc_2 = pose_2_handler_->GetPositionMeasurement();
+    // q_vc_2 = pose_2_handler_->GetAttitudeMeasurement();
+    q_vc_2 = ahrs_handler_->GetAhrsMeasurement();
 
     MSF_INFO_STREAM(
       "initial measurement vision: pos:["<<p_vc.transpose()<<"] orientation: " <<STREAMQUAT(q_vc));
@@ -342,12 +355,12 @@ void Init(double scale) const {
     meas->SetStateInitValue < StateDefinition_T::b_p > (b_p);
 
 
-    meas->SetStateInitValue < StateDefinition_T::L_2
-    > (Eigen::Matrix<double, 1, 1>::Constant(0.12434));
-    meas->SetStateInitValue < StateDefinition_T::q_wv_2 > (q_wv_2);
-    meas->SetStateInitValue < StateDefinition_T::p_wv_2 > (p_wv_2);
-    meas->SetStateInitValue < StateDefinition_T::q_ic_2 > (q_ic_2);
-    meas->SetStateInitValue < StateDefinition_T::p_ic_2 > (p_ic_2);
+    // meas->SetStateInitValue < StateDefinition_T::L_2
+    // > (Eigen::Matrix<double, 1, 1>::Constant(0.12434));
+    // meas->SetStateInitValue < StateDefinition_T::q_wv_2 > (q_wv_2);
+    // meas->SetStateInitValue < StateDefinition_T::p_wv_2 > (p_wv_2);
+    // meas->SetStateInitValue < StateDefinition_T::q_ic_2 > (q_ic_2);
+    // meas->SetStateInitValue < StateDefinition_T::p_ic_2 > (p_ic_2);
 
 
     SetStateCovariance(meas->GetStateCovariance());  // Call my set P function.
@@ -385,16 +398,16 @@ void Init(double scale) const {
         config_.press_noise_bias_p);
 
 
-    const msf_core::Vector3 nqwvv_2 = msf_core::Vector3::Constant(
-      config_.pose_noise_q_wv_2);
-    const msf_core::Vector3 npwvv_2 = msf_core::Vector3::Constant(
-      config_.pose_noise_p_wv_2);
-    const msf_core::Vector3 nqicv_2 = msf_core::Vector3::Constant(
-      config_.pose_noise_q_ic_2);
-    const msf_core::Vector3 npicv_2 = msf_core::Vector3::Constant(
-      config_.pose_noise_p_ic_2);
-    const msf_core::Vector1 n_L_2 = msf_core::Vector1::Constant(
-      config_.pose_noise_scale_2);
+    // const msf_core::Vector3 nqwvv_2 = msf_core::Vector3::Constant(
+    //   config_.pose_noise_q_wv_2);
+    // const msf_core::Vector3 npwvv_2 = msf_core::Vector3::Constant(
+    //   config_.pose_noise_p_wv_2);
+    // const msf_core::Vector3 nqicv_2 = msf_core::Vector3::Constant(
+    //   config_.pose_noise_q_ic_2);
+    // const msf_core::Vector3 npicv_2 = msf_core::Vector3::Constant(
+    //   config_.pose_noise_p_ic_2);
+    // const msf_core::Vector1 n_L_2 = msf_core::Vector1::Constant(
+    //   config_.pose_noise_scale_2);
 
 
     // Compute the blockwise Q values and store them with the states,
@@ -413,16 +426,16 @@ void Init(double scale) const {
     (dt * nb_p.cwiseProduct(nb_p)).asDiagonal();
 
 
-    state.GetQBlock<StateDefinition_T::L_2>() = (dt * n_L_2.cwiseProduct(n_L_2))
-    .asDiagonal();
-    state.GetQBlock<StateDefinition_T::q_wv_2>() =
-    (dt * nqwvv_2.cwiseProduct(nqwvv_2)).asDiagonal();
-    state.GetQBlock<StateDefinition_T::p_wv_2>() =
-    (dt * npwvv_2.cwiseProduct(npwvv_2)).asDiagonal();
-    state.GetQBlock<StateDefinition_T::q_ic_2>() =
-    (dt * nqicv_2.cwiseProduct(nqicv_2)).asDiagonal();
-    state.GetQBlock<StateDefinition_T::p_ic_2>() =
-    (dt * npicv_2.cwiseProduct(npicv_2)).asDiagonal();
+    // state.GetQBlock<StateDefinition_T::L_2>() = (dt * n_L_2.cwiseProduct(n_L_2))
+    // .asDiagonal();
+    // state.GetQBlock<StateDefinition_T::q_wv_2>() =
+    // (dt * nqwvv_2.cwiseProduct(nqwvv_2)).asDiagonal();
+    // state.GetQBlock<StateDefinition_T::p_wv_2>() =
+    // (dt * npwvv_2.cwiseProduct(npwvv_2)).asDiagonal();
+    // state.GetQBlock<StateDefinition_T::q_ic_2>() =
+    // (dt * nqicv_2.cwiseProduct(nqicv_2)).asDiagonal();
+    // state.GetQBlock<StateDefinition_T::p_ic_2>() =
+    // (dt * npicv_2.cwiseProduct(npicv_2)).asDiagonal();
   }
 
   virtual void SetStateCovariance(
@@ -462,9 +475,17 @@ void Init(double scale) const {
       indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
           msf_tmp::CorrectionStateLengthForType>::value
     };
+    //get size of correction msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_
+
+    // enum {
+    //   p_x = 0, p_y, p_z,
+    //   v_x,     v_y, v_z,
+    //   q_0,     q_1, q_2,
+    // };
+
 
     if(zero_correction_bias) {
-      msf_core_->StopProp(1);
+      // msf_core_->StopProp(1);
       for(int i =0; 
               i<msf_tmp::StripConstReference<b_a_type>::result_t::sizeInCorrection_; 
               i++) {
@@ -476,39 +497,40 @@ void Init(double scale) const {
         correction(indexOfState_b_w+i) = 0;
       }
     }else{
-      msf_core_->StopProp(0);
+      // msf_core_->StopProp(0);
     }
 
-    if(zero_correction_all) {
-        msf_core_->StopProp(1);
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_p+i)   = 0;
-        }
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<v_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_v+i)   = 0;
-        }
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<q_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_q+i)   = 0;
-        }
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<b_a_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_b_a+i) = 0;
-        }
-        for(int i =0; 
-                i<msf_tmp::StripConstReference<b_w_type>::result_t::sizeInCorrection_; 
-                i++) {
-          correction(indexOfState_b_w+i) = 0;
-        }
-    }else{
-      msf_core_->StopProp(0);
-    }
+    // // if this uncommend, we should change cross_over node to scale with lpe odom because state z also not propagate as
+    // if(zero_correction_all) {
+    //     msf_core_->StopProp(1);
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_p+i)   = 0;
+    //     }
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<v_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_v+i)   = 0;
+    //     }
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<q_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_q+i)   = 0;
+    //     }
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<b_a_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_b_a+i) = 0;
+    //     }
+    //     for(int i =0; 
+    //             i<msf_tmp::StripConstReference<b_w_type>::result_t::sizeInCorrection_; 
+    //             i++) {
+    //       correction(indexOfState_b_w+i) = 0;
+    //     }
+    // }else{
+    //   msf_core_->StopProp(0);
+    // }
 
   }
 
@@ -608,39 +630,46 @@ void Init(double scale) const {
 
 
   /// Check healhy of GPS if it bad or timeout let trust flow
-  if(position_handler_->GetGpscov() > 3.7 || !gps_h) {
-    velocity_handler_->SetNoises(0.01);
-    MSF_WARN_STREAM_ONCE("GPS high cov: trust flow more");
-  }else{
-    velocity_handler_->SetNoises(2);
-    MSF_WARN_STREAM_ONCE("GPS low cov: trust flow less");
-  }
+  // if(position_handler_->GetGpscov() > 3.7 || !gps_h) {
+  //   velocity_handler_->SetNoises(0.01);
+  //   MSF_WARN_STREAM_ONCE("GPS high cov: trust flow more");
+  // }else{
+  //   velocity_handler_->SetNoises(2);
+  //   MSF_WARN_STREAM_ONCE("GPS low cov: trust flow less");
+  // }
 
 
 
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::p>::value p_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::v>::value v_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::q>::value q_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::b_a>::value b_a_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::b_w>::value b_w_type;
+  // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+  // StateDefinition_T::L>::value L_type;
 
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::p>::value p_type;
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::v>::value v_type;
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::q>::value q_type;
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::b_a>::value b_a_type;
-  typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
-  StateDefinition_T::b_w>::value b_w_type;
-  enum {
-    indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
-    msf_tmp::CorrectionStateLengthForType>::value,
-    indexOfState_v = msf_tmp::GetStartIndex<StateSequence_T, v_type,
-    msf_tmp::CorrectionStateLengthForType>::value,
-    indexOfState_q = msf_tmp::GetStartIndex<StateSequence_T, q_type,
-    msf_tmp::CorrectionStateLengthForType>::value,
-    indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
-    msf_tmp::CorrectionStateLengthForType>::value,
-    indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
-    msf_tmp::CorrectionStateLengthForType>::value
-  };
+
+
+  // enum {
+  //   indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_v = msf_tmp::GetStartIndex<StateSequence_T, v_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_q = msf_tmp::GetStartIndex<StateSequence_T, q_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value,
+  //   indexOfState_L = msf_tmp::GetStartIndex<StateSequence_T, L_type,
+  //   msf_tmp::CorrectionStateLengthForType>::value
+  // };
+
 
 
   //Check if all require sensor bad not let state to propagation

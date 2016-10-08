@@ -164,7 +164,6 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
 
 
   gps_cov_ = msg->pose.covariance[0];
-
   ProcessPositionMeasurement(odom);
 }
 

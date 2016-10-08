@@ -369,11 +369,19 @@ void MSF_Core<EKFState_T>::PropagateState(shared_ptr<EKFState_T>& state_old,
       - state_old->template Get<StateDefinition_T::b_a>();
   const Matrix4 Omega = OmegaMatJPL(ew);
   const Matrix4 OmegaOld = OmegaMatJPL(ewold);
-  Matrix4 OmegaMean = OmegaMatJPL((ew + ewold) / 2);
+  Matrix4 OmegaMean = OmegaOld;
 
   // Zero order quaternion integration.
   // cur_state.q_ = (Eigen::Matrix<double,4,4>::Identity() +
   // 0.5*Omega*dt)*StateBuffer_[(unsigned char)(idx_state_-1)].q_.coeffs();
+
+
+
+
+
+
+
+
 
   // First order quaternion integration, this is kind of costly and may not add
   // a lot to the quality of propagation...
@@ -381,18 +389,18 @@ void MSF_Core<EKFState_T>::PropagateState(shared_ptr<EKFState_T>& state_old,
   Matrix4 MatExp;
   MatExp.setIdentity();
   OmegaMean *= 0.5 * dt;
-  for (int i = 1; i < 5; i++) {  // Can be made fourth order or less to save cycles.
+  for (int i = 1; i < 4; i++) {  // Can be made fourth order or less to save cycles.
     div *= i;
     MatExp = MatExp + OmegaMean / div;
     OmegaMean *= OmegaMean;
   }
-
-  // First oder quat integration matrix.
-  const Matrix4 quat_int =
-      MatExp + 1.0 / 48.0 * (Omega * OmegaOld - OmegaOld * Omega) * dt * dt;
+  // MSF_WARN_STREAM(MatExp);
+  // // First oder quat integration matrix.
+  // const Matrix4 quat_int =
+  //     MatExp + 1.0 / 48.0 * (Omega * OmegaOld - OmegaOld * Omega) * dt * dt;
 
   // First oder quaternion integration.
-  state_new->template Get<StateDefinition_T::q>().coeffs() = quat_int *
+  state_new->template Get<StateDefinition_T::q>().coeffs() = MatExp *
   state_old->template Get<StateDefinition_T::q>().coeffs();
   state_new->template Get<StateDefinition_T::q>().normalize();
 

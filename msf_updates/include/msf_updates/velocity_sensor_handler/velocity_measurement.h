@@ -82,7 +82,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                                         msg->integrated_y,
                                         0);
 
-    dt = (msg->integration_time_us != 0 ? msg->integration_time_us*0.000001 : 0.1); //should 10hz
+    dt = (msg->integration_time_us > 0 ? msg->integration_time_us*0.000001 : 0.1); //should 10hz
     agl = msg->distance;
     flow_q = msg->quality;
     Eigen::Matrix<double, 3, 1> gyro_raw(msg->integrated_xgyro, 
@@ -104,8 +104,10 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
     if (fixed_covariance_)  //  take fix covariance from reconfigure GUI
     {
+      //test drive covariance with quality
 
-      const double s_zv = n_zv_ * n_zv_;
+      const double s_zv = n_zv_ * n_zv_/** 255 / (flow_q != 0 ? flow_q : 1)*/;
+      MSF_WARN_STREAM_THROTTLE(1, "flow cov " << s_zv);
       R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zv, s_zv, 10)
           .finished().asDiagonal();
 
@@ -196,7 +198,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     static Eigen::Matrix<double, 3, 1> flow_n;/// sum flow
     if(isabsolute_) {
       //treat flow as velocity
-      flow_n = delta_n/dt; //10 hz
+      flow_n = delta_n/(dt > 0 ? dt : 0.1); //10 hz
     }else{
       //treat flow as position odometry (relative measurement)
       flow_n += delta_n*0.5; //10 hz
@@ -213,16 +215,22 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
           StateDefinition_T::p>::value,
       idxstartcorr_v_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
           StateDefinition_T::v>::value,
-
+      idxstartcorr_L_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+          StateDefinition_T::L>::value
     };
 
-
+    static Eigen::Matrix<double, 3, 1> z_p_old_=z_p_; 
     Eigen::Matrix<double, 3, 3> ident = (Eigen::Matrix<double, 3, 1>() << 1, 1, 0).finished().asDiagonal();
     // velocity:
 
     if(isabsolute_)
       {
         H.block<3, 3>(0, idxstartcorr_v_) =  ident;
+        // H.block<3, 1>(0, idxstartcorr_L_) =  (z_p_old_ 
+        //                                     + C_q.transpose()
+        //                                         *state.Get<StateDefinition_T::v>()
+        //                                         *0.1).eval();
+        z_p_old_ = z_p_;
       } 
     else
       {
