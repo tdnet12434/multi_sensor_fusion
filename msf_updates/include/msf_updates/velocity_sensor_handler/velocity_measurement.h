@@ -146,8 +146,13 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   typedef EKFState_T::StateDefinition_T StateDefinition_T;
   virtual ~VelocityMeasurement() {
   }
-  VelocityMeasurement(double n_zv, bool fixed_covariance,
-                      bool isabsoluteMeasurement, int sensorID, int fixedstates, double flow_minQ, Eigen::Quaternion<double> qif)
+  VelocityMeasurement(double n_zv,
+                      bool fixed_covariance,
+                      bool isabsoluteMeasurement, 
+                      int sensorID, 
+                      int fixedstates, 
+                      double flow_minQ, 
+                      Eigen::Quaternion<double> qif)
       : VelocityMeasurementBase(isabsoluteMeasurement, sensorID),
         n_zv_(n_zv),
         fixed_covariance_(fixed_covariance),
@@ -265,8 +270,8 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
 
       // Get rotation matrices.
-      Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-          .toRotationMatrix();
+      // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
+      //     .toRotationMatrix();
       //C_q.transpose() is turn body to earth frame 
 
 
@@ -328,10 +333,12 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
 
       msf_core::MSF_Core<EKFState_T>::ErrorStateCov _P;
+      Eigen::Matrix<double, msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime, msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime> sP;
+      sP = 0.5*(_P.transpose()+_P);
 
       // residual covariance, (inverse)
       Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
-       (H_new * _P * H_new.transpose() + R_).inverse();
+       (H_new * sP * H_new.transpose() + R_).inverse();
 
 
       // fault detection (mahalanobis distance !! )
@@ -362,15 +369,32 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
         // else if (_flowFault) {
         //   _flowFault = FAULT_NONE;
         // }
+        static uint8_t good_count = 0;
 
         if (_flowFault < fault_lvl_disable) {
-          flow_healhy = true;
+          good_count++;
         } else {
-          flow_healhy = false;
+          good_count--;
         }
 
+        //constrain count
+        if(good_count < 1) { 
+          good_count = 0;
+        }
+        else if(good_count > 20) { 
+          good_count = 20;
+        }
+        static bool let_correction=false;
+        if(flow_healhy) {  //if above 30cm and quality good check the good_count
+          if(good_count <= 0) { 
+            let_correction = false;
+          }
+          else if(good_count >= 20) { 
+            let_correction = true;
+          }
+        }
 
-        if(flow_healhy) {
+        if(let_correction) {
           // Call update step in base class.
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);

@@ -359,15 +359,15 @@ void MSF_Core<EKFState_T>::PropagateState(shared_ptr<EKFState_T>& state_old,
       msf_tmp::CopyNonPropagationStates<EKFState_T>(*state_old));
 
   Eigen::Matrix<double, 3, 1> dv;
-  const Vector3 ew = state_new->w_m
-      - state_new->template Get<StateDefinition_T::b_w>();
+  // const Vector3 ew = state_new->w_m
+  //     - state_new->template Get<StateDefinition_T::b_w>();
   const Vector3 ewold = state_old->w_m
       - state_old->template Get<StateDefinition_T::b_w>();
   const Vector3 ea = state_new->a_m
       - state_new->template Get<StateDefinition_T::b_a>();
   const Vector3 eaold = state_old->a_m
       - state_old->template Get<StateDefinition_T::b_a>();
-  const Matrix4 Omega = OmegaMatJPL(ew);
+  // const Matrix4 Omega = OmegaMatJPL(ew);
   const Matrix4 OmegaOld = OmegaMatJPL(ewold);
   Matrix4 OmegaMean = OmegaOld;
 

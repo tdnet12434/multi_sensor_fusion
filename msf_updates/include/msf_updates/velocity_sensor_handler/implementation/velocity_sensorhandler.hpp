@@ -62,7 +62,7 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
   z_p_.setZero();
 
 }
-  static bool referenceinit = false;  //TODO (slynen): Dynreconf reset reference.
+  // static bool referenceinit = false;  //TODO (slynen): Dynreconf reset reference.
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetNoises(

@@ -125,8 +125,8 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
     H.setZero();
 
     // Get rotation matrices.
-    Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-        .toRotationMatrix();
+    // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
+    //     .toRotationMatrix();
     //w x y z preset drift 10 deg
     Eigen::Quaternion<double> q_ = state.Get<StateDefinition_T::q>();
     q_.normalize();
@@ -178,8 +178,8 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
 
 
       // Get rotation matrices.
-      Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-          .toRotationMatrix();
+      // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
+      //     .toRotationMatrix();
 
 
 

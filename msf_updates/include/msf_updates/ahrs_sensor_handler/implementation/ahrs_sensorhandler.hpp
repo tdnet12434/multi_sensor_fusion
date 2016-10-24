@@ -56,7 +56,7 @@ AhrsSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::AhrsSensorHandler(
   z_q_.setIdentity();
 
 }
-  static bool referenceinit = false;  //TODO (slynen): Dynreconf reset reference.
+  // static bool referenceinit = false;  //TODO (slynen): Dynreconf reset reference.
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void AhrsSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetNoises(

@@ -45,7 +45,7 @@ pose_sensor/init/q_ic/y: 0
 pose_sensor/init/q_ic/z: 0
 pose_sensor/pose_fixed_p_ic: true
 pose_sensor/pose_fixed_q_ic: true
-pose_sensor/pose_fixed_p_wv: false
+pose_sensor/pose_fixed_p_wv: true
 pose_sensor/pose_fixed_q_wv: true
 
 # p_ic is the translation between the IMU and the camera in meters.
@@ -64,7 +64,7 @@ position_pose_pressure_sensor/pose_use_fixed_covariance: false
 position_pose_pressure_sensor/pose_fixed_scale: false
 position_pose_pressure_sensor/pose_fixed_p_ic: true
 position_pose_pressure_sensor/pose_fixed_q_ic: true
-position_pose_pressure_sensor/pose_fixed_p_wv: false
+position_pose_pressure_sensor/pose_fixed_p_wv: true
 position_pose_pressure_sensor/pose_fixed_q_wv: true
 position_pose_pressure_sensor/pose_delay: 0.25
 

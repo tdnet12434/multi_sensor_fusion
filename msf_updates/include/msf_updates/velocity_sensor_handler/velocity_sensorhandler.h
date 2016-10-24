@@ -35,8 +35,6 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
   double n_zv_;  ///< Velocity measurement noise.
   double delay_;       ///< Delay to be subtracted from the ros-timestamp of
                        //the measurement provided by this sensor.
-  double flow_minQ_;  //flow_minQ coefficient
-  Eigen::Quaternion<double> qif_;
 
   ros::Subscriber subFlow_, subAgl_;
 
@@ -44,7 +42,9 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
 
   bool use_fixed_covariance_;  ///< Use fixed covariance set by dynamic reconfigure.
   bool provides_absolute_measurements_;  ///< Does this sensor measure relative or absolute values.
-
+  double flow_minQ_;  //flow_minQ coefficient
+  Eigen::Quaternion<double> qif_;
+  
   void ProcessVelocityMeasurement(
       const mavros_msgs::OpticalFlowRadConstPtr& msg);
 

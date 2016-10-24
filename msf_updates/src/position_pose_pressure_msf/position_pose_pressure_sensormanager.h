@@ -317,8 +317,8 @@ void Init(double scale) const {
     MSF_WARN_STREAM("q " << STREAMQUAT(q));
     MSF_WARN_STREAM("q_wv " << STREAMQUAT(q_wv));
 
-    Eigen::Matrix<double, 3, 1> p_vision = q_wv.conjugate().toRotationMatrix()
-    * p_vc / scale - q.toRotationMatrix() * p_ic;
+    // Eigen::Matrix<double, 3, 1> p_vision = q_wv.conjugate().toRotationMatrix()
+    // * p_vc / scale - q.toRotationMatrix() * p_ic;
 
     //TODO (slynen): what if there is no initial position measurement? Then we
     // have to shift vision-world later on, before applying the first position
@@ -549,12 +549,12 @@ void Init(double scale) const {
 
     const EKFState_T& state = delaystate;
 
-
+    float new_L = state.Get<StateDefinition_T::L>()(0);
     /// Check if scale too large (L too small)
-    if (state.Get<StateDefinition_T::L>()(0) < 0) {
+    if (new_L < 0) {
       MSF_WARN_STREAM_THROTTLE(
         1,
-        "Negative scale detected: " << state.Get<StateDefinition_T::L>()(0) << ". Correcting to 0.1");
+        "Negative scale detected: " << new_L << ". Correcting to 0.1");
       Eigen::Matrix<double, 1, 1> L_;
       L_ << 0.1;
       delaystate.Set < StateDefinition_T::L > (L_);
@@ -637,6 +637,35 @@ void Init(double scale) const {
   //   velocity_handler_->SetNoises(2);
   //   MSF_WARN_STREAM_ONCE("GPS low cov: trust flow less");
   // }
+
+  // Check healhy of VISION on we should thus flow less
+  if(slam_h && !gps_h) {
+    velocity_handler_->SetNoises(10);
+    MSF_WARN_STREAM_ONCE("PURE VIS MODE: trust flow less");
+  }else{
+    velocity_handler_->SetNoises(0.1);
+    MSF_WARN_STREAM_ONCE("GPS low cov: trust flow more");
+  }
+
+
+  static float old_L=0;
+  /// Check if gps gone but vision ok, no absolute measurement so, scale don't calibrate
+  if (!gps_h && slam_h) {
+    if(old_L==0) {
+      old_L = new_L;
+    }
+    Eigen::Matrix<double, 1, 1> L_;
+    L_ << old_L;
+    delaystate.Set < StateDefinition_T::L > (L_);
+  }else{
+    old_L = new_L;
+  }
+
+
+
+
+
+
 
 
 

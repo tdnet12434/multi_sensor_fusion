@@ -254,6 +254,7 @@ struct MSF_SensorManagerROS : public msf_core::MSF_SensorManager<EKFState_T> {
             "topic but at the same time data_playback is on.");
       } else {
         const EKFState_T& state_const = *state;
+
         msgCorrect_.state[0] =
             state_const.template Get<StateDefinition_T::p>()[0]
                 - hl_state_buf_.state[0];
@@ -315,7 +316,22 @@ struct MSF_SensorManagerROS : public msf_core::MSF_SensorManager<EKFState_T> {
     // Publish state.
     sensor_fusion_comm::DoubleArrayStamped msgState;
     msgState.header = msgCorrect_.header;
-    state->ToFullStateMsg(msgState);
+    const EKFState_T& state_const = *state;
+    EKFState_T& state_lp = *state;
+    // state_lp = 0.1*state_lp + 0.9*(state);
+    // state_lp.template Get<StateDefinition_T::p>()[0]=state_const.template Get<StateDefinition_T::p>()[0]*0.1
+                                                // +0.9*state_lp.template Get<StateDefinition_T::p>()[0];
+    Eigen::Matrix<double,3,1> p_new(state_const.template Get<StateDefinition_T::p>());
+    Eigen::Matrix<double,3,1> v_new(state_const.template Get<StateDefinition_T::v>());
+    static Eigen::Matrix<double,3,1> p_filt(state_const.template Get<StateDefinition_T::p>());
+    static Eigen::Matrix<double,3,1> v_filt(state_const.template Get<StateDefinition_T::v>());
+    p_filt = 0.23*p_new+(1-0.23)*p_filt;
+    v_filt = 0.23*v_new+(1-0.23)*v_filt;
+    state_lp.template Set<StateDefinition_T::p>(p_filt);
+    state_lp.template Set<StateDefinition_T::v>(v_filt);
+
+
+    state_lp.ToFullStateMsg(msgState);
     pubState_.publish(msgState);
 
     if (pubPoseAfterUpdate_.getNumSubscribers()) {
