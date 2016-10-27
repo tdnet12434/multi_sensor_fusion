@@ -82,7 +82,8 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                                         msg->integrated_y,
                                         0);
 
-    dt = (msg->integration_time_us > 0 ? msg->integration_time_us*0.000001 : 0.1); //should 10hz
+    dt = msg->integration_time_us*0.000001;
+
     agl = msg->distance;
     flow_q = msg->quality;
     Eigen::Matrix<double, 3, 1> gyro_raw(msg->integrated_xgyro, 
@@ -170,7 +171,9 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       Eigen::Matrix<double, nMeasurements,
           msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime>& H) {
 
-
+    if (dt > 0.5f || dt < 1.0e-6f) {
+      flow_healhy = false;
+    }
 
     //select absolute or relative measurement
     if(isabsolute_) MSF_WARN_STREAM_ONCE("FLOW: treat as absolute");

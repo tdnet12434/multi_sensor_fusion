@@ -91,12 +91,14 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
     // printf("vx = %.3f vy = %.3f\n", z_v_(0), z_v_(1));
     double s_zp;
+    double s_zv;
     if (fixed_covariance_)  //  take fix covariance from reconfigure GUI
     {
 
       s_zp = n_zp_ * n_zp_;
+      // s_zv = n_zv_ * n_zv_;
       
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zp, s_zp, 9999)
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zv, s_zv, 9999)
           .finished().asDiagonal();
 
     } else {  // Tke covariance from sensor.
@@ -109,9 +111,10 @@ struct PositionMeasurement : public PositionMeasurementBase {
       }
       */
       s_zp = msg->pose.covariance[0] * msg->pose.covariance[0];
+      s_zv = msg->pose.covariance[21] * msg->pose.covariance[21];
       // printf("position covariance %.4f", s_zp);
 
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zp, s_zp, 9999)
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zv, s_zv, 9999)
           .finished().asDiagonal();
       // R_.block<3, 3>(0, 0) = msf_core::Matrix3(&msg->covariance[0]);
 
@@ -128,6 +131,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
   Eigen::Matrix<double, 3, 1> z_p_;  /// Position measurement.
   Eigen::Matrix<double, 3, 1> z_v_;  /// Velocity measurement.
   double n_zp_;  /// Position measurement noise.
+  // double n_zv_;  /// velocity measurement noise.
 
   bool fixed_covariance_;
   int fixedstates_;

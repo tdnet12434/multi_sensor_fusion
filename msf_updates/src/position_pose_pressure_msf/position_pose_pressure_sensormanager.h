@@ -639,27 +639,27 @@ void Init(double scale) const {
   // }
 
   // Check healhy of VISION on we should thus flow less
-  if(slam_h && !gps_h) {
-    velocity_handler_->SetNoises(10);
-    MSF_WARN_STREAM_ONCE("PURE VIS MODE: trust flow less");
-  }else{
-    velocity_handler_->SetNoises(0.1);
-    MSF_WARN_STREAM_ONCE("GPS low cov: trust flow more");
-  }
+  // if(slam_h && !gps_h) {
+  //   velocity_handler_->SetNoises(10);
+  //   MSF_WARN_STREAM_ONCE("PURE VIS MODE: trust flow less");
+  // }else{
+  //   velocity_handler_->SetNoises(0.1);
+  //   MSF_WARN_STREAM_ONCE("GPS low cov: trust flow more");
+  // }
 
-
-  static float old_L=0;
-  /// Check if gps gone but vision ok, no absolute measurement so, scale don't calibrate
-  if (!gps_h && slam_h) {
-    if(old_L==0) {
-      old_L = new_L;
-    }
-    Eigen::Matrix<double, 1, 1> L_;
-    L_ << old_L;
-    delaystate.Set < StateDefinition_T::L > (L_);
-  }else{
-    old_L = new_L;
-  }
+  // /// Check if gps gone but vision ok, no absolute measurement so, scale don't calibrate
+  // static float old_L=0;
+  
+  // if (!gps_h && slam_h) {
+  //   if(old_L==0) {
+  //     old_L = new_L;
+  //   }
+  //   Eigen::Matrix<double, 1, 1> L_;
+  //   L_ << old_L;
+  //   delaystate.Set < StateDefinition_T::L > (L_);
+  // }else{
+  //   old_L = new_L;
+  // }
 
 
 

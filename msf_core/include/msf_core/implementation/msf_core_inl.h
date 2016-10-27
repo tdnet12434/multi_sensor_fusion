@@ -485,6 +485,26 @@ void MSF_Core<EKFState_T>::PropagateState(shared_ptr<EKFState_T>& state_old,
       state_old->template Get<StateDefinition_T::p>()
       + ((state_new->template Get<StateDefinition_T::v>()
           + state_old->template Get<StateDefinition_T::v>()) / 2 * dt);
+
+  // //p = p + v dt + 0.5 * dv dt dt
+  // state_new->template Get<StateDefinition_T::p>() =
+  //     state_old->template Get<StateDefinition_T::p>()
+  //     + state_new->template Get<StateDefinition_T::v>() * dt;
+  //     + 0.5*(dv - constants::GRAVITY) * (dt * dt);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 template<typename EKFState_T>

@@ -158,9 +158,15 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
   odom->pose.pose.position = msg->pose.pose.position;
   odom->twist.twist.linear.x = vx;
   odom->twist.twist.linear.y = vy;
-  odom->pose.covariance[0] = msg->pose.covariance[0];
-  odom->pose.covariance[4] = msg->pose.covariance[7];
-  odom->pose.covariance[8] = msg->pose.covariance[14];
+  odom->pose.covariance[0] = msg->pose.covariance[0]; //px
+  odom->pose.covariance[7] = msg->pose.covariance[7]; //py
+  odom->pose.covariance[14] = 999;//pz
+  odom->pose.covariance[21] = msg->pose.covariance[21]; //vx
+  odom->pose.covariance[28] = msg->pose.covariance[28]; //vy
+  odom->pose.covariance[35] = 999;//vz
+
+
+
 
 
   gps_cov_ = msg->pose.covariance[0];

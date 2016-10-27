@@ -138,6 +138,8 @@ position_pose_pressure_sensor/pose_fixed_q_wv_2: true
 
 
 velocity_sensor/velocity_absolute_measurements: true
+velocity_sensor/velocity_flowNoiseXY: 0.5
+position_pose_pressure_sensor/velocity_flowNoiseXY: 0.5  #less is unstable
 position_pose_pressure_sensor/velocity_flowYaw: 10.8 #0 for eight shape, 10.8 for rectan
 
 position_pose_pressure_sensor/press_noise_meas_p: 10.00
