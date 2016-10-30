@@ -110,6 +110,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
         s_zp = n_zp_ * n_zp_;
       }
       */
+      GPShacc = msg->pose.covariance[0];
       s_zp = msg->pose.covariance[0] * msg->pose.covariance[0];
       s_zv = msg->pose.covariance[21] * msg->pose.covariance[21];
       // printf("position covariance %.4f", s_zp);
@@ -135,6 +136,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
   bool fixed_covariance_;
   int fixedstates_;
+  double GPShacc;
 
   typedef msf_updates::EKFState EKFState_T;
   typedef EKFState_T::StateSequence_T StateSequence_T;
@@ -292,15 +294,15 @@ struct PositionMeasurement : public PositionMeasurementBase {
           _gpsFault = FAULT_NONE;
         }
 
-        if (_gpsFault < fault_lvl_disable) {
-          // Call update step in base class.
+
+        // //ignore them instead cutoff
+        // if (_gpsFault > fault_lvl_disable || GPShacc > 6) {
+        //    R_ = (Eigen::Matrix<double, nMeasurements, 1>() << 9999, 9999, 9999, 9999, 9999, 9999)
+        //   .finished().asDiagonal();
+        // } 
+
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);
-        } else {
-          return;
-        }
-
-
 
 
 
