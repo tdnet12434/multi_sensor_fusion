@@ -265,7 +265,7 @@ struct PoseMeasurement : public PoseMeasurementBase {
           driftwvposfix ?
               Eigen::Matrix<double, 3, 3>::Zero() :
               (-Eigen::Matrix<double, 3, 3>::Identity()
-              /* * state.Get<StateLIdx>()(0)*/).eval();  //p_wv
+               * state.Get<StateLIdx>()(0)).eval();  //p_wv
     }
     // Attitude.
     H.block<3, 3>(3, kIdxstartcorr_q) = C_ci;  // q
@@ -351,6 +351,24 @@ struct PoseMeasurement : public PoseMeasurementBase {
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
+
+
+      msf_core::MSF_Core<EKFState_T>::ErrorStateCov &_P = state_nonconst_new->P;
+      _P = 0.5*(_P.transpose()+_P);
+
+      // residual covariance, (inverse)
+      Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
+       (H_new * _P * H_new.transpose() + R_).inverse();
+
+
+      // fault detection (mahalanobis distance !! )
+      float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
+      if(std::isnan(beta) || std::isinf(beta))
+        return;
+      printf("vis_d\t\t\t%.2f\n", beta);
+
+
+
 
       // Call update step in base class.
       this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,

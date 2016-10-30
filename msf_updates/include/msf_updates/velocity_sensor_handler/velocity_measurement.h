@@ -130,18 +130,18 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   Eigen::Matrix<double, 3, 1> z_p_;  /// Position measurement.
   Eigen::Matrix<double, 3, 1> gyro;  /// Gyro filtered
   
+
+  double n_zv_;  /// Position measurement noise.
+  bool fixed_covariance_;
+  int fixedstates_;
+  double flow_minQ_;
+  Eigen::Quaternion<double> qif_;
+  
   double flow_q;
   double agl; //
   double agl_ef;
-  double n_zv_;  /// Position measurement noise.
-  double flow_minQ_;
-  Eigen::Quaternion<double> qif_;
   double dt;
- 
   bool flow_healhy;
-  bool fixed_covariance_;
-  int fixedstates_;
-
   typedef msf_updates::EKFState EKFState_T;
   typedef EKFState_T::StateSequence_T StateSequence_T;
   typedef EKFState_T::StateDefinition_T StateDefinition_T;
@@ -206,7 +206,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     static Eigen::Matrix<double, 3, 1> flow_n;/// sum flow
     if(isabsolute_) {
       //treat flow as velocity
-      flow_n = delta_n/(dt > 0 ? dt : 0.1); //10 hz
+      flow_n = delta_n/(dt > 1e-6 ? dt : 0.1); //10 hz
     }else{
       //treat flow as position odometry (relative measurement)
       flow_n += delta_n*0.5; //10 hz
@@ -307,6 +307,8 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       // if(flow_healhy)
         r_old.block<3, 1>(0, 0) = z_p_
                             - state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
+        // Eigen::Matrix<double,3,1> state_v = state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
+        // MSF_INFO_STREAM(z_p_ << "----" << state_v);
       // else
       //   return;
 
@@ -335,26 +337,25 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
 
 
-      msf_core::MSF_Core<EKFState_T>::ErrorStateCov _P;
-      Eigen::Matrix<double, msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime, msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime> sP;
-      sP = 0.5*(_P.transpose()+_P);
+      msf_core::MSF_Core<EKFState_T>::ErrorStateCov &_P = state_nonconst_new->P;
+      _P = 0.5*(_P.transpose()+_P);
 
       // residual covariance, (inverse)
       Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
-       (H_new * sP * H_new.transpose() + R_).inverse();
+       (H_new * _P * H_new.transpose() + R_).inverse();
 
 
       // fault detection (mahalanobis distance !! )
       float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
       if(std::isnan(beta) || std::isinf(beta))
         return;
-      printf("beta\t%.2f\n", beta);
+      
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);
       int n_y_flow = 2;
 
         if (beta > BETA_TABLE[n_y_flow]) {
-          if(_flowFault >= FAULT_MINOR && beta > 500) { //from default mah_threshold
+          if(_flowFault >= FAULT_MINOR && beta > BETA_TABLE[n_y_flow]) { //from default mah_threshold
             printf("flow bad\n");
             _flowFault = FAULT_SEVERE;
           }else{
@@ -396,7 +397,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
             let_correction = true;
           }
         }
-
+        printf("flow_d\t\t%.2f\n", beta);
         if(let_correction) {
           // Call update step in base class.
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,

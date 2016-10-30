@@ -96,7 +96,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
     {
 
       s_zp = n_zp_ * n_zp_;
-      // s_zv = n_zv_ * n_zv_;
+      s_zv = n_zp_ * n_zp_*0.25;
       
       R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zv, s_zv, 9999)
           .finished().asDiagonal();
@@ -262,14 +262,12 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
 
 
-    msf_core::MSF_Core<EKFState_T>::ErrorStateCov _P;
-    Eigen::Matrix<double, msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime, msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime> sP;
-    sP = 0.5*(_P.transpose()+_P);
-
+       msf_core::MSF_Core<EKFState_T>::ErrorStateCov &_P = state_nonconst_new->P;
+      _P = 0.5*(_P.transpose()+_P);
 
       // residual covariance, (inverse)
       Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
-       (H_new * sP * H_new.transpose() + R_).inverse();
+       (H_new * _P * H_new.transpose() + R_).inverse();
 
 
       // fault detection (mahalanobis distance !! )
@@ -277,7 +275,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
       // MSF_WARN_STREAM("gb=" << beta);
       if(std::isnan(beta) || std::isinf(beta))
         return;
-
+      printf("gps_d\t%.2f\n", beta);
       // printf("position beta\t%.2f\n", beta);
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);
@@ -286,7 +284,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
           if (_gpsFault < FAULT_MINOR) {
             printf("gps FAULT_MINOR\n");
             _gpsFault = FAULT_MINOR;
-          }else if(_gpsFault >= FAULT_MINOR && beta > 10000) { //from default mah_threshold
+          }else if(_gpsFault >= FAULT_MINOR && beta > BETA_TABLE[nMeasurements]) { //from default mah_threshold
             printf("gps bad\n");
             _gpsFault = FAULT_SEVERE;
           }

@@ -148,6 +148,7 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
 
   mavros_msgs::OpticalFlowRadPtr flow_msg(
       new mavros_msgs::OpticalFlowRad());
+  if(std::isnan(agl_sensor)) return;
   // Fixed covariance will be set in measurement class -> MakeFromSensorReadingImpl.
   flow_msg->header = msg->header;
   flow_msg->integration_time_us = msg->integration_time_us;
@@ -180,17 +181,17 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementAGLCallba
       "*** velocity sensor got first agl measurement from topic "
           << this->topic_namespace_ << "/" << subAgl_.getTopic()
           << " ***");
-  static uint16_t num_sen = 0;
-  static float sum_sen = 0;
-  static float offset = 0;
-  if(num_sen<10) {
-    num_sen++;
-    sum_sen+=msg->local;
-  }
-  if(num_sen==10) {
-    offset = sum_sen/num_sen;
-  }
-  agl_sensor = msg->local - offset;
+  // static uint16_t num_sen = 0;
+  // static float sum_sen = 0;
+  // static float offset = 0;
+  // if(num_sen<10) {
+  //   num_sen++;
+  //   sum_sen+=msg->bottom_clearance;
+  // }
+  // if(num_sen==10) {
+  //   offset = sum_sen/num_sen;
+  // }
+  agl_sensor = msg->bottom_clearance /*- offset*/;
 }
 }  // namespace msf_position_sensor
 #endif  // VELOCITY_SENSORHANDLER_HPP_

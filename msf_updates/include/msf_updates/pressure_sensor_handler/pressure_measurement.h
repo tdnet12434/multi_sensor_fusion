@@ -106,7 +106,7 @@ struct PressureMeasurement : public PressureMeasurementBase {
 
     // Construct residuals.
     // Height.
-    r_old.block<1, 1>(0, 0) = (z_p_ /*+ state.Get<StateDefinition_T::b_p>()*/)
+    r_old.block<1, 1>(0, 0) = (z_p_ + state.Get<StateDefinition_T::b_p>())
         - state.Get<StateDefinition_T::p>().block<1, 1>(2, 0);
 
     // Call update step in base class.
