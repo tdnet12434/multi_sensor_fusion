@@ -108,7 +108,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       //test drive covariance with quality
 
       const double s_zv = n_zv_ * n_zv_/** 255 / (flow_q != 0 ? flow_q : 1)*/;
-      
+      MSF_WARN_STREAM_THROTTLE(1, "flow cov " << s_zv);
       R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zv, s_zv, 10)
           .finished().asDiagonal();
 
@@ -280,40 +280,40 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
 
 
-  // polynomial noise model, found using least squares fit
-  // h, h**2, v, v*h, v*h**2
-  const float p[5] = {0.04005232f, -0.00656446f, -0.26265873f,  0.13686658f, -0.00397357f};
+  // // polynomial noise model, found using least squares fit
+  // // h, h**2, v, v*h, v*h**2
+  // const float p[5] = {0.04005232f, -0.00656446f, -0.26265873f,  0.13686658f, -0.00397357f};
 
-  // prevent extrapolation past end of polynomial fit by bounding independent variables
-  float h = agl_ef;
-  float v = z_p_.norm();
-  const float h_min = 2.0f;
-  const float h_max = 8.0f;
-  const float v_min = 0.5f;
-  const float v_max = 1.0f;
+  // // prevent extrapolation past end of polynomial fit by bounding independent variables
+  // float h = agl_ef;
+  // float v = z_p_.norm();
+  // const float h_min = 2.0f;
+  // const float h_max = 8.0f;
+  // const float v_min = 0.5f;
+  // const float v_max = 1.0f;
 
-  if (h > h_max) {
-    h = h_max;
-  }
+  // if (h > h_max) {
+  //   h = h_max;
+  // }
 
-  if (h < h_min) {
-    h = h_min;
-  }
+  // if (h < h_min) {
+  //   h = h_min;
+  // }
 
-  if (v > v_max) {
-    v = v_max;
-  }
+  // if (v > v_max) {
+  //   v = v_max;
+  // }
 
-  if (v < v_min) {
-    v = v_min;
-  }
+  // if (v < v_min) {
+  //   v = v_min;
+  // }
 
-  // compute polynomial value
-  float flow_vxy_stddev = p[0] * h + p[1] * h * h + p[2] * v + p[3] * v * h + p[4] * v * h * h;
+  // // compute polynomial value
+  // float flow_vxy_stddev = p[0] * h + p[1] * h * h + p[2] * v + p[3] * v * h + p[4] * v * h * h;
 
-  const double s_zv = flow_vxy_stddev * flow_vxy_stddev;
-  R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zv, s_zv, 999)
-      .finished().asDiagonal();
+  // const double s_zv = flow_vxy_stddev * flow_vxy_stddev;
+  // R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zv, s_zv, 999)
+  //     .finished().asDiagonal();
 
 
 
@@ -443,7 +443,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
             let_correction = true;
           }
         }
-        MSF_WARN_STREAM_THROTTLE(1, "flow cov " << s_zv);
+        
         printf("flow_d\t\t%.2f\n", beta);
         if(let_correction) {
           // Call update step in base class.
