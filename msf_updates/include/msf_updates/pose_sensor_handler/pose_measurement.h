@@ -223,39 +223,38 @@ struct PoseMeasurement : public PoseMeasurementBase {
       state_in->ClearCrossCov<StatePwvIdx>();
 
 
-      //block of size p q .. start at   row,col
-      // Construct H matrix.
-      // Position:
-      H.block<3, 3>(0, kIdxstartcorr_p) = C_wv
-          * state.Get<StateLIdx>()(0);  // p
+    // Construct H matrix.
+    // Position:
+    H.block<3, 3>(0, kIdxstartcorr_p) = C_wv
+        * state.Get<StateLIdx>()(0);  // p
 
-      H.block<3, 3>(0, kIdxstartcorr_q) = -C_wv * C_q * pci_sk
+    H.block<3, 3>(0, kIdxstartcorr_q) = -C_wv * C_q * pci_sk
         * state.Get<StateLIdx>()(0);  // q
 
-      H.block<3, 1>(0, kIdxstartcorr_L) =
-          scalefix ?
-              Eigen::Matrix<double, 3, 1>::Zero() :
-              (C_wv * C_q * state.Get<StatePicIdx>() + C_wv
-                      * (-state.Get<StatePwvIdx>()
-                          + state.Get<StateDefinition_T::p>())).eval();  // L
+    H.block<3, 1>(0, kIdxstartcorr_L) =
+        scalefix ?
+            Eigen::Matrix<double, 3, 1>::Zero() :
+            (C_wv * C_q * state.Get<StatePicIdx>() + C_wv
+                    * (-state.Get<StatePwvIdx>()
+                        + state.Get<StateDefinition_T::p>())).eval();  // L
 
-      H.block<3, 3>(0, kIdxstartcorr_qwv) =
+    H.block<3, 3>(0, kIdxstartcorr_qwv) =
         driftwvattfix ?
             Eigen::Matrix<double, 3, 3>::Zero() : (-C_wv * skewold).eval();  // q_wv
 
-      H.block<3, 3>(0, kIdxstartcorr_pic) =
-          calibposfix ?
-              Eigen::Matrix<double, 3, 3>::Zero() :
-              (C_wv * C_q * state.Get<StateLIdx>()(0)).eval();  //p_ic
+    H.block<3, 3>(0, kIdxstartcorr_pic) =
+        calibposfix ?
+            Eigen::Matrix<double, 3, 3>::Zero() :
+            (C_wv * C_q * state.Get<StateLIdx>()(0)).eval();  //p_ic
 
 
-      // TODO (slynen): Check scale commenting
-      H.block<3, 3>(0, kIdxstartcorr_pwv) =
-          driftwvposfix ?
-              Eigen::Matrix<double, 3, 3>::Zero() :
-              (-Eigen::Matrix<double, 3, 3>::Identity()
-               * state.Get<StateLIdx>()(0)).eval();  //p_wv
-    
+    // TODO (slynen): Check scale commenting
+    H.block<3, 3>(0, kIdxstartcorr_pwv) =
+        driftwvposfix ?
+            Eigen::Matrix<double, 3, 3>::Zero() :
+            (-Eigen::Matrix<double, 3, 3>::Identity()
+            /* * state.Get<StateLIdx>()(0)*/).eval();  //p_wv
+
     // Attitude.
     H.block<3, 3>(3, kIdxstartcorr_q) = C_ci;  // q
 
@@ -271,9 +270,9 @@ struct PoseMeasurement : public PoseMeasurementBase {
 
     // This line breaks the filter if a position sensor in the global frame is
     // available or if we want to set a global yaw rotation.
-    // H.block<1, 1>(6, kIdxstartcorr_qwv + 2) = Eigen::Matrix<double, 1, 1>::
-    // Constant(driftwvattfix ? 0.0 : 1.00); // fix vision world yaw drift because unobservable otherwise (see PhD Thesis)
-    // //above thanabadee uncommend
+    //H.block<1, 1>(6, kIdxstartcorr_qwv + 2) = Eigen::Matrix<double, 1, 1>::
+    // Constant(driftwvattfix ? 0.0 : 1.0); // fix vision world yaw drift because unobservable otherwise (see PhD Thesis)
+
   }
 
   /**
