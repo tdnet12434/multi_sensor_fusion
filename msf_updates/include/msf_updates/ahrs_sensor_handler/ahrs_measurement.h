@@ -23,6 +23,7 @@
 #include <msf_core/msf_core.h>
 #include <msf_core/eigen_utils.h>
 #include <sensor_msgs/Imu.h>
+#include <sensor_msgs/MagneticField.h>
 
 namespace msf_updates {
 namespace ahrs_measurement {
@@ -77,11 +78,31 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
     H_old.setZero();
 
 
-    z_q_ = Eigen::Quaternion<double> (msg->orientation.w, msg->orientation.x, msg->orientation.y, msg->orientation.z);
+    z_q_ = Eigen::Quaternion<double> (msg->orientation.w, 
+                                      msg->orientation.x, 
+                                      msg->orientation.y, 
+                                      msg->orientation.z);
     
 
+    Eigen::Matrix<double, 3, 1> a = Eigen::Matrix<double, 3, 1>(
+                                      msg->linear_acceleration.x,
+                                      msg->linear_acceleration.y,
+                                      msg->linear_acceleration.z
+                                      );
+    Eigen::Matrix<double, 3, 1> mag = Eigen::Matrix<double, 3, 1>(
+                                      msg->angular_velocity.x * 1.0e7,
+                                      msg->angular_velocity.y * 1.0e7,
+                                      msg->angular_velocity.z * 1.0e7
+                                      );
+
+    Eigen::Matrix<double, 3, 1> g;
+    g << 0,0,9.81;
+    double normdif=fabs(a.norm()-g.norm());
+    double mnorm = fabs(mag.norm());
+    // printf("norm=%.2f\t\t%.2f\n", normdif, mnorm);
 
     const double s_zq = n_zq_ * n_zq_;
+    // const double s_zq = normdif*normdif;
     R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zq, s_zq, s_zq)
         .finished().asDiagonal();
 

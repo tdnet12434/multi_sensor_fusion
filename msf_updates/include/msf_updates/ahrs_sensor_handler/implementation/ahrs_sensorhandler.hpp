@@ -50,7 +50,9 @@ AhrsSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::AhrsSensorHandler(
   subImu_ =
       nh.subscribe<sensor_msgs::Imu>
   ("imu_input", 5, &AhrsSensorHandler::MeasurementCallback, this);
-
+  subMag_ =
+      nh.subscribe<sensor_msgs::MagneticField>
+  ("mag_input", 5, &AhrsSensorHandler::MagMeasurementCallback, this);
 
 
   z_q_.setIdentity();
@@ -116,8 +118,31 @@ void AhrsSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
    double time_now = msg->header.stamp.toSec();
   timestamp_previous_pose_ = time_now;
 
-  ProcessAhrsMeasurement(msg);
+  sensor_msgs::ImuPtr imu_msg(
+      new sensor_msgs::Imu());
+  imu_msg->header = msg->header;
+  imu_msg->linear_acceleration = msg->linear_acceleration;
+  imu_msg->orientation = msg->orientation;
+
+  //temperary
+  imu_msg->angular_velocity.x = mag(0);
+  imu_msg->angular_velocity.y = mag(1);
+  imu_msg->angular_velocity.z = mag(2);
+
+  ProcessAhrsMeasurement(imu_msg);
 }
+
+template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
+void AhrsSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MagMeasurementCallback(
+    const sensor_msgs::MagneticFieldConstPtr & msg) {
+
+  mag(0)= msg->magnetic_field.x;
+  mag(1)= msg->magnetic_field.y;
+  mag(2)= msg->magnetic_field.z;
+
+
+}
+
 
 }  // namespace msf_position_sensor
 #endif  // AHRS_SENSORHANDLER_HPP_

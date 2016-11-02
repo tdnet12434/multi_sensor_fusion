@@ -20,7 +20,7 @@
 #define AHRS_SENSOR_H_
 
 #include <msf_core/msf_sensormanagerROS.h>
-
+#include <sensor_msgs/MagneticField.h>
 #include <sensor_msgs/Imu.h>
 namespace msf_ahrs_sensor {
 
@@ -32,9 +32,10 @@ class AhrsSensorHandler : public msf_core::SensorHandler<
   Eigen::Quaternion<double> z_q_;  ///< Ahrs measurement.
   double n_zq_;  ///< Ahrs measurement noise.
 
+  Eigen::Matrix<double, 3, 1> mag;
 
   ros::Subscriber subImu_;
-
+  ros::Subscriber subMag_;
 
   bool use_fixed_covariance_;  ///< Use fixed covariance set by dynamic reconfigure.
   bool provides_absolute_measurements_;  ///< Does this sensor measure relative or absolute values.
@@ -44,6 +45,9 @@ class AhrsSensorHandler : public msf_core::SensorHandler<
 
   void MeasurementCallback(
     const sensor_msgs::ImuConstPtr & msg);
+
+  void MagMeasurementCallback(
+    const sensor_msgs::MagneticFieldConstPtr & msg);
 
  public:
   typedef MEASUREMENT_TYPE measurement_t;

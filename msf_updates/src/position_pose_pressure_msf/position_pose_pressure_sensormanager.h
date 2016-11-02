@@ -37,6 +37,7 @@
 #include <msf_updates/ahrs_sensor_handler/ahrs_measurement.h>
   bool zero_correction_all;
   bool zero_correction_bias;
+  bool zero_correction_pwv;
   double ahrs_noise=0;
   
  namespace msf_updates {
@@ -326,6 +327,7 @@ void Init(double scale) const {
     // have to shift vision-world later on, before applying the first position
     // measurement.
     p = p_pos - q.toRotationMatrix() * p_ip;
+    p_pos(2) = pressure_handler_->GetPressureMeasurement()(0);
     // p_wv = p - p_vision;  // Shift the vision frame so that it fits the position
     // measurement
 
@@ -469,6 +471,8 @@ void Init(double scale) const {
         StateDefinition_T::b_a>::value b_a_type;
     typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
         StateDefinition_T::b_w>::value b_w_type;
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::p_wv>::value p_wv_type;
     enum {
       indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
           msf_tmp::CorrectionStateLengthForType>::value,
@@ -479,6 +483,8 @@ void Init(double scale) const {
       indexOfState_b_a = msf_tmp::GetStartIndex<StateSequence_T, b_a_type,
           msf_tmp::CorrectionStateLengthForType>::value,
       indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_p_wv = msf_tmp::GetStartIndex<StateSequence_T, p_wv_type,
           msf_tmp::CorrectionStateLengthForType>::value
     };
     //get size of correction msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_
@@ -504,6 +510,14 @@ void Init(double scale) const {
       }
     }else{
       // msf_core_->StopProp(0);
+    }
+
+    if(zero_correction_pwv) {
+        for(int i =0; 
+                i<msf_tmp::StripConstReference<p_wv_type>::result_t::sizeInCorrection_; 
+                i++) {
+          correction(indexOfState_p_wv+i)   = 0;
+      }
     }
 
     // // if this uncommend, we should change cross_over node to scale with lpe odom because state z also not propagate as
@@ -675,7 +689,7 @@ void Init(double scale) const {
   // if(ahrs_wknoise!=0) {
   //   if (!gps_h && slam_h) {
   //     ahrs_wknoise *=1.0+0.005;
-  //     ahrs_wknoise = std::min(ahrs_wknoise,double(99.9));
+  //     ahrs_wknoise = std::min(ahrs_wknoise,double(1.0));
   //     ahrs_handler_->SetNoises(ahrs_wknoise);
   //   }else{
   //     ahrs_wknoise *=1.0-0.005;
@@ -687,7 +701,13 @@ void Init(double scale) const {
   // }
   // MSF_WARN_STREAM_THROTTLE(1,"ahs :" << ahrs_wknoise);
 
-
+  // If outdoor vision + GPS we can calibrate pwv , otherwise zero correction it
+  // (not complete .. it divergence when vs optical flow)
+  // if (gps_h && slam_h) { 
+  //   zero_correction_pwv = false;
+  // }else{
+  //   zero_correction_pwv = true;
+  // }
 
 
   // typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
