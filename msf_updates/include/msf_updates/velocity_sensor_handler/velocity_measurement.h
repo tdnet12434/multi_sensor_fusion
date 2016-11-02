@@ -186,7 +186,9 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     // Get rotation matrices.
     Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
         .toRotationMatrix();
-
+    // Get shift matrices
+    Eigen::Matrix<double, 3, 3> C_f = state.Get<StateDefinition_T::q_if>()
+        .toRotationMatrix();
     //w x y z preset drift 10 deg
     Eigen::Quaternion<double> q_b_i = qif_;
     q_b_i.normalize();
@@ -201,7 +203,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                               -(flow(0) - gyro(0)) * agl_ef,
                               -(flow(1) - gyro(1)) * agl_ef,
                                0);
-    Eigen::Matrix<double, 3, 1> delta_n = C_q * Shift_q* delta_b;
+    Eigen::Matrix<double, 3, 1> delta_n = Shift_q*delta_b;
 
     static Eigen::Matrix<double, 3, 1> flow_n;/// sum flow
     if(isabsolute_) {
@@ -223,22 +225,25 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
           StateDefinition_T::p>::value,
       idxstartcorr_v_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
           StateDefinition_T::v>::value,
+      idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+          StateDefinition_T::q>::value,
       idxstartcorr_L_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::L>::value
+          StateDefinition_T::L>::value,
+      idxstartcorr_qif_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+          StateDefinition_T::q_if>::value
     };
 
-    static Eigen::Matrix<double, 3, 1> z_p_old_=z_p_; 
     Eigen::Matrix<double, 3, 3> ident = (Eigen::Matrix<double, 3, 1>() << 1, 1, 0).finished().asDiagonal();
     // velocity:
-
+    Eigen::Matrix<double, 3, 3> skew_v = Skew(state.Get<StateDefinition_T::v>());
+    Eigen::Matrix<double, 3, 1> Rtv = C_q.transpose()*state.Get<StateDefinition_T::v>();
+    Eigen::Matrix<double, 3, 3> skew_Rtv = Skew(Rtv);
     if(isabsolute_)
       {
-        H.block<3, 3>(0, idxstartcorr_v_) =  ident;
-        // H.block<3, 1>(0, idxstartcorr_L_) =  (z_p_old_ 
-        //                                     + C_q.transpose()
-        //                                         *state.Get<StateDefinition_T::v>()
-        //                                         *0.1).eval();
-        z_p_old_ = z_p_;
+        H.block<3, 3>(0, idxstartcorr_v_) =  C_f.transpose()*C_q.transpose();
+        H.block<3, 3>(0, idxstartcorr_q_) =  C_f.transpose()*C_q.transpose()*skew_v;
+        H.block<3, 3>(0, idxstartcorr_qif_) =  C_f.transpose()*skew_Rtv;
+
       } 
     else
       {
@@ -319,8 +324,12 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
 
       // Get rotation matrices.
-      // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-      //     .toRotationMatrix();
+      Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
+          .toRotationMatrix();
+
+      // Get rotation matrices.
+      Eigen::Matrix<double, 3, 3> C_f = state.Get<StateDefinition_T::q_if>()
+          .toRotationMatrix();
       //C_q.transpose() is turn body to earth frame 
 
 
@@ -352,7 +361,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       // // Velocity
       // if(flow_healhy)
         r_old.block<3, 1>(0, 0) = z_p_
-                            - state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
+                            - C_f.transpose()*C_q.transpose()*state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
         // Eigen::Matrix<double,3,1> state_v = state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
         // MSF_INFO_STREAM(z_p_ << "----" << state_v);
       // else
@@ -443,7 +452,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
             let_correction = true;
           }
         }
-        
+
         printf("flow_d\t\t%.2f\n", beta);
         if(let_correction) {
           // Call update step in base class.

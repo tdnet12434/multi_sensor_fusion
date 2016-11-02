@@ -37,6 +37,7 @@
 #include <msf_updates/ahrs_sensor_handler/ahrs_measurement.h>
   bool zero_correction_all;
   bool zero_correction_bias;
+  double ahrs_noise=0;
   
  namespace msf_updates {
 
@@ -170,6 +171,7 @@ private:
     velocity_handler_->SetDelay(config.velocity_flowDelay);
     velocity_handler_->SetMinQ(config.velocity_flowMinQ);
 
+    ahrs_noise = config.ahrs_q;
     ahrs_handler_->SetNoises(config.ahrs_q);
 
     double yawinit = config_.velocity_flowYaw / 180 * M_PI;
@@ -239,9 +241,9 @@ void Init(double scale) const {
 
     flow_pos = velocity_handler_->GetVelocityMeasurement();
 
-    b_p << pose_handler_->GetPositionMeasurement()(2) / scale
-            - pressure_handler_->GetPressureMeasurement()(0);  /// Pressure drift state
-
+    // b_p << pose_handler_->GetPositionMeasurement()(2) / scale
+    //         - pressure_handler_->GetPressureMeasurement()(0);  /// Pressure drift state
+    b_p << 0, 0, 0;
 
     // p_vc_2 = pose_2_handler_->GetPositionMeasurement();
     // q_vc_2 = pose_2_handler_->GetAttitudeMeasurement();
@@ -340,7 +342,7 @@ void Init(double scale) const {
     shared_ptr < msf_core::MSF_InitMeasurement<EKFState_T>
     > meas(new msf_core::MSF_InitMeasurement<EKFState_T>(true));
 
-    meas->SetStateInitValue < StateDefinition_T::p > (p_zero);
+    meas->SetStateInitValue < StateDefinition_T::p > (p_pos);
     meas->SetStateInitValue < StateDefinition_T::v > (v);
     meas->SetStateInitValue < StateDefinition_T::q > (q);
     meas->SetStateInitValue < StateDefinition_T::b_w > (b_w);
@@ -353,6 +355,7 @@ void Init(double scale) const {
     meas->SetStateInitValue < StateDefinition_T::p_ic > (p_ic);
     meas->SetStateInitValue < StateDefinition_T::p_ip > (p_ip);
     meas->SetStateInitValue < StateDefinition_T::b_p > (b_p);
+    meas->SetStateInitValue < StateDefinition_T::q_if > (q_wv); //<<<must be identity
 
 
     // meas->SetStateInitValue < StateDefinition_T::L_2
@@ -397,7 +400,9 @@ void Init(double scale) const {
     const msf_core::Vector1 nb_p = msf_core::Vector1::Constant(
         config_.press_noise_bias_p);
 
-
+    const msf_core::Vector3 nqifv = msf_core::Vector3( 0.0,
+                                                       0.0,
+                                                       config_.flow_noise_q_if);
     // const msf_core::Vector3 nqwvv_2 = msf_core::Vector3::Constant(
     //   config_.pose_noise_q_wv_2);
     // const msf_core::Vector3 npwvv_2 = msf_core::Vector3::Constant(
@@ -425,7 +430,8 @@ void Init(double scale) const {
     state.GetQBlock<StateDefinition_T::b_p>() = 
     (dt * nb_p.cwiseProduct(nb_p)).asDiagonal();
 
-
+    state.GetQBlock<StateDefinition_T::q_if>() =
+    (dt * nqifv.cwiseProduct(nqifv)).asDiagonal();
     // state.GetQBlock<StateDefinition_T::L_2>() = (dt * n_L_2.cwiseProduct(n_L_2))
     // .asDiagonal();
     // state.GetQBlock<StateDefinition_T::q_wv_2>() =
@@ -566,9 +572,10 @@ void Init(double scale) const {
 
     /// Check timeout each sensor
     bool slam_h, gps_h, flow_h;
-    double time_now =          ros::Time::now().toSec();
-    double lasttime_pose =     pose_handler_->GetLasttime();
+    double time_now          = ros::Time::now().toSec();
+    double lasttime_pose     = pose_handler_->GetLasttime();
     double lasttime_position = position_handler_->GetLasttime();
+    double gps_hacc          = position_handler_->GetGpscov();
     double lasttime_velocity = velocity_handler_->GetLasttime();
 
     slam_h = gps_h = flow_h = false;
@@ -600,7 +607,7 @@ void Init(double scale) const {
 
 
   if(time_now - lasttime_position > 1.0 || 
-   lasttime_position == 0)
+   lasttime_position == 0 || gps_hacc > 100)
   { 
     gps_h = false;
     MSF_WARN_STREAM_ONCE("GPS timeout >1s" 
@@ -663,8 +670,22 @@ void Init(double scale) const {
 
 
 
-
-
+  // Reducing trust of attitude from PX4 when indoor
+  // static double ahrs_wknoise=(ahrs_noise!=0 ? ahrs_noise : 0);
+  // if(ahrs_wknoise!=0) {
+  //   if (!gps_h && slam_h) {
+  //     ahrs_wknoise *=1.0+0.005;
+  //     ahrs_wknoise = std::min(ahrs_wknoise,double(99.9));
+  //     ahrs_handler_->SetNoises(ahrs_wknoise);
+  //   }else{
+  //     ahrs_wknoise *=1.0-0.005;
+  //     ahrs_wknoise = std::max(ahrs_wknoise,ahrs_noise);
+  //     ahrs_handler_->SetNoises(ahrs_wknoise);
+  //   }
+  // }else{
+  //   ahrs_wknoise = ahrs_noise;
+  // }
+  // MSF_WARN_STREAM_THROTTLE(1,"ahs :" << ahrs_wknoise);
 
 
 

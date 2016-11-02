@@ -72,8 +72,6 @@ struct PoseMeasurement : public PoseMeasurementBase {
       tlast = time;
     }
 
-    //design for magnetometer 
-    use_position_measurement = (msg->pose.covariance[0] > 4 ? false:true);
 
     if (fixed_covariance_) {  // Take fix covariance from reconfigure GUI.
       const double s_zp = n_zp_ * n_zp_;
@@ -121,7 +119,6 @@ struct PoseMeasurement : public PoseMeasurementBase {
   Eigen::Matrix<double, 3, 1> z_p_;  /// Position measurement camera seen from world.
   double n_zp_, n_zq_;  /// Position and attitude measurement noise.
 
-  bool use_position_measurement;
   bool measurement_world_sensor_;
   bool fixed_covariance_;
   msf_updates::PoseDistorter::Ptr distorter_;
@@ -225,15 +222,7 @@ struct PoseMeasurement : public PoseMeasurementBase {
     if (driftwvposfix)
       state_in->ClearCrossCov<StatePwvIdx>();
 
-    if(!use_position_measurement) 
-    {
-      H.block<3, 3>(0, kIdxstartcorr_p) = Eigen::Matrix<double, 3, 3>::Zero();
-      H.block<3, 3>(0, kIdxstartcorr_q) = Eigen::Matrix<double, 3, 3>::Zero();
-      H.block<3, 1>(0, kIdxstartcorr_L) = Eigen::Matrix<double, 3, 1>::Zero();
-      H.block<3, 3>(0, kIdxstartcorr_qwv) = Eigen::Matrix<double, 3, 3>::Zero();
-      H.block<3, 3>(0, kIdxstartcorr_pic) = Eigen::Matrix<double, 3, 3>::Zero();
-      H.block<3, 3>(0, kIdxstartcorr_pwv) = Eigen::Matrix<double, 3, 3>::Zero();
-    }else{
+
       //block of size p q .. start at   row,col
       // Construct H matrix.
       // Position:
@@ -266,7 +255,7 @@ struct PoseMeasurement : public PoseMeasurementBase {
               Eigen::Matrix<double, 3, 3>::Zero() :
               (-Eigen::Matrix<double, 3, 3>::Identity()
                * state.Get<StateLIdx>()(0)).eval();  //p_wv
-    }
+    
     // Attitude.
     H.block<3, 3>(3, kIdxstartcorr_q) = C_ci;  // q
 
@@ -282,9 +271,9 @@ struct PoseMeasurement : public PoseMeasurementBase {
 
     // This line breaks the filter if a position sensor in the global frame is
     // available or if we want to set a global yaw rotation.
-    H.block<1, 1>(6, kIdxstartcorr_qwv + 2) = Eigen::Matrix<double, 1, 1>::
-    Constant(driftwvattfix ? 0.0 : 1.00); // fix vision world yaw drift because unobservable otherwise (see PhD Thesis)
-    //above thanabadee uncommend
+    // H.block<1, 1>(6, kIdxstartcorr_qwv + 2) = Eigen::Matrix<double, 1, 1>::
+    // Constant(driftwvattfix ? 0.0 : 1.00); // fix vision world yaw drift because unobservable otherwise (see PhD Thesis)
+    // //above thanabadee uncommend
   }
 
   /**

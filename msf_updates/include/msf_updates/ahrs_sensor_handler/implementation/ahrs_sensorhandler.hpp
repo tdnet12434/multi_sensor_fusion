@@ -104,6 +104,10 @@ void AhrsSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
     const sensor_msgs::ImuConstPtr & msg) {
   this->SequenceWatchDog(msg->header.seq, subImu_.getTopic());
 
+  if (msg->header.seq % 10 != 0) {
+    return;
+  }
+  
   MSF_INFO_STREAM_ONCE(
       "*** ahrs sensor got first measurement from topic "
           << this->topic_namespace_ << "/" << subImu_.getTopic()

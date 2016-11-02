@@ -37,7 +37,8 @@ enum StateDefinition {  //must not manually set the enum values!
   q_ic,
   p_ic,
   p_ip,
-  b_p
+  b_p,
+  q_if
 };
 
 namespace {
@@ -66,7 +67,9 @@ typedef boost::fusion::vector<
     msf_core::StateVar_T<Eigen::Quaternion<double>, q_ic>,  ///< Rotation from the IMU frame to the camera frame expressed in the IMU frame.
     msf_core::StateVar_T<Eigen::Matrix<double, 3, 1>, p_ic>,  ///< Translation from the IMU frame to the camera frame expressed in the IMU frame.
     msf_core::StateVar_T<Eigen::Matrix<double, 3, 1>, p_ip>,  ///< Translation from the IMU frame to the position sensor frame expressed in the IMU frame.
-    msf_core::StateVar_T<Eigen::Matrix<double, 1, 1>, b_p>  ///< Pressure sensor bias.
+    msf_core::StateVar_T<Eigen::Matrix<double, 1, 1>, b_p>,  ///< Pressure sensor bias.
+    msf_core::StateVar_T<Eigen::Quaternion<double>, q_if>  ///< Rotation from the IMU frame to the flow frame expressed in the IMU frame.
+
 
 > fullState_T;
 }
