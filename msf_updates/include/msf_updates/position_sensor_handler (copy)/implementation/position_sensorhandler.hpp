@@ -116,8 +116,13 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessPositionMeasu
   }
 
   // Get all the fixed states and set flag bits.
-  // MANAGER_TYPE* mngr = dynamic_cast<MANAGER_TYPE*>(&manager_);
+  MANAGER_TYPE* mngr = dynamic_cast<MANAGER_TYPE*>(&manager_);
 
+  if (mngr) {
+    if (mngr->Getcfg().position_fixed_p_ip) {
+      fixedstates |= 1 << msf_updates::EKFState::StateDefinition_T::p_ip;
+    }
+  }
 
   shared_ptr < MEASUREMENT_TYPE
       > meas(

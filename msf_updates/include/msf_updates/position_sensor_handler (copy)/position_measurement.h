@@ -28,7 +28,7 @@
 namespace msf_updates {
 namespace position_measurement {
 enum {
-  nMeasurements = 4
+  nMeasurements = 6
 };
 
 
@@ -82,10 +82,12 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
     // Get measurement.
     z_p_ = Eigen::Matrix<double, 3, 1>(msg->pose.pose.position.x, 
-                                       msg->pose.pose.position.y,0);
+                                       msg->pose.pose.position.y,
+                                       0);
 
     z_v_ = Eigen::Matrix<double, 3, 1>(msg->twist.twist.linear.x, 
-                                       msg->twist.twist.linear.y,0);
+                                       msg->twist.twist.linear.y,
+                                       0);
 
     // printf("vx = %.3f vy = %.3f\n", z_v_(0), z_v_(1));
     double s_zp;
@@ -96,7 +98,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
       s_zp = n_zp_ * n_zp_;
       s_zv = n_zp_ * n_zp_*0.25;
       
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, s_zv, s_zv)
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zv, s_zv, 9999)
           .finished().asDiagonal();
 
     } else {  // Tke covariance from sensor.
@@ -111,9 +113,9 @@ struct PositionMeasurement : public PositionMeasurementBase {
       GPShacc = msg->pose.covariance[0];
       s_zp = msg->pose.covariance[0] * msg->pose.covariance[0];
       s_zv = msg->pose.covariance[21] * msg->pose.covariance[21];
-      // printf("p cov %.4f- v cov %.2f", s_zp, s_zv);
+      // printf("position covariance %.4f", s_zp);
 
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, s_zv, s_zv)
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, 9999, s_zv, s_zv, 9999)
           .finished().asDiagonal();
       // R_.block<3, 3>(0, 0) = msf_core::Matrix3(&msg->covariance[0]);
 
@@ -161,9 +163,12 @@ struct PositionMeasurement : public PositionMeasurementBase {
     H.setZero();
 
     // Get rotation matrices.
-    // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-    //     .conjugate().toRotationMatrix();
+    Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
+        .conjugate().toRotationMatrix();
 
+    // Preprocess for elements in H matrix.
+    Eigen::Matrix<double, 3, 3> p_prism_imu_sk = Skew(
+        state.Get<StateDefinition_T::p_ip>());
 
     // Get indices of states in error vector.
     enum {
@@ -172,16 +177,31 @@ struct PositionMeasurement : public PositionMeasurementBase {
       idxstartcorr_v_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
           StateDefinition_T::v>::value,
       idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::q>::value
+          StateDefinition_T::q>::value,
+      idxstartcorr_p_pi_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+          StateDefinition_T::p_ip>::value,
     };
 
+    bool fixed_p_pos_imu = (fixedstates_ & 1 << StateDefinition_T::p_ip);
+
+    // Clear crosscorrelations.
+    if (fixed_p_pos_imu)
+      state_in->ClearCrossCov<StateDefinition_T::p_ip>();
 
     // Construct H matrix:
     // Position:
-    H.block<2, 2>(0, idxstartcorr_p_) = Eigen::Matrix<double, 2, 2>::Identity();  // p
+    H.block<3, 3>(0, idxstartcorr_p_) = Eigen::Matrix<double, 3, 3>::Identity();  // p
+    H.block<1, 1>(0, idxstartcorr_p_+2)(0) = 0;
+    H.block<3, 3>(0, idxstartcorr_q_) = -C_q.transpose() * p_prism_imu_sk;  // q
+
+    H.block<3, 3>(0, idxstartcorr_p_pi_) =
+        fixed_p_pos_imu ?
+            Eigen::Matrix<double, 3, 3>::Zero() : (C_q.transpose()).eval();  //p_pos_imu_
+
 
     // Velocity:
-    H.block<2, 2>(2, idxstartcorr_v_) = Eigen::Matrix<double, 2, 2>::Identity();  // v
+    H.block<3, 3>(3, idxstartcorr_v_) = Eigen::Matrix<double, 3, 3>::Identity();  // v
+    H.block<1, 1>(3, idxstartcorr_v_+2)(0) = 0;
 
 
 
@@ -205,16 +225,18 @@ struct PositionMeasurement : public PositionMeasurementBase {
       CalculateH(state_nonconst_new, H_new);
 
       // Get rotation matrices.
-      // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-      //     .conjugate().toRotationMatrix();
-
+      Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
+          .conjugate().toRotationMatrix();
 
       // Construct residuals:
       // Position
-      r_old.block<2, 1>(0, 0) = z_p_.block<2,1>(0,0)- state.Get<StateDefinition_T::p>().block<2,1>(0,0);
+      r_old.block<3, 1>(0, 0) = z_p_
+          - (state.Get<StateDefinition_T::p>()
+              + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       
       // Velocity
-      r_old.block<2, 1>(2, 0) = z_v_.block<2,1>(0,0)- state.Get<StateDefinition_T::v>().block<2,1>(0,0);
+      r_old.block<3, 1>(3, 0) = z_v_
+          - state.Get<StateDefinition_T::v>();
 
 
       if (!CheckForNumeric(r_old, "r_old")) {
@@ -255,7 +277,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
       // MSF_WARN_STREAM("gb=" << beta);
       if(std::isnan(beta) || std::isinf(beta))
         return;
-      // printf("gps_d\t%.2f\n", beta);
+      printf("gps_d\t%.2f\n", beta);
       // printf("position beta\t%.2f\n", beta);
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);

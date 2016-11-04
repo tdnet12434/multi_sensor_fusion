@@ -453,7 +453,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
           }
         }
 
-        printf("flow_d\t\t%.2f\n", beta);
+        // printf("flow_d\t\t%.2f\n", beta);
         if(let_correction) {
           // Call update step in base class.
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,

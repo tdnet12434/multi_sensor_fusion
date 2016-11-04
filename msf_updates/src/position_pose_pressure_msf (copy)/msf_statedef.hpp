@@ -57,6 +57,7 @@ typedef boost::fusion::vector<
 
     // States not varying during propagation.
     msf_core::StateVar_T<Eigen::Matrix<double, 1, 1>, L>,     ///< Visual scale.
+        msf_core::AuxiliaryNonTemporalDrifting>,  ///< Translation from the world frame to the frame in which the pose is measured expressed in the world frame.
     msf_core::StateVar_T<Eigen::Matrix<double, 3, 1>, p_wv>,  ///< Vision world position drift.
     msf_core::StateVar_T<Eigen::Matrix<double, 1, 1>, b_p>,  ///< Pressure sensor bias.
     msf_core::StateVar_T<Eigen::Quaternion<double>, q_if>  ///< Rotation from the IMU frame to the flow frame expressed in the IMU frame.

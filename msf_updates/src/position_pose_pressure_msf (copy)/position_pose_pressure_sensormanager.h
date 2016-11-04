@@ -270,7 +270,40 @@ void Init(double scale) const {
         "No measurements received yet to initialize flow position - using [0 0 0]");
 
     ros::NodeHandle pnh("~");
+    pnh.param("pose_sensor/init/p_ic/x", p_ic[0], 0.0);
+    pnh.param("pose_sensor/init/p_ic/y", p_ic[1], 0.0);
+    pnh.param("pose_sensor/init/p_ic/z", p_ic[2], 0.0);
 
+    pnh.param("pose_sensor/init/q_ic/w", q_ic.w(), 1.0);
+    pnh.param("pose_sensor/init/q_ic/x", q_ic.x(), 0.0);
+    pnh.param("pose_sensor/init/q_ic/y", q_ic.y(), 0.0);
+    pnh.param("pose_sensor/init/q_ic/z", q_ic.z(), 0.0);
+    q_ic.normalize();
+
+    MSF_INFO_STREAM("p_ic: " << p_ic.transpose());
+    MSF_INFO_STREAM("q_ic: " << STREAMQUAT(q_ic));
+
+    //pose2-----------------------------------------
+
+    pnh.param("pose2_sensor/init/p_ic/x", p_ic_2[0], 0.0);
+    pnh.param("pose2_sensor/init/p_ic/y", p_ic_2[1], 0.0);
+    pnh.param("pose2_sensor/init/p_ic/z", p_ic_2[2], 0.0);
+
+    pnh.param("pose2_sensor/init/q_ic/w", q_ic_2.w(), 1.0);
+    pnh.param("pose2_sensor/init/q_ic/x", q_ic_2.x(), 0.0);
+    pnh.param("pose2_sensor/init/q_ic/y", q_ic_2.y(), 0.0);
+    pnh.param("pose2_sensor/init/q_ic/z", q_ic_2.z(), 0.0);
+    q_ic_2.normalize();
+
+    MSF_INFO_STREAM("p_ic_2: " << p_ic_2.transpose());
+    MSF_INFO_STREAM("q_ic_2: " << STREAMQUAT(q_ic_2));
+
+
+
+
+    pnh.param("position_sensor/init/p_ip/x", p_ip[0], 0.0);
+    pnh.param("position_sensor/init/p_ip/y", p_ip[1], 0.0);
+    pnh.param("position_sensor/init/p_ip/z", p_ip[2], 0.0);
 
     // Calculate initial attitude and position based on sensor measurements
     // here we take the attitude from the pose sensor and augment it with
@@ -293,7 +326,7 @@ void Init(double scale) const {
     //TODO (slynen): what if there is no initial position measurement? Then we
     // have to shift vision-world later on, before applying the first position
     // measurement.
-    p = p_pos;
+    p = p_pos - q.toRotationMatrix() * p_ip;
     p_pos(2) = pressure_handler_->GetPressureMeasurement()(0);
     // p_wv = p - p_vision;  // Shift the vision frame so that it fits the position
     // measurement
@@ -318,7 +351,11 @@ void Init(double scale) const {
     meas->SetStateInitValue < StateDefinition_T::b_a > (b_a);
     meas->SetStateInitValue < StateDefinition_T::L
     > (Eigen::Matrix<double, 1, 1>::Constant(scale));
+    meas->SetStateInitValue < StateDefinition_T::q_wv > (q_wv);
     meas->SetStateInitValue < StateDefinition_T::p_wv > (p_wv);
+    meas->SetStateInitValue < StateDefinition_T::q_ic > (q_ic);
+    meas->SetStateInitValue < StateDefinition_T::p_ic > (p_ic);
+    meas->SetStateInitValue < StateDefinition_T::p_ip > (p_ip);
     meas->SetStateInitValue < StateDefinition_T::b_p > (b_p);
     meas->SetStateInitValue < StateDefinition_T::q_if > (q_wv); //<<<must be identity
 
@@ -352,8 +389,14 @@ void Init(double scale) const {
   }
 
   virtual void CalculateQAuxiliaryStates(EKFState_T& state, double dt) const {
+    const msf_core::Vector3 nqwvv = msf_core::Vector3::Constant(
+      config_.pose_noise_q_wv);
     const msf_core::Vector3 npwvv = msf_core::Vector3::Constant(
       config_.pose_noise_p_wv);
+    const msf_core::Vector3 nqicv = msf_core::Vector3::Constant(
+      config_.pose_noise_q_ic);
+    const msf_core::Vector3 npicv = msf_core::Vector3::Constant(
+      config_.pose_noise_p_ic);
     const msf_core::Vector1 n_L = msf_core::Vector1::Constant(
       config_.pose_noise_scale);
     const msf_core::Vector1 nb_p = msf_core::Vector1::Constant(
@@ -378,10 +421,17 @@ void Init(double scale) const {
     // these then get copied by the core to the correct places in Qd.
     state.GetQBlock<StateDefinition_T::L>() = (dt * n_L.cwiseProduct(n_L))
     .asDiagonal();
+    state.GetQBlock<StateDefinition_T::q_wv>() =
+    (dt * nqwvv.cwiseProduct(nqwvv)).asDiagonal();
     state.GetQBlock<StateDefinition_T::p_wv>() =
     (dt * npwvv.cwiseProduct(npwvv)).asDiagonal();
+    state.GetQBlock<StateDefinition_T::q_ic>() =
+    (dt * nqicv.cwiseProduct(nqicv)).asDiagonal();
+    state.GetQBlock<StateDefinition_T::p_ic>() =
+    (dt * npicv.cwiseProduct(npicv)).asDiagonal();
     state.GetQBlock<StateDefinition_T::b_p>() = 
     (dt * nb_p.cwiseProduct(nb_p)).asDiagonal();
+
     state.GetQBlock<StateDefinition_T::q_if>() =
     (dt * nqifv.cwiseProduct(nqifv)).asDiagonal();
     // state.GetQBlock<StateDefinition_T::L_2>() = (dt * n_L_2.cwiseProduct(n_L_2))
@@ -556,6 +606,10 @@ void Init(double scale) const {
       Eigen::Matrix<double, 3, 1> p_wv_;
       p_wv_.setZero();
       delaystate.Set < StateDefinition_T::p_wv > (p_wv_);
+
+      Eigen::Quaternion<double>  q_wv_;
+      q_wv_.setIdentity();
+      delaystate.Set < StateDefinition_T::q_wv > (q_wv_);
 
       //set slam bad health
       slam_h = false;

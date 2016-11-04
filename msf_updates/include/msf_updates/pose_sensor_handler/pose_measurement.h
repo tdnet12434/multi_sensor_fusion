@@ -27,7 +27,7 @@
 namespace msf_updates {
 namespace pose_measurement {
 enum {
-  nMeasurements = 7
+  nMeasurements = 6
 };
 /**
  * \brief A measurement as provided by a pose tracking algorithm.
@@ -37,9 +37,6 @@ typedef msf_core::MSF_Measurement<geometry_msgs::PoseWithCovarianceStamped,
 
 template<
     int StateLIdx = EKFState::StateDefinition_T::L,
-    int StateQicIdx = EKFState::StateDefinition_T::q_ic,
-    int StatePicIdx = EKFState::StateDefinition_T::p_ic,
-    int StateQwvIdx = EKFState::StateDefinition_T::q_wv,
     int StatePwvIdx = EKFState::StateDefinition_T::p_wv
     >
 struct PoseMeasurement : public PoseMeasurementBase {
@@ -63,21 +60,12 @@ struct PoseMeasurement : public PoseMeasurementBase {
                                      msg->pose.pose.orientation.y,
                                      msg->pose.pose.orientation.z);
 
-    if (distorter_) {
-      static double tlast = 0;
-      if (tlast != 0) {
-        double dt = time - tlast;
-        distorter_->Distort(z_p_, z_q_, dt);
-      }
-      tlast = time;
-    }
-
 
     if (fixed_covariance_) {  // Take fix covariance from reconfigure GUI.
       const double s_zp = n_zp_ * n_zp_;
       const double s_zq = n_zq_ * n_zq_;
       R_ =
-          (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, s_zp, s_zq, s_zq, s_zq, 1e-6)
+          (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, s_zp, s_zq, s_zq, s_zq)
               .finished().asDiagonal();
     } else {  // Take covariance from sensor.
       R_.block<6, 6>(0, 0) = Eigen::Matrix<double, 6, 6>(
@@ -93,23 +81,6 @@ struct PoseMeasurement : public PoseMeasurementBase {
       // Clear cross-correlations between q and p.
       R_.block<3, 3>(0, 3) = Eigen::Matrix<double, 3, 3>::Zero();
       R_.block<3, 3>(3, 0) = Eigen::Matrix<double, 3, 3>::Zero();
-      R_(6, 6) = 1e-6;  // q_wv yaw-measurement noise
-
-      /*************************************************************************************/
-      // Use this if your pose sensor is ethzasl_ptam (www.ros.org/wiki/ethzasl_ptam)
-      // ethzasl_ptam publishes the camera pose as the world seen from the camera.
-      if (!measurement_world_sensor_) {
-        Eigen::Matrix<double, 3, 3> C_zq = z_q_.toRotationMatrix();
-        z_q_ = z_q_.conjugate();
-        z_p_ = -C_zq.transpose() * z_p_;
-
-        Eigen::Matrix<double, 6, 6> C_cov(Eigen::Matrix<double, 6, 6>::Zero());
-        C_cov.block<3, 3>(0, 0) = C_zq;
-        C_cov.block<3, 3>(3, 3) = C_zq;
-
-        R_.block<6, 6>(0, 0) = C_cov.transpose() * R_.block<6, 6>(0, 0) * C_cov;
-      }
-      /*************************************************************************************/
     }
   }
  public:
@@ -130,9 +101,6 @@ struct PoseMeasurement : public PoseMeasurementBase {
 
   enum AuxState {
     L = StateLIdx,
-    q_ic = StateQicIdx,
-    p_ic = StatePicIdx,
-    q_wv = StateQwvIdx,
     p_wv = StatePwvIdx
   };
 
@@ -164,21 +132,9 @@ struct PoseMeasurement : public PoseMeasurementBase {
     H.setZero();
 
     // Get rotation matrices.
-    Eigen::Matrix<double, 3, 3> C_wv = state.Get<StateQwvIdx>()
-        .toRotationMatrix();
     Eigen::Matrix<double, 3, 3> C_wi = state.Get<StateDefinition_T::q>()
         .toRotationMatrix();
 
-    Eigen::Matrix<double, 3, 3> C_ci = state.Get<StateQicIdx>()
-        .conjugate().toRotationMatrix();
-
-    // Preprocess for elements in H matrix.
-    Eigen::Matrix<double, 3, 1> vecold =
-        (-state.Get<StatePwvIdx>() + state.Get<StateDefinition_T::p>()
-            + C_wi * state.Get<StatePicIdx>()) * state.Get<StateLIdx>();
-    Eigen::Matrix<double, 3, 3> skewold = Skew(vecold);
-
-    Eigen::Matrix<double, 3, 3> pci_sk = Skew(state.Get<StatePicIdx>());
 
 
     // Get indices of states in error vector.
@@ -192,89 +148,42 @@ struct PoseMeasurement : public PoseMeasurementBase {
 
       kIdxstartcorr_L = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
           StateLIdx>::value,
-      kIdxstartcorr_qwv = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateQwvIdx>::value,
       kIdxstartcorr_pwv = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StatePwvIdx>::value,
-      kIdxstartcorr_qic = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateQicIdx>::value,
-      kIdxstartcorr_pic = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StatePicIdx>::value,
+          StatePwvIdx>::value
     };
 
     // Read the fixed states flags.
     bool scalefix = (fixedstates_ & 1 << StateLIdx);
-    bool calibposfix = (fixedstates_ & 1 << StatePicIdx);
-    bool calibattfix = (fixedstates_ & 1 << StateQicIdx);
-    bool driftwvattfix = (fixedstates_ & 1 << StateQwvIdx);
     bool driftwvposfix = (fixedstates_ & 1 << StatePwvIdx);
 
     // Set crosscov to zero for fixed states.
     if (scalefix)
       state_in->ClearCrossCov<StateLIdx>();
-    if (calibposfix)
-      state_in->ClearCrossCov<StatePicIdx>();
-    if (calibattfix)
-      state_in->ClearCrossCov<StateQicIdx>();
-    if (driftwvattfix)
-      state_in->ClearCrossCov<StateQwvIdx>();
     if (driftwvposfix)
       state_in->ClearCrossCov<StatePwvIdx>();
 
 
     // Construct H matrix.
     // Position:
-    H.block<3, 3>(0, kIdxstartcorr_p) = C_wv.transpose()
-        * state.Get<StateLIdx>()(0);  // p
-
-    H.block<3, 3>(0, kIdxstartcorr_q) = -C_wv.transpose() * C_wi * pci_sk
-        * state.Get<StateLIdx>()(0);  // q
+    H.block<3, 3>(0, kIdxstartcorr_p) = Eigen::Matrix<double, 3, 3>::Identity()*state.Get<StateLIdx>()(0);  // p
 
     if (scalefix) {
       H.block<3, 1>(0, kIdxstartcorr_L).setZero();
     } else {
-      H.block<3, 1>(0, kIdxstartcorr_L) =
-          (C_wv.transpose() * C_wi * state.Get<StatePicIdx>() +
-              C_wv.transpose() *
-              (-state.Get<StatePwvIdx>() + state.Get<StateDefinition_T::p>())).eval();  // L
+      H.block<3, 1>(0, kIdxstartcorr_L) =-state.Get<StatePwvIdx>() + state.Get<StateDefinition_T::p>();  // L
     }
 
-    if (driftwvattfix) {
-      H.block<3, 3>(0, kIdxstartcorr_qwv).setZero();
-    } else {
-      H.block<3, 3>(0, kIdxstartcorr_qwv) = (-C_wv.transpose() * skewold).eval();  // q_wv
-    }
-
-    if (calibposfix) {
-      H.block<3, 3>(0, kIdxstartcorr_pic).setZero();
-    } else {
-      H.block<3, 3>(0, kIdxstartcorr_pic) =
-          (C_wv.transpose() * C_wi * state.Get<StateLIdx>()(0)).eval();  //p_ic
-    }
 
     // TODO (slynen): Check scale commenting
     if (driftwvposfix) {
       H.block<3, 3>(0, kIdxstartcorr_pwv).setZero();
     } else {
       H.block<3, 3>(0, kIdxstartcorr_pwv) = (-Eigen::Matrix<double, 3, 3>::Identity()
-          /* * state.Get<StateLIdx>()(0)*/).eval();  //p_wv
+           * state.Get<StateLIdx>()(0)).eval();  //p_wv
     }
 
     // Attitude.
-    H.block<3, 3>(3, kIdxstartcorr_q) = C_ci;  // q
-
-    if (driftwvattfix) {
-      H.block<3, 3>(3, kIdxstartcorr_qwv).setZero();
-    } else {
-      H.block<3, 3>(3, kIdxstartcorr_qwv) = (C_ci * C_wi.transpose()).eval();  // q_wv
-    }
-
-    if (calibattfix) {
-      H.block<3, 3>(3, kIdxstartcorr_qic).setZero();
-    } else {
-      H.block<3, 3>(3, kIdxstartcorr_qic) =
-          Eigen::Matrix<double, 3, 3>::Identity().eval();  //q_ic
-    }
+    H.block<3, 3>(3, kIdxstartcorr_q) = Eigen::Matrix<double, 3, 3>::Identity().eval();  // q
 
     // This line breaks the filter if a position sensor in the global frame is
     // available or if we want to set a global yaw rotation.
@@ -290,8 +199,6 @@ struct PoseMeasurement : public PoseMeasurementBase {
   virtual void Apply(shared_ptr<EKFState_T> state_nonconst_new,
                      msf_core::MSF_Core<EKFState_T>& core) {
 
-    if (isabsolute_) {  // Does this measurement refer to an absolute measurement,
-      // or is is just relative to the last measurement.
       // Get a const ref, so we can read core states
       const EKFState_T& state = *state_nonconst_new;
       // init variables
@@ -302,32 +209,22 @@ struct PoseMeasurement : public PoseMeasurementBase {
       CalculateH(state_nonconst_new, H_new);
 
       // Get rotation matrices.
-      Eigen::Matrix<double, 3, 3> C_wv = state.Get<StateQwvIdx>()
-
-          .toRotationMatrix();
       Eigen::Matrix<double, 3, 3> C_wi = state.Get<StateDefinition_T::q>()
           .toRotationMatrix();
 
       // Construct residuals.
       // Position.
       r_old.block<3, 1>(0, 0) = z_p_
-          - (C_wv
-              * (-state.Get<StatePwvIdx>()
+          - (-state.Get<StatePwvIdx>()
                   + state.Get<StateDefinition_T::p>()
-                  + C_wi * state.Get<StatePicIdx>()))
+                  )
               * state.Get<StateLIdx>();
 
       // Attitude.
       Eigen::Quaternion<double> q_err;  // q_err = \hat{q}_vc * q_cv
-      q_err = (state.Get<StateQwvIdx>().conjugate()
-          * state.Get<StateDefinition_T::q>()
-          * state.Get<StateQicIdx>()).conjugate() * z_q_;
+      q_err = (state.Get<StateDefinition_T::q>()).conjugate() * z_q_;
       r_old.block<3, 1>(3, 0) = q_err.vec() / q_err.w() * 2;
-      // Vision world yaw drift.
-      q_err = state.Get<StateQwvIdx>();
-
-      r_old(6, 0) = -2 * (q_err.w() * q_err.z() + q_err.x() * q_err.y())
-          / (1 - 2 * (q_err.y() * q_err.y() + q_err.z() * q_err.z()));
+      
 
       if (!CheckForNumeric(r_old, "r_old")) {
         MSF_ERROR_STREAM("pose r_old: "<<r_old);
@@ -361,7 +258,7 @@ struct PoseMeasurement : public PoseMeasurementBase {
       float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
       if(std::isnan(beta) || std::isinf(beta))
         return;
-      printf("vis_d\t\t\t%.2f\n", beta);
+      // printf("vis_d\t\t\t%.2f\n", beta);
 
 
 
@@ -369,122 +266,7 @@ struct PoseMeasurement : public PoseMeasurementBase {
       // Call update step in base class.
       this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);
-    } else {
-      // Init variables: Get previous measurement.
-      shared_ptr < msf_core::MSF_MeasurementBase<EKFState_T> > prevmeas_base =
-          core.GetPreviousMeasurement(this->time, this->sensorID_);
-
-      if (prevmeas_base->time == msf_core::constants::INVALID_TIME) {
-        MSF_WARN_STREAM(
-            "The previous measurement is invalid. Could not apply measurement! " "time:"<<this->time<<" sensorID: "<<this->sensorID_);
-        return;
-      }
-
-      // Make this a pose measurement.
-      shared_ptr<PoseMeasurement> prevmeas = dynamic_pointer_cast
-          < PoseMeasurement > (prevmeas_base);
-      if (!prevmeas) {
-        MSF_WARN_STREAM(
-            "The dynamic cast of the previous measurement has failed. "
-            "Could not apply measurement");
-        return;
-      }
-
-      // Get state at previous measurement.
-      shared_ptr<EKFState_T> state_nonconst_old = core.GetClosestState(
-          prevmeas->time);
-
-      if (state_nonconst_old->time == msf_core::constants::INVALID_TIME) {
-        MSF_WARN_STREAM(
-            "The state at the previous measurement is invalid. Could "
-            "not apply measurement");
-        return;
-      }
-
-      // Get a const ref, so we can read core states.
-      const EKFState_T& state_new = *state_nonconst_new;
-      const EKFState_T& state_old = *state_nonconst_old;
-
-      Eigen::Matrix<double, nMeasurements,
-          msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime> H_new,
-          H_old;
-      Eigen::Matrix<double, nMeasurements, 1> r_new, r_old;
-
-      CalculateH(state_nonconst_old, H_old);
-
-      H_old *= -1;
-
-      CalculateH(state_nonconst_new, H_new);
-
-      //TODO (slynen): check that both measurements have the same states fixed!
-      Eigen::Matrix<double, 3, 3> C_wv_old, C_wv_new;
-      Eigen::Matrix<double, 3, 3> C_q_old, C_q_new;
-
-      C_wv_new = state_new.Get<StateQwvIdx>().conjugate().toRotationMatrix();
-      C_q_new = state_new.Get<StateDefinition_T::q>().conjugate()
-          .toRotationMatrix();
-
-      C_wv_old = state_old.Get<StateQwvIdx>().conjugate().toRotationMatrix();
-      C_q_old = state_old.Get<StateDefinition_T::q>().conjugate()
-          .toRotationMatrix();
-
-      // Construct residuals.
-      // Position:
-      Eigen::Matrix<double, 3, 1> diffprobpos = (C_wv_new.transpose()
-          * (-state_new.Get<StatePwvIdx>() + state_new.Get<StateDefinition_T::p>()
-              + C_q_new.transpose() * state_new.Get<StatePicIdx>()))
-          * state_new.Get<StateLIdx>() - (C_wv_old.transpose()
-          * (-state_old.Get<StatePwvIdx>() + state_old.Get<StateDefinition_T::p>()
-              + C_q_old.transpose() * state_old.Get<StatePicIdx>()))
-              * state_old.Get<StateLIdx>();
-
-
-      Eigen::Matrix<double, 3, 1> diffmeaspos = z_p_ - prevmeas->z_p_;
-
-      r_new.block<3, 1>(0, 0) = diffmeaspos - diffprobpos;
-
-      // Attitude:
-      Eigen::Quaternion<double> diffprobatt = (state_new.Get<StateQwvIdx>()
-          * state_new.Get<StateDefinition_T::q>()
-          * state_new.Get<StateQicIdx>()).conjugate()
-          * (state_old.Get<StateQwvIdx>()
-              * state_old.Get<StateDefinition_T::q>()
-              * state_old.Get<StateQicIdx>());
-
-      Eigen::Quaternion<double> diffmeasatt = z_q_.conjugate() * prevmeas->z_q_;
-
-      Eigen::Quaternion<double> q_err;
-      q_err = diffprobatt.conjugate() * diffmeasatt;
-
-      r_new.block<3, 1>(3, 0) = q_err.vec() / q_err.w() * 2;
-      // Vision world yaw drift.
-      q_err = state_new.Get<StateQwvIdx>();
-
-      r_new(6, 0) = -2 * (q_err.w() * q_err.z() + q_err.x() * q_err.y())
-          / (1 - 2 * (q_err.y() * q_err.y() + q_err.z() * q_err.z()));
-
-      if (!CheckForNumeric(r_old, "r_old")) {
-        MSF_ERROR_STREAM("r_old: "<<r_old);
-        MSF_WARN_STREAM(
-            "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
-      }
-      if (!CheckForNumeric(H_new, "H_old")) {
-        MSF_ERROR_STREAM("H_old: "<<H_new);
-        MSF_WARN_STREAM(
-            "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
-      }
-      if (!CheckForNumeric(R_, "R_")) {
-        MSF_ERROR_STREAM("R_: "<<R_);
-        MSF_WARN_STREAM(
-            "state: "<<const_cast<EKFState_T&>(state_new). ToEigenVector().transpose());
-      }
-
-      // Call update step in base class.
-      this->CalculateAndApplyCorrectionRelative(state_nonconst_old,
-                                                state_nonconst_new, core, H_old,
-                                                H_new, r_new, R_);
-
-    }
+    
   }
 };
 

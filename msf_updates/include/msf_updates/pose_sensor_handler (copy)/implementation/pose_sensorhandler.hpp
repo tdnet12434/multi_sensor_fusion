@@ -147,8 +147,17 @@ void PoseSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessPoseMeasurement(
     if (mngr->Getcfg().pose_fixed_scale) {
       fixedstates |= 1 << MEASUREMENT_TYPE::AuxState::L;
     }
+    if (mngr->Getcfg().pose_fixed_p_ic) {
+      fixedstates |= 1 << MEASUREMENT_TYPE::AuxState::p_ic;
+    }
+    if (mngr->Getcfg().pose_fixed_q_ic) {
+      fixedstates |= 1 << MEASUREMENT_TYPE::AuxState::q_ic;
+    }
     if (mngr->Getcfg().pose_fixed_p_wv) {
       fixedstates |= 1 << MEASUREMENT_TYPE::AuxState::p_wv;
+    }
+    if (mngr->Getcfg().pose_fixed_q_wv) {
+      fixedstates |= 1 << MEASUREMENT_TYPE::AuxState::q_wv;
     }
   }
 
