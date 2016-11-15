@@ -28,7 +28,7 @@
 namespace msf_updates {
 namespace velocity_measurement {
 enum {
-  nMeasurements = 3
+  nMeasurements = 2
 };
 
 enum fault_t {
@@ -193,8 +193,12 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     Eigen::Quaternion<double> q_b_i = qif_;
     q_b_i.normalize();
     Eigen::Matrix<double, 3, 3> Shift_q = q_b_i.toRotationMatrix();
-    
-    agl_ef = agl * C_q(2,2);
+      
+
+    Eigen::Vector3d euler = C_q.eulerAngles(2, 1, 0);
+
+
+    agl_ef = agl * cos(euler[2]) * cos(euler[1]);
 
     if(flow_q < flow_minQ_ || agl_ef <= 0.3)          {flow_healhy = false;}
 
@@ -238,16 +242,21 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
     Eigen::Matrix<double, 3, 3> skew_v = Skew(state.Get<StateDefinition_T::v>());
     Eigen::Matrix<double, 3, 1> Rtv = C_q.transpose()*state.Get<StateDefinition_T::v>();
     Eigen::Matrix<double, 3, 3> skew_Rtv = Skew(Rtv);
+
+    Eigen::Matrix<double, 2, 3> S;
+    S << 1,0,0,
+         0,1,0;
+
     if(isabsolute_)
       {
-        H.block<3, 3>(0, idxstartcorr_v_) =  C_f.transpose()*C_q.transpose();
-        H.block<3, 3>(0, idxstartcorr_q_) =  C_f.transpose()*C_q.transpose()*skew_v;
-        H.block<3, 3>(0, idxstartcorr_qif_) =  C_f.transpose()*skew_Rtv;
+        H.block<2, 3>(0, idxstartcorr_v_) =  S*C_f.transpose()*C_q.transpose();
+        H.block<2, 3>(0, idxstartcorr_q_) =  S*C_f.transpose()*C_q.transpose()*skew_v;
+        H.block<2, 3>(0, idxstartcorr_qif_) =  S*C_f.transpose()*skew_Rtv;
 
       } 
     else
       {
-        H.block<3, 3>(0, idxstartcorr_p_) = ident;
+        H.block<2, 3>(0, idxstartcorr_p_) = S*ident;
       }
       
 
@@ -360,8 +369,8 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
       // // Velocity
       // if(flow_healhy)
-        r_old.block<3, 1>(0, 0) = z_p_
-                            - C_f.transpose()*C_q.transpose()*state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
+        r_old.block<2, 1>(0, 0) = z_p_.block<2,1>(0,0)
+                            - (C_f.transpose()*C_q.transpose()*state.Get<StateDefinition_T::v>()).block<2, 1>(0, 0);
         // Eigen::Matrix<double,3,1> state_v = state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
         // MSF_INFO_STREAM(z_p_ << "----" << state_v);
       // else

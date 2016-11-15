@@ -294,7 +294,7 @@ void Init(double scale) const {
     // have to shift vision-world later on, before applying the first position
     // measurement.
     p = p_pos;
-    p_pos(2) = pressure_handler_->GetPressureMeasurement()(0);
+    p_pos(2) = pressure_handler_->GetAveragedPressureMeasurement()(0);
     // p_wv = p - p_vision;  // Shift the vision frame so that it fits the position
     // measurement
 

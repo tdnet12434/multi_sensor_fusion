@@ -30,7 +30,7 @@ PressureSensorHandler::PressureSensorHandler(
   ros::NodeHandle pnh("~/pressure_sensor");
   ros::NodeHandle nh("msf_updates");
   subPressure_ =
-      nh.subscribe<geometry_msgs::PointStamped>
+      nh.subscribe<sensor_msgs::FluidPressure>
       ("pressure_height", 20, &PressureSensorHandler::MeasurementCallback, this);
   subProcessed_alt_ =
       nh.subscribe<mavros_msgs::Altitude>
@@ -95,10 +95,40 @@ void PressureSensorHandler::MeasurementProcessedCallback(
 
   this->manager_.msf_core_->AddMeasurement(meas);
 }
+
+
+
+
+
+
+
 void PressureSensorHandler::MeasurementCallback(
-    const geometry_msgs::PointStampedConstPtr & msg) {
+    const sensor_msgs::FluidPressureConstPtr & msg) {
 
   received_first_measurement_ = true;
+
+
+  static double init_z[20];
+  static uint8_t count = 0;
+  static double z_start = 0;
+  if(count==20) {
+    for(int i =0;i<20;i++) z_start+=init_z[i];
+    z_start/=20;
+    count=21; //exit calibrate level
+    printf("init z at %.2f\n\n", z_start);
+  }
+  else if(count<20) {
+    init_z[count] = msg->fluid_pressure;
+    count++;
+    return;
+  }
+
+
+
+
+
+
+
 
   this->SequenceWatchDog(msg->header.seq, subPressure_.getTopic());
   MSF_INFO_STREAM_ONCE(
@@ -108,7 +138,7 @@ void PressureSensorHandler::MeasurementCallback(
   
   // Make averaged measurement.
   memcpy(heightbuff, heightbuff + 1, sizeof(double) * (heightbuffsize - 1));
-  heightbuff[heightbuffsize - 1] = msg->point.z;
+  heightbuff[heightbuffsize - 1] = msg->fluid_pressure- z_start;
   double sum = 0;
   for (int k = 0; k < heightbuffsize; ++k)
     sum += heightbuff[k];

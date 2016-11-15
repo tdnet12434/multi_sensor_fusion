@@ -56,7 +56,7 @@ static const float BETA_TABLE[7] = {0,
             19.6465647819,
            };
 
-
+#define wrap_pi(x) (x < -3.14 ? x+6.28 : (x > 3.14 ? x - 6.28: x))
 
 /**
  * \brief A measurement as provided by a position sensor, e.g. Total Station, GPS.
@@ -89,7 +89,7 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
                                       msg->linear_acceleration.y,
                                       msg->linear_acceleration.z
                                       );
-    Eigen::Matrix<double, 3, 1> mag = Eigen::Matrix<double, 3, 1>(
+    mag = Eigen::Matrix<double, 3, 1>(
                                       msg->angular_velocity.x * 1.0e7,
                                       msg->angular_velocity.y * 1.0e7,
                                       msg->angular_velocity.z * 1.0e7
@@ -101,6 +101,7 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
     double mnorm = fabs(mag.norm());
     // printf("norm=%.2f\t\t%.2f\n", normdif, mnorm);
 
+
     const double s_zq = n_zq_ * n_zq_;
     // const double s_zq = normdif*normdif;
     R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zq, s_zq, s_zq)
@@ -110,6 +111,8 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Eigen::Quaternion<double> z_q_;  /// Position measurement.
+  Eigen::Matrix<double, 3, 1> mag;
+
   double n_zq_;  /// Position measurement noise.
   double dt;
  
@@ -153,6 +156,17 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
     q_.normalize();
 
 
+    double hpi = 1.57079;
+    Eigen::Vector3d euler = q_.toRotationMatrix().eulerAngles(2, 1, 0);
+    double yaw_q = euler[0];
+
+    Eigen::Vector3d Rmag = (q_.toRotationMatrix() * mag);
+    double yaw_mag=wrap_pi(-atan2(mag[1], mag[0])+hpi);
+
+
+
+    // printf("%.2f,%.2f,%.2f,%.2f\n", Rmag[0], Rmag[1], Rmag[2], yaw_q);
+    // printf("yaw,%.3f, %.3f\n", yaw_q,yaw_mag);
     // Get indices of states in error vector.
     enum {
       idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,

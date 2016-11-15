@@ -22,6 +22,7 @@
 #include <geometry_msgs/PointStamped.h>
 #include <mavros_msgs/Altitude.h>
 #include <msf_core/msf_sensormanagerROS.h>
+#include <sensor_msgs/FluidPressure.h>
 
 #include <msf_updates/pressure_sensor_handler/pressure_measurement.h>
 
@@ -38,7 +39,7 @@ class PressureSensorHandler : public msf_core::SensorHandler<
   double heightbuff[heightbuffsize];
   ros::Subscriber subPressure_;
   ros::Subscriber subProcessed_alt_;
-  void MeasurementCallback(const geometry_msgs::PointStampedConstPtr & msg);
+  void MeasurementCallback(const sensor_msgs::FluidPressureConstPtr & msg);
   void MeasurementProcessedCallback(const mavros_msgs::AltitudeConstPtr & msg);
  public:
   PressureSensorHandler(
