@@ -29,6 +29,7 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
     : SensorHandler<msf_updates::EKFState>(meas, topic_namespace,
                                            parameternamespace),
       n_zv_(0.01),
+      n_zsonar_(0.05),
       delay_(0),
       flow_minQ_(75),
       qif_(Eigen::Quaternion<double>(1,0,0,0)),
@@ -68,6 +69,12 @@ template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetNoises(
     double n_zv) {
   n_zv_ = n_zv;
+}
+
+template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
+void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetSonarNoises(
+    double n_zsonar) {
+  n_zsonar_ = n_zsonar;
 }
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
@@ -119,7 +126,7 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
 
   shared_ptr < MEASUREMENT_TYPE
       > meas(
-          new MEASUREMENT_TYPE(n_zv_, use_fixed_covariance_,
+          new MEASUREMENT_TYPE(n_zv_, n_zsonar_, use_fixed_covariance_,
                                provides_absolute_measurements_, 
                                this->sensorID,
                                fixedstates,
@@ -156,7 +163,7 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
   flow_msg->integrated_y = msg->integrated_y;
   flow_msg->integrated_xgyro = msg->integrated_xgyro;
   flow_msg->integrated_ygyro = msg->integrated_ygyro;
-  flow_msg->integrated_zgyro = msg->integrated_zgyro;
+  flow_msg->integrated_zgyro = msg->distance;
   flow_msg->temperature = msg->temperature;
   flow_msg->quality = msg->quality;
   flow_msg->time_delta_distance_us = msg->time_delta_distance_us;

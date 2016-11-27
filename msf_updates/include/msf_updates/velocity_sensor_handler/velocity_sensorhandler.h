@@ -33,6 +33,7 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
  
   Eigen::Matrix<double, 3, 1> z_p_;  ///< Velocity measurement.
   double n_zv_;  ///< Velocity measurement noise.
+  double n_zsonar_;  ///< Velocity measurement noise.
   double delay_;       ///< Delay to be subtracted from the ros-timestamp of
                        //the measurement provided by this sensor.
 
@@ -63,6 +64,7 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
   }
   // Setters for configure values.
   void SetNoises(double n_zv);
+  void SetSonarNoises(double n_zsonar);
   void SetDelay(double delay);
   void SetMinQ(double flow_minQ);
   void SetQif(Eigen::Quaternion<double> qif);

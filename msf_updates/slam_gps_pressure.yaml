@@ -96,15 +96,19 @@ position_pose_pressure_sensor/position_fixed_p_ip: true
 
 velocity_sensor/velocity_absolute_measurements: true
 velocity_sensor/velocity_flowNoiseXY: 0.5
+velocity_sensor/velocity_sonarNoiseXY: 0.05
 velocity_sensor/flow_noise_q_if: 0.001 
 position_pose_pressure_sensor/velocity_flowNoiseXY: 0.5  #less is unstable
+position_pose_pressure_sensor/velocity_sonarNoiseXY: 0.05
 position_pose_pressure_sensor/velocity_flowYaw: 0.0 # z10.8 #0 for eight shape, 10.8 for rectan
 position_pose_pressure_sensor/flow_noise_q_if: 0.001 
 
 
 
-position_pose_pressure_sensor/press_noise_meas_p: 10.00
-position_pose_pressure_sensor/press_noise_bias_p:  0.00
+position_pose_pressure_sensor/press_noise_meas_p: 3.00
+position_pose_pressure_sensor/press_noise_bias_p:  0.0
+
+position_pose_pressure_sensor/terrian_noise:  1.0
 
 
 #velocity model-aid

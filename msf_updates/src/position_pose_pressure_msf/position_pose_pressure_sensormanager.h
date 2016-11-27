@@ -169,6 +169,7 @@ private:
     // pose_2_handler_->SetDelay(config.pose_delay_2);
 
     velocity_handler_->SetNoises(config.velocity_flowNoiseXY); //move to use logic
+    velocity_handler_->SetSonarNoises(config.velocity_SonarNoiseXY); //move to use logic
     velocity_handler_->SetDelay(config.velocity_flowDelay);
     velocity_handler_->SetMinQ(config.velocity_flowMinQ);
 
@@ -362,6 +363,8 @@ void Init(double scale) const {
     const msf_core::Vector3 nqifv = msf_core::Vector3( 0.0,
                                                        0.0,
                                                        config_.flow_noise_q_if);
+    const msf_core::Vector1 ntz = msf_core::Vector1::Constant(
+        config_.terrian_noise);
     // const msf_core::Vector3 nqwvv_2 = msf_core::Vector3::Constant(
     //   config_.pose_noise_q_wv_2);
     // const msf_core::Vector3 npwvv_2 = msf_core::Vector3::Constant(
@@ -384,6 +387,8 @@ void Init(double scale) const {
     (dt * nb_p.cwiseProduct(nb_p)).asDiagonal();
     state.GetQBlock<StateDefinition_T::q_if>() =
     (dt * nqifv.cwiseProduct(nqifv)).asDiagonal();
+    state.GetQBlock<StateDefinition_T::tz>() = 
+    (dt * ntz.cwiseProduct(ntz)).asDiagonal();
     // state.GetQBlock<StateDefinition_T::L_2>() = (dt * n_L_2.cwiseProduct(n_L_2))
     // .asDiagonal();
     // state.GetQBlock<StateDefinition_T::q_wv_2>() =
@@ -423,6 +428,8 @@ void Init(double scale) const {
         StateDefinition_T::b_w>::value b_w_type;
     typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
         StateDefinition_T::p_wv>::value p_wv_type;
+    typedef typename msf_tmp::GetEnumStateType<StateSequence_T,
+        StateDefinition_T::tz>::value tz_type;
     enum {
       indexOfState_p = msf_tmp::GetStartIndex<StateSequence_T, p_type,
           msf_tmp::CorrectionStateLengthForType>::value,
@@ -435,6 +442,8 @@ void Init(double scale) const {
       indexOfState_b_w = msf_tmp::GetStartIndex<StateSequence_T, b_w_type,
           msf_tmp::CorrectionStateLengthForType>::value,
       indexOfState_p_wv = msf_tmp::GetStartIndex<StateSequence_T, p_wv_type,
+          msf_tmp::CorrectionStateLengthForType>::value,
+      indexOfState_tz = msf_tmp::GetStartIndex<StateSequence_T, tz_type,
           msf_tmp::CorrectionStateLengthForType>::value
     };
     //get size of correction msf_tmp::StripConstReference<p_type>::result_t::sizeInCorrection_
