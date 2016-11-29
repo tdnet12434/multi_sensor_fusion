@@ -27,6 +27,11 @@
 #include <msf_updates/pose_sensor_handler/pose_measurement.h>
 #include <msf_updates/position_sensor_handler/position_sensorhandler.h>
 #include <msf_updates/position_sensor_handler/position_measurement.h>
+
+#include <msf_updates/agl_sensor_handler/agl_sensorhandler.h>
+#include <msf_updates/agl_sensor_handler/agl_measurement.h>
+
+
 #include <msf_updates/pressure_sensor_handler/pressure_sensorhandler.h>
 #include <msf_updates/PositionPosePressureSensorConfig.h>
 
@@ -35,6 +40,8 @@
 
 #include <msf_updates/ahrs_sensor_handler/ahrs_sensorhandler.h>
 #include <msf_updates/ahrs_sensor_handler/ahrs_measurement.h>
+
+
   bool zero_correction_all;
   bool zero_correction_bias;
   bool zero_correction_pwv;
@@ -57,23 +64,28 @@
     friend class msf_pose_sensor::PoseSensorHandler<
     msf_updates::pose_measurement::PoseMeasurement<>, this_T>;
 
-
-
     typedef msf_velocity_sensor::VelocitySensorHandler<
     msf_updates::velocity_measurement::VelocityMeasurement, this_T> VelocitySensorHandler_T;
     friend class msf_velocity_sensor::VelocitySensorHandler<
     msf_updates::velocity_measurement::VelocityMeasurement, this_T>;
-
 
     typedef msf_ahrs_sensor::AhrsSensorHandler<
     msf_updates::ahrs_measurement::AhrsMeasurement, this_T> AhrsSensorHandler_T;
     friend class msf_ahrs_sensor::AhrsSensorHandler<
     msf_updates::ahrs_measurement::AhrsMeasurement, this_T>;
 
+
     typedef msf_position_sensor::PositionSensorHandler<
     msf_updates::position_measurement::PositionMeasurement, this_T> PositionSensorHandler_T;
     friend class msf_position_sensor::PositionSensorHandler<
     msf_updates::position_measurement::PositionMeasurement, this_T>;
+
+    typedef msf_agl_sensor::AglSensorHandler<
+    msf_updates::agl_measurement::AglMeasurement, this_T> AglSensorHandler_T;
+    friend class msf_agl_sensor::AglSensorHandler<
+    msf_updates::agl_measurement::AglMeasurement, this_T>;
+
+
     // typedef msf_pose_sensor::PoseSensorHandler<msf_updates::pose_measurement::PoseMeasurement<
     // msf_updates::EKFState::StateDefinition_T::L_2,
     // msf_updates::EKFState::StateDefinition_T::q_ic_2,
@@ -103,6 +115,10 @@
       new PositionSensorHandler_T(*this, "", "position_sensor"));
     AddHandler(position_handler_);
 
+    agl_handler_.reset(
+      new AglSensorHandler_T(*this, "", "agl_sensor"));
+    AddHandler(agl_handler_);
+
     pressure_handler_.reset(
         new msf_pressure_sensor::PressureSensorHandler(*this, "","pressure_sensor"));
     AddHandler(pressure_handler_);
@@ -118,7 +134,6 @@
     ahrs_handler_.reset(
       new AhrsSensorHandler_T(*this, "", "ahrs_sensor"));
     AddHandler(ahrs_handler_);
-
 
 
 
@@ -138,6 +153,7 @@ private:
   shared_ptr<msf_core::IMUHandler_ROS<msf_updates::EKFState> > imu_handler_;
   shared_ptr<PoseSensorHandler_T> pose_handler_;
   shared_ptr<PositionSensorHandler_T> position_handler_;
+  shared_ptr<AglSensorHandler_T> agl_handler_;
   shared_ptr<msf_pressure_sensor::PressureSensorHandler> pressure_handler_;
 
   // shared_ptr<PoseSensor_2_Handler_T> pose_2_handler_;
@@ -162,6 +178,9 @@ private:
     position_handler_->SetNoises(config.position_noise_meas);
     position_handler_->SetDelay(config.position_delay);
 
+    agl_handler_->SetNoises(config.agl_noise_meas);
+    agl_handler_->SetDelay(config.agl_delay);
+
     pressure_handler_->SetNoises(config.press_noise_meas_p);
 
     // pose_2_handler_->SetNoises(config.pose_noise_meas_p_2,
@@ -169,12 +188,12 @@ private:
     // pose_2_handler_->SetDelay(config.pose_delay_2);
 
     velocity_handler_->SetNoises(config.velocity_flowNoiseXY); //move to use logic
-    velocity_handler_->SetSonarNoises(config.velocity_SonarNoiseXY); //move to use logic
     velocity_handler_->SetDelay(config.velocity_flowDelay);
     velocity_handler_->SetMinQ(config.velocity_flowMinQ);
 
     ahrs_noise = config.ahrs_q;
     ahrs_handler_->SetNoises(config.ahrs_q);
+
 
     double yawinit = config_.velocity_flowYaw / 180 * M_PI;
     Eigen::Quaterniond yawq(cos(yawinit / 2), 0, 0, sin(yawinit / 2));
@@ -237,6 +256,8 @@ void Init(double scale) const {
     P.setZero();  // Error state covariance; if zero, a default initialization in msf_core is used.
     p_zero.setZero();
     p_pos = position_handler_->GetPositionMeasurement();
+
+    Eigen::Matrix<double,1,1> sonar = agl_handler_->GetAglMeasurement();
 
     p_vc = pose_handler_->GetPositionMeasurement();
     q_vc = pose_handler_->GetAttitudeMeasurement();

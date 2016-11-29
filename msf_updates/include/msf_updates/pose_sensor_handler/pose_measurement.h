@@ -255,7 +255,7 @@ struct PoseMeasurement : public PoseMeasurementBase {
 
 
       // fault detection (mahalanobis distance !! )
-      float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
+      double beta = (r_old.transpose() * (S_I * r_old))(0, 0);
       if(std::isnan(beta) || std::isinf(beta))
         return;
       // printf("vis_d\t\t\t%.2f\n", beta);

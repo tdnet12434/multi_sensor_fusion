@@ -48,7 +48,7 @@ static const fault_t fault_lvl_disable = FAULT_SEVERE;
 // chi squared distribution, false alarm probability 0.0001
 // see fault_table.py
 // note skip 0 index so we can use degree of freedom as index
-static const float BETA_TABLE[7] = {0,
+static const double BETA_TABLE[7] = {0,
             8.82050518214,
             12.094592431,
             13.9876612368,
@@ -159,7 +159,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
     const EKFState_T& state = *state_in;  // Get a const ref, so we can read core states.
 
     H.setZero();
-
+    
     // Get rotation matrices.
     // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
     //     .conjugate().toRotationMatrix();
@@ -251,7 +251,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
 
       // fault detection (mahalanobis distance !! )
-      float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
+      double beta = (r_old.transpose() * (S_I * r_old))(0, 0);
       // MSF_WARN_STREAM("gb=" << beta);
       if(std::isnan(beta) || std::isinf(beta))
         return;

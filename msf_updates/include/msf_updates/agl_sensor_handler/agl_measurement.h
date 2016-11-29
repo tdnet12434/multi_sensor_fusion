@@ -15,28 +15,29 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
-#ifndef AHRS_MEASUREMENT_HPP_
-#define AHRS_MEASUREMENT_HPP_ 
+ */
+#ifndef AGL_MEASUREMENT_HPP_
+#define AGL_MEASUREMENT_HPP_
 
 #include <msf_core/msf_measurement.h>
 #include <msf_core/msf_core.h>
 #include <msf_core/eigen_utils.h>
-#include <sensor_msgs/Imu.h>
-#include <sensor_msgs/MagneticField.h>
+#include <sensor_msgs/Range.h>
 
 namespace msf_updates {
-namespace ahrs_measurement {
+namespace agl_measurement {
 enum {
-  nMeasurements = 3
+  z_tz=0,
+  nMeasurements
 };
+
 
 enum fault_t {
   FAULT_NONE = 0,
   FAULT_MINOR,
   FAULT_SEVERE
 };
-fault_t _flowFault;
+fault_t _gpsFault;
 
 // change this to set when
 // the system will abort correcting a measurement
@@ -56,20 +57,22 @@ static const double BETA_TABLE[7] = {0,
             19.6465647819,
            };
 
-#define wrap_pi(x) (x < -3.14 ? x+6.28 : (x > 3.14 ? x - 6.28: x))
+
+
+
 
 /**
- * \brief A measurement as provided by a position sensor, e.g. Total Station, GPS.
+ * \brief A measurement as provided by a agl sensor, e.g. Total Station, GPS.
  */
 typedef msf_core::MSF_Measurement<
-    sensor_msgs::Imu,
-    Eigen::Matrix<double, nMeasurements, nMeasurements>, msf_updates::EKFState> AhrsMeasurementBase;
-struct AhrsMeasurement : public AhrsMeasurementBase {
+    sensor_msgs::Range,
+    Eigen::Matrix<double, nMeasurements, nMeasurements>, msf_updates::EKFState> AglMeasurementBase;
+struct AglMeasurement : public AglMeasurementBase {
  private:
-  typedef AhrsMeasurementBase Measurement_t;
+  typedef AglMeasurementBase Measurement_t;
   typedef Measurement_t::Measurement_ptr measptr_t;
 
-    virtual void MakeFromSensorReadingImpl(measptr_t msg) {
+  virtual void MakeFromSensorReadingImpl(measptr_t msg) {
 
     Eigen::Matrix<double, nMeasurements,
         msf_core::MSF_Core<msf_updates::EKFState>::nErrorStatesAtCompileTime> H_old;
@@ -77,96 +80,70 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
 
     H_old.setZero();
 
-
-    z_q_ = Eigen::Quaternion<double> (msg->orientation.w, 
-                                      msg->orientation.x, 
-                                      msg->orientation.y, 
-                                      msg->orientation.z);
-    
-
-    Eigen::Matrix<double, 3, 1> a = Eigen::Matrix<double, 3, 1>(
-                                      msg->linear_acceleration.x,
-                                      msg->linear_acceleration.y,
-                                      msg->linear_acceleration.z
-                                      );
-    mag = Eigen::Matrix<double, 3, 1>(
-                                      msg->angular_velocity.x * 1.0e7,
-                                      msg->angular_velocity.y * 1.0e7,
-                                      msg->angular_velocity.z * 1.0e7
-                                      );
-
-    Eigen::Matrix<double, 3, 1> g;
-    g << 0,0,9.81;
-    double normdif=fabs(a.norm()-g.norm());
-    double mnorm = fabs(mag.norm());
-    // printf("norm=%.2f\t\t%.2f\n", normdif, mnorm);
+    // Get measurement.
+    z_p_ = Eigen::Matrix<double,1,1>::Constant(msg->range);
+    printf("sonar = %.2f\n", z_p_(0));
 
 
-    const double s_zq = n_zq_ * n_zq_;
-    // const double s_zq = normdif*normdif;
-    R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zq, s_zq, s_zq)
-        .finished().asDiagonal();
+    const double s_zsonar = n_zp_ * n_zp_;
+    R_ (0) = s_zsonar;
+    printf("R_=%.2f\n", R_(0));
 
   }
  public:
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-  Eigen::Quaternion<double> z_q_;  /// Position measurement.
-  Eigen::Matrix<double, 3, 1> mag;
+  Eigen::Matrix<double, 1, 1> z_p_;  /// Agl measurement.
+  double n_zp_;  /// Agl measurement noise.
 
-  double n_zq_;  /// Position measurement noise.
-  double dt;
- 
   bool fixed_covariance_;
   int fixedstates_;
+
+  Eigen::Matrix<double,1,1> z_sonar_compensated;
+  bool sonar_healhy;
 
   typedef msf_updates::EKFState EKFState_T;
   typedef EKFState_T::StateSequence_T StateSequence_T;
   typedef EKFState_T::StateDefinition_T StateDefinition_T;
-  virtual ~AhrsMeasurement() {
+  virtual ~AglMeasurement() {
   }
-  AhrsMeasurement(double n_zq, bool fixed_covariance,
+  AglMeasurement(double n_zp, bool fixed_covariance,
                       bool isabsoluteMeasurement, int sensorID, int fixedstates)
-      : AhrsMeasurementBase(isabsoluteMeasurement, sensorID),
-        n_zq_(n_zq),
+      : AglMeasurementBase(isabsoluteMeasurement, sensorID),
+        n_zp_(n_zp),
         fixed_covariance_(fixed_covariance),
-        fixedstates_(fixedstates)
-         {
+        fixedstates_(fixedstates) {
   }
   virtual std::string Type() {
-    return "ahrs";
+    return "agl";
   }
 
   virtual void CalculateH(
       shared_ptr<EKFState_T> state_in,
       Eigen::Matrix<double, nMeasurements,
           msf_core::MSF_Core<EKFState_T>::nErrorStatesAtCompileTime>& H) {
-
-
-
-
     const EKFState_T& state = *state_in;  // Get a const ref, so we can read core states.
 
     H.setZero();
+    
 
     // Get rotation matrices.
-    // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-    //     .toRotationMatrix();
-    //w x y z preset drift 10 deg
-    Eigen::Quaternion<double> q_ = state.Get<StateDefinition_T::q>();
-    q_.normalize();
+    Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
+        .toRotationMatrix();
 
 
-    double hpi = 1.57079;
-    Eigen::Vector3d euler = q_.toRotationMatrix().eulerAngles(2, 1, 0);
-    double yaw_q = euler[0];
+    Eigen::Vector3d euler = C_q.eulerAngles(2, 1, 0);
 
-    Eigen::Vector3d Rmag = (q_.toRotationMatrix() * mag);
-    double yaw_mag=wrap_pi(-atan2(mag[1], mag[0])+hpi);
+    double eff = cos(euler[2]) * cos(euler[1]);
 
+    if (z_p_(0) < 0.3 || z_p_(0) > 4.0) {
+      sonar_healhy = false;
+    }else {
+      sonar_healhy = true;
+    }
 
+    z_sonar_compensated = z_p_ * eff;
+    printf("%.2f\n",z_sonar_compensated(0) );
 
-    // printf("%.2f,%.2f,%.2f,%.2f\n", Rmag[0], Rmag[1], Rmag[2], yaw_q);
-    // printf("yaw,%.3f, %.3f\n", yaw_q,yaw_mag);
     // Get indices of states in error vector.
     enum {
       idxstartcorr_p_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
@@ -176,20 +153,18 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
       idxstartcorr_q_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
           StateDefinition_T::q>::value,
       idxstartcorr_L_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
-          StateDefinition_T::L>::value
+          StateDefinition_T::L>::value,
+      idxstartcorr_qif_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+          StateDefinition_T::q_if>::value,
+      idxstartcorr_tz_ = msf_tmp::GetStartIndexInCorrection<StateSequence_T,
+          StateDefinition_T::tz>::value
     };
-    // double qx=q_.x();
-    // double qy=q_.y();
-    // double qz=q_.z();
-    // double qw=q_.w();
-    // Eigen::Matrix<double, 4,3> Qdth;
-    // Qdth << -qx, -qy, -qz,
-    //          qw, -qz,  qy,
-    //          qz,  qw, -qx,
-    //         -qy,  qx,  qw;
-    // Qdth*=0.5;
-    H.block<3, 3>(0, idxstartcorr_q_) =  Eigen::MatrixXd::Identity(3,3);//Qdth;
 
+        printf("gg%d\n",sonar_healhy);
+        H.block<1, 1>(z_tz, idxstartcorr_p_+2)(0) = (sonar_healhy ? 1:0);
+        H.block<1, 1>(z_tz, idxstartcorr_tz_)(0) = (sonar_healhy ? -1:0);
+
+      
   }
 
   /**
@@ -198,7 +173,8 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
   virtual void Apply(shared_ptr<EKFState_T> state_nonconst_new,
                      msf_core::MSF_Core<EKFState_T>& core) {
 
-      // Get a const ref, so we can read core states.
+
+   // Get a const ref, so we can read core states.
       const EKFState_T& state = *state_nonconst_new;
       // init variables
       Eigen::Matrix<double, nMeasurements,
@@ -213,37 +189,33 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
 
 
       // Get rotation matrices.
-      // Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
-      //     .toRotationMatrix();
+      Eigen::Matrix<double, 3, 3> C_q = state.Get<StateDefinition_T::q>()
+          .toRotationMatrix();
+
+        r_old.block<1, 1>(z_tz, 0) = z_sonar_compensated 
+                                      - (state.Get<StateDefinition_T::p>().block<1, 1>(2, 0)
+                                          - state.Get<StateDefinition_T::tz>().block<1, 1>(0, 0));
 
 
-      msf_core::MSF_Core<EKFState_T>::ErrorStateCov &_P = state_nonconst_new->P;
-      _P = 0.5*(_P.transpose()+_P);
 
-      Eigen::Quaternion<double> q_err;
-      q_err = state.Get<StateDefinition_T::q>().conjugate() * z_q_;
-      r_old.block<3,1>(0,0) = q_err.vec() / q_err.w() * 2;
-      // r_old.block<1,1>(3,0) = q_err.w();
-      // else
-      //   return;
 
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       if (!CheckForNumeric(r_old, "r_old")) {
         // Eigen::Matrix<double, 3, 3> ident
-        // r_old.block<3, 1>(0, 0) =  ;
-        MSF_ERROR_STREAM("ahrs r_old: "<<r_old);
+        // r_old.block<1, 1>(0, 0) =  ;
+        MSF_ERROR_STREAM("agl r_old: "<<r_old);
         return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
       if (!CheckForNumeric(H_new, "H_old")) {
-        MSF_ERROR_STREAM("ahrs H_old: "<<H_new);
+        MSF_ERROR_STREAM("agl H_old: "<<H_new);
         return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
       if (!CheckForNumeric(R_, "R_")) {
-        MSF_ERROR_STREAM("ahrs R_: "<<R_);
+        MSF_ERROR_STREAM("agl R_: "<<R_);
         return;
         MSF_WARN_STREAM(
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
@@ -253,9 +225,10 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
 
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);
-    } 
+
+  }
 };
-}  // namespace position_measurement
+}  // namespace agl_measurement
 }  // namespace msf_updates
 
-#endif  // POSITION_MEASUREMENT_HPP_
+#endif  // AGL_MEASUREMENT_HPP_

@@ -29,7 +29,6 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
     : SensorHandler<msf_updates::EKFState>(meas, topic_namespace,
                                            parameternamespace),
       n_zv_(0.01),
-      n_zsonar_(0.05),
       delay_(0),
       flow_minQ_(75),
       qif_(Eigen::Quaternion<double>(1,0,0,0)),
@@ -55,9 +54,9 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
       nh.subscribe<mavros_msgs::OpticalFlowRad>
   ("flow_input", 20, &VelocitySensorHandler::MeasurementCallback, this);
 
-  subAgl_ =
-      nh.subscribe<mavros_msgs::Altitude>
-  ("agl_input", 20, &VelocitySensorHandler::MeasurementAGLCallback, this);
+  // subAgl_ =
+  //     nh.subscribe<mavros_msgs::Altitude>
+  // ("agl_input", 20, &VelocitySensorHandler::MeasurementAGLCallback, this);
 
 
   z_p_.setZero();
@@ -71,11 +70,7 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetNoises(
   n_zv_ = n_zv;
 }
 
-template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
-void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetSonarNoises(
-    double n_zsonar) {
-  n_zsonar_ = n_zsonar;
-}
+
 
 template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::SetDelay(
@@ -126,7 +121,8 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
 
   shared_ptr < MEASUREMENT_TYPE
       > meas(
-          new MEASUREMENT_TYPE(n_zv_, n_zsonar_, use_fixed_covariance_,
+          new MEASUREMENT_TYPE(n_zv_, 
+                               use_fixed_covariance_,
                                provides_absolute_measurements_, 
                                this->sensorID,
                                fixedstates,
@@ -136,6 +132,7 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
   meas->MakeFromSensorReading(msg, msg->header.stamp.toSec() - delay_);
 
   z_p_ = meas->z_p_;  // Store this for the init procedure.
+  // printf("res=%.2f\n", meas->res_out);
 
   this->manager_.msf_core_->AddMeasurement(meas);
 }
@@ -168,37 +165,36 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
   flow_msg->quality = msg->quality;
   flow_msg->time_delta_distance_us = msg->time_delta_distance_us;
 
-  flow_msg->distance = agl_sensor;
+  flow_msg->distance = msg->distance;
 
   if(flow_msg->quality < flow_minQ_) return;
-  if(agl_sensor < 0.3) return;
-  if(agl_sensor > 4) return;
+
 
    double time_now = msg->header.stamp.toSec();
   timestamp_previous_pose_ = time_now;
 
   ProcessVelocityMeasurement(flow_msg);
 }
-template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
-void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementAGLCallback(
-    const mavros_msgs::AltitudeConstPtr & msg) {
-  this->SequenceWatchDog(msg->header.seq, subAgl_.getTopic());
+// template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
+// void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementAGLCallback(
+//     const mavros_msgs::AltitudeConstPtr & msg) {
+//   this->SequenceWatchDog(msg->header.seq, subAgl_.getTopic());
 
-  MSF_INFO_STREAM_ONCE(
-      "*** velocity sensor got first agl measurement from topic "
-          << this->topic_namespace_ << "/" << subAgl_.getTopic()
-          << " ***");
-  // static uint16_t num_sen = 0;
-  // static float sum_sen = 0;
-  // static float offset = 0;
-  // if(num_sen<10) {
-  //   num_sen++;
-  //   sum_sen+=msg->bottom_clearance;
-  // }
-  // if(num_sen==10) {
-  //   offset = sum_sen/num_sen;
-  // }
-  agl_sensor = msg->bottom_clearance /*- offset*/;
-}
+//   MSF_INFO_STREAM_ONCE(
+//       "*** velocity sensor got first agl measurement from topic "
+//           << this->topic_namespace_ << "/" << subAgl_.getTopic()
+//           << " ***");
+//   // static uint16_t num_sen = 0;
+//   // static float sum_sen = 0;
+//   // static float offset = 0;
+//   // if(num_sen<10) {
+//   //   num_sen++;
+//   //   sum_sen+=msg->bottom_clearance;
+//   // }
+//   // if(num_sen==10) {
+//   //   offset = sum_sen/num_sen;
+//   // }
+//   agl_sensor = msg->bottom_clearance /*- offset*/;
+// }
 }  // namespace msf_position_sensor
 #endif  // VELOCITY_SENSORHANDLER_HPP_

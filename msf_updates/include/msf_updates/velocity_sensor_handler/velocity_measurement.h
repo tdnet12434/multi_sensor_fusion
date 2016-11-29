@@ -30,7 +30,6 @@ namespace velocity_measurement {
 enum {
   z_vx = 0,
   z_vy,
-  z_tz,
   nMeasurements
 };
 
@@ -50,7 +49,7 @@ static const fault_t fault_lvl_disable = FAULT_SEVERE;
 // chi squared distribution, false alarm probability 0.0001
 // see fault_table.py
 // note skip 0 index so we can use degree of freedom as index
-static const float BETA_TABLE[7] = {0,
+static const double BETA_TABLE[7] = {0,
             8.82050518214,
             12.094592431,
             13.9876612368,
@@ -87,13 +86,11 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
     dt = msg->integration_time_us*0.000001;
 
-    agl = msg->distance;
     flow_q = msg->quality;
     Eigen::Matrix<double, 3, 1> gyro_raw(msg->integrated_xgyro, 
                                          msg->integrated_ygyro, 
                                          0);
 
-    sonar = msg->integrated_zgyro;
     /*High pass filter*/
     // static double b = 2*3.1415926*0.1*0.01;
     // static double a = 1/(1+b);
@@ -111,9 +108,9 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       //test drive covariance with quality
 
       const double s_zv = n_zv_ * n_zv_/** 255 / (flow_q != 0 ? flow_q : 1)*/;
-      const double s_zsonar = n_zsonar_ * n_zsonar_;
+
       MSF_WARN_STREAM_THROTTLE(1, "flow cov " << s_zv);
-      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zv, s_zv, s_zsonar)
+      R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zv, s_zv)
           .finished().asDiagonal();
 
     } else {  // Tke covariance from sensor.
@@ -132,31 +129,27 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   EIGEN_MAKE_ALIGNED_OPERATOR_NEW
   Eigen::Matrix<double, 3, 1> flow;  /// raw flow measurement.
   Eigen::Matrix<double, 3, 1> z_p_;  /// Position measurement.
-  Eigen::Matrix<double, 1, 1> z_sonar_;  /// Position measurement.
   Eigen::Matrix<double, 3, 1> gyro;  /// Gyro filtered
   
 
   double n_zv_;  /// Position measurement noise.
-  double n_zsonar_;  /// Position measurement noise.
   bool fixed_covariance_;
   int fixedstates_;
   double flow_minQ_;
   Eigen::Quaternion<double> qif_;
   
   double flow_q;
-  double agl; //
   double agl_ef;
   double dt;
-  double sonar;
   bool flow_healhy;
   bool sonar_healhy;
+  double res_out;
   typedef msf_updates::EKFState EKFState_T;
   typedef EKFState_T::StateSequence_T StateSequence_T;
   typedef EKFState_T::StateDefinition_T StateDefinition_T;
   virtual ~VelocityMeasurement() {
   }
   VelocityMeasurement(double n_zv,
-                      double n_zsonar,
                       bool fixed_covariance,
                       bool isabsoluteMeasurement, 
                       int sensorID, 
@@ -165,7 +158,6 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
                       Eigen::Quaternion<double> qif)
       : VelocityMeasurementBase(isabsoluteMeasurement, sensorID),
         n_zv_(n_zv),
-        n_zsonar_(n_zsonar),
         fixed_covariance_(fixed_covariance),
         fixedstates_(fixedstates),
         flow_minQ_(flow_minQ),
@@ -209,18 +201,19 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
     double eff = cos(euler[2]) * cos(euler[1]);
 
-    if (sonar < 0.2 || sonar > 4.0) {
+
+    agl_ef = (state.Get<StateDefinition_T::p>()(2)-state.Get<StateDefinition_T::tz>()(0))* eff;
+
+    if (agl_ef < 0.2 || agl_ef > 4.0) {
       sonar_healhy = false;
     }else {
       sonar_healhy = true;
     }
-    z_sonar_(0) = sonar * eff;
 
 
 
 
     // agl_ef = agl * eff;
-    agl_ef = (state.Get<StateDefinition_T::p>()(2)-state.Get<StateDefinition_T::tz>()(0))* eff;
     // printf("our=%.2f , but=%.2f\n", (state.Get<StateDefinition_T::p>()(2)-state.Get<StateDefinition_T::tz>()(0)), agl);
 
     if(flow_q < flow_minQ_ || agl_ef <= 0.3)          {flow_healhy = false;}
@@ -277,9 +270,6 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
         H.block<2, 3>(z_vx, idxstartcorr_v_) =  S*C_f.transpose()*C_q.transpose();
         H.block<2, 3>(z_vx, idxstartcorr_q_) =  S*C_f.transpose()*C_q.transpose()*skew_v;
         H.block<2, 3>(z_vx, idxstartcorr_qif_) =  S*C_f.transpose()*skew_Rtv;
-
-        H.block<1, 1>(z_tz, idxstartcorr_p_+2)(0) = (sonar_healhy ? 1:0);
-        H.block<1, 1>(z_tz, idxstartcorr_tz_)(0) = (sonar_healhy ? -1:0);
       } 
     else
       {
@@ -398,9 +388,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       // if(flow_healhy)
         r_old.block<2, 1>(z_vx, 0) = z_p_.block<2,1>(0,0)
                                       - (C_f.transpose()*C_q.transpose()*state.Get<StateDefinition_T::v>()).block<2, 1>(0, 0);
-        r_old.block<1, 1>(z_tz, 0) = z_sonar_ 
-                                      - (state.Get<StateDefinition_T::p>().block<1, 1>(2, 0)
-                                          - state.Get<StateDefinition_T::tz>().block<1, 1>(0, 0));
+
         // Eigen::Matrix<double,3,1> state_v = state.Get<StateDefinition_T::v>().block<3, 1>(0, 0);
         // MSF_INFO_STREAM(z_p_ << "----" << state_v);
       // else
@@ -440,10 +428,10 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
 
       // fault detection (mahalanobis distance !! )
-      float beta = (r_old.transpose() * (S_I * r_old))(0, 0);
+      double beta = (r_old.transpose() * (S_I * r_old))(0, 0);
       if(std::isnan(beta) || std::isinf(beta))
         return;
-      
+      res_out = beta;
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);
       int n_y_flow = 2;

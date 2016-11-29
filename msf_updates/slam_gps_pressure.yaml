@@ -93,13 +93,15 @@ position_pose_pressure_sensor/position_yaw_init: 0 #-128.0
 position_pose_pressure_sensor/position_fixed_p_ip: true
 
 
-
-velocity_sensor/velocity_absolute_measurements: true
+velocity_sensor/velocity_use_fixed_covariance: true 
+velocity_sensor/velocity_absolute_measurements: true 
+velocity_sensor/velocity_measurement_world_sensor: true  
 velocity_sensor/velocity_flowNoiseXY: 0.5
-velocity_sensor/velocity_sonarNoiseXY: 0.05
 velocity_sensor/flow_noise_q_if: 0.001 
+position_pose_pressure_sensor/velocity_use_fixed_covariance: true 
+position_pose_pressure_sensor/velocity_absolute_measurements: true 
+position_pose_pressure_sensor/velocity_measurement_world_sensor: true  
 position_pose_pressure_sensor/velocity_flowNoiseXY: 0.5  #less is unstable
-position_pose_pressure_sensor/velocity_sonarNoiseXY: 0.05
 position_pose_pressure_sensor/velocity_flowYaw: 0.0 # z10.8 #0 for eight shape, 10.8 for rectan
 position_pose_pressure_sensor/flow_noise_q_if: 0.001 
 
@@ -107,9 +109,26 @@ position_pose_pressure_sensor/flow_noise_q_if: 0.001
 
 position_pose_pressure_sensor/press_noise_meas_p: 3.00
 position_pose_pressure_sensor/press_noise_bias_p:  0.0
+position_pose_pressure_sensor/press_use_fixed_covariance: true 
+position_pose_pressure_sensor/press_absolute_measurements: true 
+position_pose_pressure_sensor/press_measurement_world_sensor: true 
+pressure_sensor/press_noise_meas_p: 3.00
+pressure_sensor/press_noise_bias_p:  0.0 
+pressure_sensor/press_use_fixed_covariance: true 
+pressure_sensor/press_absolute_measurements: true 
+pressure_sensor/press_measurement_world_sensor: true  
 
-position_pose_pressure_sensor/terrian_noise:  1.0
+position_pose_pressure_sensor/terrian_noise:  0.5
 
+
+position_pose_pressure_sensor/agl_noise_meas: 0.01  
+position_pose_pressure_sensor/agl_use_fixed_covariance: true 
+position_pose_pressure_sensor/agl_absolute_measurements: true 
+position_pose_pressure_sensor/agl_measurement_world_sensor: true  
+agl_sensor/agl_noise_meas: 0.01  
+agl_sensor/agl_use_fixed_covariance: true 
+agl_sensor/agl_absolute_measurements: true
+agl_sensor/agl_measurement_world_sensor: true  
 
 #velocity model-aid
 # velocity_sensor/velocity_absolute_measurements: true
