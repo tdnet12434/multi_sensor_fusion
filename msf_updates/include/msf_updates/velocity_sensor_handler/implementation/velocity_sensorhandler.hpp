@@ -54,6 +54,10 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
       nh.subscribe<mavros_msgs::OpticalFlowRad>
   ("flow_input", 20, &VelocitySensorHandler::MeasurementCallback, this);
 
+  pubRes_ = 
+      nh.advertise<geometry_msgs::PointStamped>
+  ("flow_res", 10);
+
   // subAgl_ =
   //     nh.subscribe<mavros_msgs::Altitude>
   // ("agl_input", 20, &VelocitySensorHandler::MeasurementAGLCallback, this);
@@ -132,7 +136,19 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
   meas->MakeFromSensorReading(msg, msg->header.stamp.toSec() - delay_);
 
   z_p_ = meas->z_p_;  // Store this for the init procedure.
-  // printf("res=%.2f\n", meas->res_out);
+
+  if(pubRes_.getNumSubscribers()) {
+    geometry_msgs::PointStampedPtr res_msg(
+        new geometry_msgs::PointStamped());
+
+    res_msg->header  = msg->header;
+    res_msg->point.x = meas->res_out;
+    res_msg->point.y = 0;
+    res_msg->point.z = 0;
+
+    pubRes_.publish(res_msg);
+    // printf("res=%.4f\n", meas->res_out);
+  }
 
   this->manager_.msf_core_->AddMeasurement(meas);
 }

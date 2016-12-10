@@ -23,6 +23,7 @@
 
 #include <mavros_msgs/OpticalFlowRad.h>
 #include <mavros_msgs/Altitude.h>
+#include <geometry_msgs/PointStamped.h>
 
 namespace msf_velocity_sensor {
 
@@ -37,6 +38,7 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
                        //the measurement provided by this sensor.
 
   ros::Subscriber subFlow_;
+  ros::Publisher pubRes_;
               //, subAgl_;
 
   double agl_sensor;

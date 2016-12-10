@@ -46,6 +46,8 @@ class PositionSensorHandler : public msf_core::SensorHandler<
   // ros::Subscriber subTransformStamped_;
   // ros::Subscriber subNavSatFix_;
   ros::Subscriber subVel;
+
+  ros::Publisher pubRes_;
   msf_core::GPSConversion gpsConversion_;
   double vx,
          vy;

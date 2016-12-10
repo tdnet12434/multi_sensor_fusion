@@ -32,7 +32,7 @@ catkin_package(
     INCLUDE_DIRS include ${catkin_INCLUDE_DIRS}
     LIBRARIES 
 )
-
+add_definitions(-DBOOST_NO_CXX11_VARIADIC_TEMPLATES)
 add_executable(msf_eval_run src/msf_eval.cpp)
 target_link_libraries(msf_eval ${catkin_LIBRARIES})
 

@@ -32,6 +32,7 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 else()
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
+add_definitions(-DBOOST_NO_CXX11_VARIADIC_TEMPLATES)
 
 # Enable timing the core
 add_definitions (-DENABLE_MSF_TIMING)

@@ -28,7 +28,7 @@ catkin_package(
 )
 
 add_library(${PROJECT_NAME} src/Timer.cc)
-
+add_definitions(-DBOOST_NO_CXX11_VARIADIC_TEMPLATES)
 catkin_add_gtest(${PROJECT_NAME}_tests src/test/testMSFTiming.cc)
 target_link_libraries(${PROJECT_NAME}_tests ${PROJECT_NAME} pthread)
 

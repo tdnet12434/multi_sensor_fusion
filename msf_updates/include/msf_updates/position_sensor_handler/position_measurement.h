@@ -135,7 +135,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
   bool fixed_covariance_;
   int fixedstates_;
   double GPShacc;
-
+  double res_out;
   typedef msf_updates::EKFState EKFState_T;
   typedef EKFState_T::StateSequence_T StateSequence_T;
   typedef EKFState_T::StateDefinition_T StateDefinition_T;
@@ -240,18 +240,14 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
 
 
-
-
-       msf_core::MSF_Core<EKFState_T>::ErrorStateCov &_P = state_nonconst_new->P;
-      _P = 0.5*(_P.transpose()+_P);
-
       // residual covariance, (inverse)
       Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
-       (H_new * _P * H_new.transpose() + R_).inverse();
+       (H_new * state_nonconst_new->P * H_new.transpose() + R_).inverse();
 
 
       // fault detection (mahalanobis distance !! )
       double beta = (r_old.transpose() * (S_I * r_old))(0, 0);
+      res_out = beta;
       // MSF_WARN_STREAM("gb=" << beta);
       if(std::isnan(beta) || std::isinf(beta))
         return;

@@ -67,7 +67,10 @@ PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::PositionSensorHandler(
   subVel =
       nh.subscribe<geometry_msgs::TwistStamped>
   ("gpsvel_input", 20, &PositionSensorHandler::MeasurementVelCallback, this);
-
+  pubRes_ = 
+      nh.advertise<geometry_msgs::PointStamped>
+  ("gps_res",10);
+  
   z_p_.setZero();
 
 }
@@ -128,6 +131,20 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessPositionMeasu
   meas->MakeFromSensorReading(msg, msg->header.stamp.toSec() - delay_);
 
   z_p_ = meas->z_p_;  // Store this for the init procedure.
+
+    if(pubRes_.getNumSubscribers()) {
+    geometry_msgs::PointStampedPtr res_msg(
+        new geometry_msgs::PointStamped());
+
+    res_msg->header  = msg->header;
+    res_msg->point.x = meas->res_out;
+    res_msg->point.y = 0;
+    res_msg->point.z = 0;
+
+    pubRes_.publish(res_msg);
+    // printf("res=%.4f\n", meas->res_out);
+  }
+
 
   this->manager_.msf_core_->AddMeasurement(meas);
 }

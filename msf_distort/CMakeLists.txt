@@ -21,7 +21,7 @@ catkin_package(
     INCLUDE_DIRS ${catkin_INCLUDE_DIRS}
     LIBRARIES
 )
-
+add_definitions(-DBOOST_NO_CXX11_VARIADIC_TEMPLATES)
 add_executable(msf_distort src/msf_distort.cc)
 target_link_libraries(msf_distort ${catkin_LIBRARIES} ${boost_LIBRARIES})
 add_dependencies(msf_distort ${${PROJECT_NAME}_EXPORTED_TARGETS})

@@ -210,7 +210,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       sonar_healhy = true;
     }
 
-
+    printf("flow_go\n");
 
 
     // agl_ef = agl * eff;
@@ -419,12 +419,12 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
 
 
-      msf_core::MSF_Core<EKFState_T>::ErrorStateCov &_P = state_nonconst_new->P;
-      _P = 0.5*(_P.transpose()+_P);
+      // msf_core::MSF_Core<EKFState_T>::ErrorStateCov &_P = state_nonconst_new->P;
+      // _P = 0.5*(_P.transpose()+_P);
 
       // residual covariance, (inverse)
       Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
-       (H_new * _P * H_new.transpose() + R_).inverse();
+       (H_new * state_nonconst_new->P * H_new.transpose() + R_).inverse();
 
 
       // fault detection (mahalanobis distance !! )

@@ -82,12 +82,12 @@ struct AglMeasurement : public AglMeasurementBase {
 
     // Get measurement.
     z_p_ = Eigen::Matrix<double,1,1>::Constant(msg->range);
-    printf("sonar = %.2f\n", z_p_(0));
+    // printf("sonar = %.2f\n", z_p_(0));
 
 
     const double s_zsonar = n_zp_ * n_zp_;
     R_ (0) = s_zsonar;
-    printf("R_=%.2f\n", R_(0));
+    // printf("R_=%.2f\n", R_(0));
 
   }
  public:
@@ -142,7 +142,7 @@ struct AglMeasurement : public AglMeasurementBase {
     }
 
     z_sonar_compensated = z_p_ * eff;
-    printf("%.2f\n",z_sonar_compensated(0) );
+    // printf("%.2f\n",z_sonar_compensated(0) );
 
     // Get indices of states in error vector.
     enum {
@@ -160,7 +160,7 @@ struct AglMeasurement : public AglMeasurementBase {
           StateDefinition_T::tz>::value
     };
 
-        printf("gg%d\n",sonar_healhy);
+        // printf("gg%d\n",sonar_healhy);
         H.block<1, 1>(z_tz, idxstartcorr_p_+2)(0) = (sonar_healhy ? 1:0);
         H.block<1, 1>(z_tz, idxstartcorr_tz_)(0) = (sonar_healhy ? -1:0);
 
@@ -172,7 +172,6 @@ struct AglMeasurement : public AglMeasurementBase {
    */
   virtual void Apply(shared_ptr<EKFState_T> state_nonconst_new,
                      msf_core::MSF_Core<EKFState_T>& core) {
-
 
    // Get a const ref, so we can read core states.
       const EKFState_T& state = *state_nonconst_new;
@@ -195,8 +194,7 @@ struct AglMeasurement : public AglMeasurementBase {
         r_old.block<1, 1>(z_tz, 0) = z_sonar_compensated 
                                       - (state.Get<StateDefinition_T::p>().block<1, 1>(2, 0)
                                           - state.Get<StateDefinition_T::tz>().block<1, 1>(0, 0));
-
-
+                           
 
 
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());

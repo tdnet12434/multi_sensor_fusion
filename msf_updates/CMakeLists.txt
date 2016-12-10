@@ -24,7 +24,7 @@ generate_dynamic_reconfigure_options(
 cfg/PositionPosePressureSensor.cfg
 #cfg/PositionPosePressureMagSensor.cfg
 )
-
+add_definitions(-DBOOST_NO_CXX11_VARIADIC_TEMPLATES)
 catkin_package(
     DEPENDS
     CATKIN_DEPENDS roscpp msf_core geometry_msgs sensor_fusion_comm mavros_msgs

@@ -217,9 +217,6 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
       //     .toRotationMatrix();
 
 
-      msf_core::MSF_Core<EKFState_T>::ErrorStateCov &_P = state_nonconst_new->P;
-      _P = 0.5*(_P.transpose()+_P);
-
       Eigen::Quaternion<double> q_err;
       q_err = state.Get<StateDefinition_T::q>().conjugate() * z_q_;
       r_old.block<3,1>(0,0) = q_err.vec() / q_err.w() * 2;
