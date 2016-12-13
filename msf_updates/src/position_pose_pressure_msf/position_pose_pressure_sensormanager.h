@@ -315,7 +315,7 @@ void Init(double scale) const {
     //TODO (slynen): what if there is no initial position measurement? Then we
     // have to shift vision-world later on, before applying the first position
     // measurement.
-    p = p_pos;
+    p_pos = (position_handler_->ReceivedFirstMeasurement() ? position_handler_->GetPositionMeasurement() : p_zero);
     p_pos(2) = (pressure_handler_->ReceivedFirstMeasurement() ? pressure_handler_->GetAveragedPressureMeasurement()(0) : 0.0);
     // p_wv = p - p_vision;  // Shift the vision frame so that it fits the position
     // measurement

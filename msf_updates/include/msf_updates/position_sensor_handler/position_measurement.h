@@ -249,7 +249,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
       double beta = (r_old.transpose() * (S_I * r_old))(0, 0);
       res_out = beta;
       // MSF_WARN_STREAM("gb=" << beta);
-      if(std::isnan(beta) || std::isinf(beta))
+      if(std::isnan(beta) || std::isinf(beta) || beta < 0.0)
         return;
       // printf("gps_d\t%.2f\n", beta);
       // printf("position beta\t%.2f\n", beta);

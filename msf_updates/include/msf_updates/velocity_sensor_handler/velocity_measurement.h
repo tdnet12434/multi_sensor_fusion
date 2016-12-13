@@ -429,7 +429,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
       // fault detection (mahalanobis distance !! )
       double beta = (r_old.transpose() * (S_I * r_old))(0, 0);
-      if(std::isnan(beta) || std::isinf(beta))
+      if(std::isnan(beta) || std::isinf(beta) || beta<0)
         return;
       res_out = beta;
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
@@ -456,28 +456,16 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
         //   _flowFault = FAULT_NONE;
         // }
         static uint8_t good_count = 0;
-
+        const uint8_t MAX_COUNT = 20;
+        const uint8_t CONFIDENT = 15;
         if (_flowFault < fault_lvl_disable) {
-          good_count++;
+          (good_count > MAX_COUNT ? MAX_COUNT : ++good_count);
         } else {
-          good_count--;
-        }
-
-        //constrain count
-        if(good_count < 1) { 
-          good_count = 0;
-        }
-        else if(good_count > 20) { 
-          good_count = 20;
+          (good_count < 1 ? 0 : --good_count);
         }
         static bool let_correction=false;
         if(flow_healhy) {  //if above 30cm and quality good check the good_count
-          if(good_count <= 0) { 
-            let_correction = false;
-          }
-          else if(good_count >= 20) { 
-            let_correction = true;
-          }
+          let_correction = (good_count >= CONFIDENT ? true : false);
         }
 
         // printf("flow_d\t\t%.2f\n", beta);
