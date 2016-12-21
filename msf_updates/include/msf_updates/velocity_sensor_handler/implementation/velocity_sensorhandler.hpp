@@ -58,6 +58,10 @@ VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::VelocitySensorHandler(
       nh.advertise<geometry_msgs::PointStamped>
   ("flow_res", 10);
 
+  pubFlowScaled_ =
+      nh.advertise<geometry_msgs::TwistStamped>
+  ("flow_scaled", 10);
+
   // subAgl_ =
   //     nh.subscribe<mavros_msgs::Altitude>
   // ("agl_input", 20, &VelocitySensorHandler::MeasurementAGLCallback, this);
@@ -143,11 +147,21 @@ void VelocitySensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::ProcessVelocityMeasu
 
     res_msg->header  = msg->header;
     res_msg->point.x = meas->res_out;
-    res_msg->point.y = 0;
+    res_msg->point.y = (meas->flow_state ? 0.0 : -1.0);
     res_msg->point.z = 0;
 
     pubRes_.publish(res_msg);
     // printf("res=%.4f\n", meas->res_out);
+  }
+
+  if(pubFlowScaled_.getNumSubscribers()) {
+    geometry_msgs::TwistStamped flowscaled_msg;
+    flowscaled_msg.header = msg->header;
+    flowscaled_msg.header.stamp = ros::Time::now();
+    flowscaled_msg.twist.linear.x = z_p_.block<1,1>(0,0)(0);
+    flowscaled_msg.twist.linear.y = z_p_.block<1,1>(1,0)(0);
+    if(fabs(flowscaled_msg.twist.linear.x) < 5.0 && fabs(flowscaled_msg.twist.linear.y) < 5.0) 
+      pubFlowScaled_.publish(flowscaled_msg);
   }
 
   this->manager_.msf_core_->AddMeasurement(meas);

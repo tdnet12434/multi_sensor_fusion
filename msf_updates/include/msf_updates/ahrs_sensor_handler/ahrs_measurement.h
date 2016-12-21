@@ -246,8 +246,19 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
             "state: "<<const_cast<EKFState_T&>(state). ToEigenVector().transpose());
       }
 
+      // residual covariance, (inverse)
+      Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
+       (H_new * state_nonconst_new->P * H_new.transpose() + R_).inverse();
 
 
+      // fault detection (mahalanobis distance !! )
+      double beta = (r_old.transpose() * (S_I * r_old))(0, 0);
+      if(std::isnan(beta) || std::isinf(beta) || beta<0)
+        return;
+
+      printf("ahrs_beta = %.4f\n", beta);
+
+      // if(beta < 7.0) 
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);
     } 

@@ -24,6 +24,7 @@
 #include <mavros_msgs/OpticalFlowRad.h>
 #include <mavros_msgs/Altitude.h>
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 
 namespace msf_velocity_sensor {
 
@@ -36,9 +37,9 @@ class VelocitySensorHandler : public msf_core::SensorHandler<
   double n_zv_;  ///< Velocity measurement noise.
   double delay_;       ///< Delay to be subtracted from the ros-timestamp of
                        //the measurement provided by this sensor.
-
   ros::Subscriber subFlow_;
   ros::Publisher pubRes_;
+  ros::Publisher pubFlowScaled_;
               //, subAgl_;
 
   double agl_sensor;

@@ -221,6 +221,19 @@ struct AglMeasurement : public AglMeasurementBase {
 
 
 
+      // residual covariance, (inverse)
+      Eigen::Matrix<double, nMeasurements, nMeasurements> S_I =
+       (H_new * state_nonconst_new->P * H_new.transpose() + R_).inverse();
+
+
+      // fault detection (mahalanobis distance !! )
+      double beta = (r_old.transpose() * (S_I * r_old))(0, 0);
+      if(std::isnan(beta) || std::isinf(beta))
+        return;
+      // printf("agl inno = %.4f\n", beta);
+
+
+      if(beta < 10) 
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);
 

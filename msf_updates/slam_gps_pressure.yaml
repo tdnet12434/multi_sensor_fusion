@@ -123,6 +123,8 @@ pressure_sensor/press_measurement_world_sensor: true
 
 position_pose_pressure_sensor/terrian_noise:  0.5
 
+position_pose_pressure_sensor/ahrs_q: 0.05
+ahrs_sensor/ahrs_q: 0.05
 
 position_pose_pressure_sensor/agl_noise_meas: 0.01  
 position_pose_pressure_sensor/agl_use_fixed_covariance: true 

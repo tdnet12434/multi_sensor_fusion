@@ -144,6 +144,8 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
   bool flow_healhy;
   bool sonar_healhy;
   double res_out;
+  bool flow_state;
+
   typedef msf_updates::EKFState EKFState_T;
   typedef EKFState_T::StateSequence_T StateSequence_T;
   typedef EKFState_T::StateDefinition_T StateDefinition_T;
@@ -210,7 +212,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       sonar_healhy = true;
     }
 
-    printf("flow_go\n");
+    // printf("flow_go\n");
 
 
     // agl_ef = agl * eff;
@@ -233,6 +235,9 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       //treat flow as position odometry (relative measurement)
       flow_n += delta_n*0.5; //10 hz
     }
+    // printf("%.4f\t%.4f\t\tdt=%.4f\n", flow_n(0)
+    //                                 , flow_n(1)
+    //                                 , dt);
         z_p_(0) = flow_n(0);
         z_p_(1) = flow_n(1);
         z_p_(2) = 0;
@@ -432,19 +437,25 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
       if(std::isnan(beta) || std::isinf(beta) || beta<0)
         return;
       res_out = beta;
+
+          // printf("f%.4f\t%.4f\t\tdt=%.4f\n", flow_x_scaled
+          //                           , flow_y_scaled
+          //                           , dt);
+
+
       // printf("%.3f\t%.3f\t%.3f\n%.3f\n\n\n",
             // _P(3,3),_P(4,4),_P(5,5),beta);
       int n_y_flow = 2;
 
         if (beta > BETA_TABLE[n_y_flow]) {
           if(_flowFault >= FAULT_MINOR && beta > BETA_TABLE[n_y_flow]) { //from default mah_threshold
-            printf("flow bad\n");
+            // printf("flow bad\n");
             _flowFault = FAULT_SEVERE;
           }else{
             _flowFault = FAULT_MINOR;
           }
           if (_flowFault < FAULT_MINOR) {
-            printf("flow FAULT_MINOR\n");
+            // printf("flow FAULT_MINOR\n");
             _flowFault = FAULT_MINOR;
           }
         }else{
@@ -468,13 +479,14 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
           let_correction = (good_count >= CONFIDENT ? true : false);
         }
 
-        // printf("flow_d\t\t%.2f\n", beta);
+        // printf("flow_d\t\t%.5f\tcount=%d\n", beta, good_count);
         if(let_correction) {
           // Call update step in base class.
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
                                         R_);
         }else{
-          printf("bad flow\n");
+          // printf("bad flow\n");
+          flow_state = false;
           return;
         }
     } 
