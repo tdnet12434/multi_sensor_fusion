@@ -391,6 +391,7 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
 
       // // Velocity
       // if(flow_healhy)
+        // printf("z_p_=%.2f\n", z_p_(0));
         r_old.block<2, 1>(z_vx, 0) = z_p_.block<2,1>(0,0)
                                       - (C_f.transpose()*C_q.transpose()*state.Get<StateDefinition_T::v>()).block<2, 1>(0, 0);
 
@@ -398,7 +399,6 @@ struct VelocityMeasurement : public VelocityMeasurementBase {
         // MSF_INFO_STREAM(z_p_ << "----" << state_v);
       // else
       //   return;
-
       //         + C_q.transpose() * state.Get<StateDefinition_T::p_ip>());
       if (!CheckForNumeric(r_old, "r_old")) {
         // Eigen::Matrix<double, 3, 3> ident

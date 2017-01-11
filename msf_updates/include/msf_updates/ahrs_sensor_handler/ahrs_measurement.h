@@ -256,7 +256,7 @@ struct AhrsMeasurement : public AhrsMeasurementBase {
       if(std::isnan(beta) || std::isinf(beta) || beta<0)
         return;
 
-      printf("ahrs_beta = %.4f\n", beta);
+      // printf("ahrs_beta = %.4f\n", beta);
 
       // if(beta < 7.0) 
           this->CalculateAndApplyCorrection(state_nonconst_new, core, H_new, r_old,
