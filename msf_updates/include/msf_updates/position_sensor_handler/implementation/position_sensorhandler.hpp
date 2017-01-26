@@ -164,6 +164,10 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
   double time_now = msg->header.stamp.toSec();
   timestamp_previous_pose_ = time_now;
 
+  if(msg->header.stamp.toSec() - vel_ts > 2.0) {
+    MSF_INFO_STREAM_ONCE("No GPS Vel received");
+    vx=115200;
+  }
   nav_msgs::OdometryPtr odom(
       new nav_msgs::Odometry);
   odom->header = msg->header;
@@ -189,7 +193,7 @@ template<typename MEASUREMENT_TYPE, typename MANAGER_TYPE>
 void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementVelCallback(
     const geometry_msgs::TwistStampedConstPtr & msg) {
   this->SequenceWatchDog(msg->header.seq, subVel.getTopic());
-
+  vel_ts = msg->header.stamp.toSec();
   MSF_INFO_STREAM_ONCE(
       "*** gps velocity sensor got first measurement from topic "
           << this->topic_namespace_ << "/" << subVel.getTopic()

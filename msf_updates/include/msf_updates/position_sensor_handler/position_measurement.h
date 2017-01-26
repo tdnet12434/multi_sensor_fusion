@@ -181,7 +181,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
     H.block<2, 2>(0, idxstartcorr_p_) = Eigen::Matrix<double, 2, 2>::Identity();  // p
 
     // Velocity:
-    H.block<2, 2>(2, idxstartcorr_v_) = Eigen::Matrix<double, 2, 2>::Identity();  // v
+    H.block<2, 2>(2, idxstartcorr_v_) = (z_v_(0,0) >=115000 ? 0.0 : 1.0)*Eigen::Matrix<double, 2, 2>::Identity();  // v
 
 
 

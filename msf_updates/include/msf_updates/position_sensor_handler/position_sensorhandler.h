@@ -49,6 +49,8 @@ class PositionSensorHandler : public msf_core::SensorHandler<
 
   ros::Publisher pubRes_;
   msf_core::GPSConversion gpsConversion_;
+
+  double vel_ts;
   double vx,
          vy;
   double gps_cov_;
