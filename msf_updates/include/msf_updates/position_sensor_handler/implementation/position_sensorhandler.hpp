@@ -165,7 +165,6 @@ void PositionSensorHandler<MEASUREMENT_TYPE, MANAGER_TYPE>::MeasurementCallback(
   timestamp_previous_pose_ = time_now;
 
   if(msg->header.stamp.toSec() - vel_ts > 2.0) {
-    MSF_INFO_STREAM_ONCE("No GPS Vel received");
     vx=115200;
   }
   nav_msgs::OdometryPtr odom(

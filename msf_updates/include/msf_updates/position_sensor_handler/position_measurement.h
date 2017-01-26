@@ -86,7 +86,13 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
     z_v_ = Eigen::Matrix<double, 3, 1>(msg->twist.twist.linear.x, 
                                        msg->twist.twist.linear.y,0);
-
+    if(z_v_(0,0) > 115000) 
+    {
+      GPSvel_valid=false;
+      z_v_(0,0)=0;
+      MSF_INFO_STREAM_ONCE("\n\n\n NO GPS VEL MODE \n\n\n");
+    }
+    else GPSvel_valid=true;
     // printf("vx = %.3f vy = %.3f\n", z_v_(0), z_v_(1));
     double s_zp;
     double s_zv;
@@ -95,7 +101,8 @@ struct PositionMeasurement : public PositionMeasurementBase {
 
       s_zp = n_zp_ * n_zp_;
       s_zv = n_zp_ * n_zp_*0.25;
-      
+      if(!GPSvel_valid) s_zv=999;
+
       R_ = (Eigen::Matrix<double, nMeasurements, 1>() << s_zp, s_zp, s_zv, s_zv)
           .finished().asDiagonal();
 
@@ -136,6 +143,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
   int fixedstates_;
   double GPShacc;
   double res_out;
+  bool GPSvel_valid;
   typedef msf_updates::EKFState EKFState_T;
   typedef EKFState_T::StateSequence_T StateSequence_T;
   typedef EKFState_T::StateDefinition_T StateDefinition_T;
@@ -181,9 +189,7 @@ struct PositionMeasurement : public PositionMeasurementBase {
     H.block<2, 2>(0, idxstartcorr_p_) = Eigen::Matrix<double, 2, 2>::Identity();  // p
 
     // Velocity:
-    H.block<2, 2>(2, idxstartcorr_v_) = (z_v_(0,0) >=115000 ? 0.0 : 1.0)*Eigen::Matrix<double, 2, 2>::Identity();  // v
-
-
+    H.block<2, 2>(2, idxstartcorr_v_) = (GPSvel_valid ? 0.0 : 1.0)*Eigen::Matrix<double, 2, 2>::Identity();  // v
 
   }
 
